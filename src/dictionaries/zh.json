@@ -1,0 +1,59 @@
+{
+  "common": {
+    "nav": {
+      "products": "产品",
+      "works": "案例",
+      "experiments": "AI 实验室",
+      "about": "关于",
+      "workWithMe": "商务合作"
+    },
+    "footer": {
+      "desc": "以代码、AI 和系统思维构建现实世界的产品。驻地日本东京。",
+      "pages": "页面",
+      "connect": "联系",
+      "rights": "版权所有。"
+    }
+  },
+  "home": {
+    "hero": {
+      "title": "Toshiki Tech",
+      "subtitle": "用代码、AI 与系统思维，构建真正可用的产品。",
+      "intro": "我致力于开发软件产品、浏览器工具及应用级 AI 系统。",
+      "cta": {
+        "viewProducts": "查看产品",
+        "exploreWork": "探索案例"
+      }
+    },
+    "products": {
+      "title": "核心产品",
+      "subtitle": "软件开发者亲历打造，旨在解决日语沉浸学习中的核心痛点。",
+      "all": "所有产品"
+    },
+    "works": {
+      "title": "精选案例",
+      "subtitle": "我与企业合作，构建稳健、现代的数字系统和定制化 Web 解决方案。",
+      "all": "合作详情"
+    },
+    "beyondCode": {
+      "title": "代码之外",
+      "desc": "并非所有灵感都应归于代码。有些思绪，需要一个更开阔的地方去呼吸。",
+      "cta": "在 dogiant.com 阅读更多"
+    },
+    "productDetail": {
+      "back": "返回产品列表",
+      "features": "核心功能",
+      "techStack": "技术栈"
+    },
+    "contact": {
+      "title": "开始合作",
+      "name": "您的姓名",
+      "email": "您的邮箱",
+      "company": "所在公司",
+      "message": "项目需求或详细信息",
+      "submit": "提交申请",
+      "submitting": "提交中...",
+      "success": "提交成功！我会尽快与您联系。",
+      "error": "提交失败，请重试或直接联系我。"
+    }
+  }
+}

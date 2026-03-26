@@ -1,0 +1,59 @@
+{
+  "common": {
+    "nav": {
+      "products": "プロダクト",
+      "works": "実績",
+      "experiments": "AIラボ",
+      "about": "プロフィール",
+      "workWithMe": "お仕事のご依頼"
+    },
+    "footer": {
+      "desc": "コード、AI、システム思考で現実世界のプロダクトを構築。東京在住。",
+      "pages": "ページ",
+      "connect": "コンタクト",
+      "rights": "無断転載禁止。"
+    }
+  },
+  "home": {
+    "hero": {
+      "title": "Toshiki Tech",
+      "subtitle": "コード、AI、システム思考を用いて、現実のプロダクトを構築する。",
+      "intro": "ソフトウェアプロダクト、ブラウザツール、応用AIシステムの構築に注力しています。",
+      "cta": {
+        "viewProducts": "プロダクトを見る",
+        "exploreWork": "実績を見る"
+      }
+    },
+    "products": {
+      "title": "プロダクト",
+      "subtitle": "開発者自らが日本語学習で直面した課題を解決するために设计された学習ツール。",
+      "all": "全プロダクト"
+    },
+    "works": {
+      "title": "選定実績",
+      "subtitle": "ビジネスの課題に対し、堅牢かつモダンなデジタルシステムを構築します。",
+      "all": "実績の詳細"
+    },
+    "beyondCode": {
+      "title": "Beyond Code",
+      "desc": "すべての思考がコードで完結するわけではありません。別の場所で深める思考もあります。",
+      "cta": "dogiant.com で読む"
+    },
+    "productDetail": {
+      "back": "プロダクト一覧に戻る",
+      "features": "主な機能",
+      "techStack": "技術スタック"
+    },
+    "contact": {
+      "title": "コラボレーションを開始する",
+      "name": "お名前",
+      "email": "メールアドレス",
+      "company": "貴社名",
+      "message": "プロジェクトの詳細またはメッセージ",
+      "submit": "リクエストを送信",
+      "submitting": "送信中...",
+      "success": "送信されました！追ってご連絡いたします。",
+      "error": "エラーが発生しました。時間を置いて再度お試しいただくか、直接ご連絡ください。"
+    }
+  }
+}

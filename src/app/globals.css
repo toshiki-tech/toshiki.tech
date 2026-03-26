@@ -3,25 +3,81 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --foreground-rgb: 23, 23, 23;
+  --background-start-rgb: 255, 255, 255;
+  --background-end-rgb: 255, 255, 255;
+  
+  --accent: 37, 99, 235; /* Blue-600 */
+  --accent-foreground: 255, 255, 255;
+  
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+  
+  --border: #e4e4e7;
+  --card: #ffffff;
+  --card-foreground: #18181b;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --foreground-rgb: 240, 240, 240;
+    --background-start-rgb: 10, 10, 10;
+    --background-end-rgb: 12, 12, 12;
+    
+    --accent: 59, 130, 246; /* Blue-500 */
+    --accent-foreground: 255, 255, 255;
+    
+    --muted: #1e1e21;
+    --muted-foreground: #a1a1aa;
+    
+    --border: #27272a;
+    --card: #18181b;
+    --card-foreground: #fafafa;
   }
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+@layer components {
+  .btn-primary {
+    @apply px-5 py-2.5 rounded-md bg-[rgb(var(--accent))] text-[rgb(var(--accent-foreground))] font-medium transition-all hover:opacity-90 active:scale-95;
   }
+  
+  .btn-secondary {
+    @apply px-5 py-2.5 rounded-md border border-[var(--border)] text-[rgb(var(--foreground-rgb))] font-medium transition-all hover:bg-[var(--muted)] active:scale-95;
+  }
+  
+  .card {
+    @apply rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 transition-all hover:border-[rgb(var(--accent))];
+  }
+  
+  .section-title {
+    @apply text-3xl font-bold tracking-tight mb-4;
+  }
+  
+  .section-subtitle {
+    @apply text-lg text-[var(--muted-foreground)] mb-8 max-w-2xl;
+  }
+}
+
+/* Glassmorphism for Navbar */
+.glass {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background: rgba(var(--background-start-rgb), 0.8);
+  border-bottom: 1px solid var(--border);
+}
+
+/* Layout utilities */
+.container-custom {
+  @apply max-w-5xl mx-auto px-6 lg:px-8;
 }

@@ -1,0 +1,59 @@
+{
+  "common": {
+    "nav": {
+      "products": "Products",
+      "works": "Works",
+      "experiments": "AI Lab",
+      "about": "About",
+      "workWithMe": "Work with me"
+    },
+    "footer": {
+      "desc": "Building real-world products with code, AI and systems thinking. Based in Tokyo, Japan.",
+      "pages": "Pages",
+      "connect": "Connect",
+      "rights": "All rights reserved."
+    }
+  },
+  "home": {
+    "hero": {
+      "title": "Toshiki Tech",
+      "subtitle": "Building real-world products with code, AI and systems thinking.",
+      "intro": "I build software products, browser tools, and applied AI systems.",
+      "cta": {
+        "viewProducts": "View Products",
+        "exploreWork": "Explore Work"
+      }
+    },
+    "products": {
+      "title": "Products",
+      "subtitle": "Learning tools built by a developer to solve real-world immersion pain points.",
+      "all": "all products"
+    },
+    "works": {
+      "title": "Selected Work",
+      "subtitle": "I collaborate with businesses to build robust, modern digital systems and custom web solutions.",
+      "all": "collaboration details"
+    },
+    "beyondCode": {
+      "title": "Beyond Code",
+      "desc": "Not everything belongs in code. Some thoughts need a different place to breathe.",
+      "cta": "Explore Writing on dogiant.com"
+    },
+    "productDetail": {
+      "back": "Back to Products",
+      "features": "Core Features",
+      "techStack": "Tech Stack"
+    },
+    "contact": {
+      "title": "Start a collaboration",
+      "name": "Your name",
+      "email": "Your email",
+      "company": "Company",
+      "message": "Project details or message",
+      "submit": "Send Request",
+      "submitting": "Sending...",
+      "success": "Sent successfully! I'll get back to you soon.",
+      "error": "Something went wrong. Please try again or reach out directly."
+    }
+  }
+}
