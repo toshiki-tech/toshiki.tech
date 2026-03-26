@@ -22,6 +22,7 @@ const NavLink = ({ href, children, active }: { href: string; children: React.Rea
   </Link>
 );
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const Navbar = ({ lang, dict }: { lang: Locale; dict: any }) => {
   const pathname = usePathname();
   const navDict = dict.common.nav;

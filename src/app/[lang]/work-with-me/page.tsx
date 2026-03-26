@@ -1,5 +1,4 @@
 import { Locale, getDictionary } from '@/lib/get-dictionary';
-import Link from 'next/link';
 import WorkWithMeClient from './WorkWithMeClient';
 
 export async function generateMetadata({ params }: { params: { lang: Locale } }) {

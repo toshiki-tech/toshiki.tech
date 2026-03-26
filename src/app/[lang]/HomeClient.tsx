@@ -47,6 +47,7 @@ const item = {
   show: { opacity: 1, y: 0, transition: { duration: 0.6 } }
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function HomeClient({ lang, dict }: { lang: Locale; dict: any }) {
   const hDict = dict.home;
 

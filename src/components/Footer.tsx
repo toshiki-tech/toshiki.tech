@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Locale } from '@/lib/get-dictionary';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const Footer = ({ lang, dict }: { lang: Locale; dict: any }) => {
   const footerDict = dict.common.footer;
   
