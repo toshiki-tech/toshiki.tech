@@ -92,7 +92,7 @@ export default function HomeClient({ lang, dict }: { lang: Locale; dict: any }) 
           </div>
         </motion.div>
 
-        <div className="flex-1 w-full relative h-[400px] md:h-[600px] pointer-events-none select-none overflow-hidden">
+        <div className="flex-1 w-full relative h-[400px] md:h-[600px] pointer-events-none select-none">
           <motion.div 
             initial={{ opacity: 0, scale: 0.9, x: 40 }}
             animate={{ opacity: 1, scale: 1, x: 0 }}
@@ -102,15 +102,14 @@ export default function HomeClient({ lang, dict }: { lang: Locale; dict: any }) 
             <img 
               src="/images/hero-banner.png" 
               alt="Toshiki Tech Abstract" 
-              className="w-full h-full object-contain object-right opacity-70 dark:opacity-80 mix-blend-screen dark:mix-blend-normal" 
+              className="w-full h-full object-contain object-center opacity-80 dark:opacity-90 rounded-3xl"
               style={{
-                maskImage: 'linear-gradient(to right, transparent, black, black, transparent)',
-                WebkitMaskImage: 'linear-gradient(to right, transparent, black, black, transparent)'
+                maskImage: 'linear-gradient(to right, transparent 0%, black 30%, black 100%)',
+                WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 30%, black 100%)'
               }}
             />
             {/* Ambient glows */}
-            <div className="absolute top-1/4 right-0 -z-10 w-64 h-64 bg-[rgb(var(--accent))]/10 rounded-full blur-[100px] animate-pulse" />
-            <div className="absolute bottom-1/4 left-1/2 -z-10 w-40 h-40 bg-blue-500/5 rounded-full blur-[80px]" />
+            <div className="absolute top-1/4 right-1/4 -z-10 w-80 h-80 bg-[rgb(var(--accent))]/15 rounded-full blur-[120px]" />
           </motion.div>
         </div>
       </section>
