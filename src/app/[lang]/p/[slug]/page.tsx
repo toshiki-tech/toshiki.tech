@@ -99,16 +99,36 @@ export default async function ProductDetailPage({ params }: { params: { lang: Lo
             </div>
 
             <div className="order-1 lg:order-2">
-              <div className="aspect-[4/5] md:aspect-square bg-[var(--card)] rounded-4xl border border-[var(--border)] shadow-2xl overflow-hidden relative group">
-                <div className="absolute inset-0 bg-gradient-to-tr from-[rgb(var(--accent))]/5 to-transparent" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center space-y-4 opacity-40">
-                    <Cpu size={80} className="mx-auto text-[var(--muted-foreground)]" />
+            <div className="order-1 lg:order-2 space-y-12">
+              {/* Primary Image */}
+              <div className="aspect-[4/5] md:aspect-square bg-[var(--card)] rounded-3xl border border-[var(--border)] shadow-2xl overflow-hidden relative group">
+                <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black/20 to-transparent z-10" />
+                {product.imageUrl ? (
+                  <img 
+                    src={product.imageUrl} 
+                    alt={t.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center space-y-4 opacity-40">
+                      <Cpu size={80} className="mx-auto text-[var(--muted-foreground)]" />
+                    </div>
                   </div>
-                </div>
-                <div className="absolute top-10 right-10 w-20 h-20 border border-[var(--border)] rounded-2xl rotate-12 bg-[var(--card)] shadow-lg" />
-                <div className="absolute bottom-20 -left-10 w-40 h-1 bg-[rgb(var(--accent))]" />
+                )}
               </div>
+
+              {/* Gallery Preview */}
+              {product.gallery && product.gallery.length > 0 && (
+                <div className="grid grid-cols-3 gap-4">
+                  {product.gallery.map((img, i) => (
+                    <div key={i} className="aspect-[3/4] rounded-xl overflow-hidden border border-[var(--border)] shadow-sm hover:shadow-lg transition-all hover:-translate-y-1 cursor-zoom-in">
+                      <img src={img} alt={`Gallery ${i}`} className="w-full h-full object-cover" />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
             </div>
           </div>
         </div>

@@ -36,7 +36,7 @@ const Navbar = ({ lang, dict }: { lang: Locale; dict: any }) => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 glass">
+    <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-white/5">
       <div className="container-custom flex items-center justify-between h-20">
         <Link href={`/${lang}`} className="group flex items-center gap-4">
           <Logo className="w-10 h-10 transition-transform group-hover:scale-110" />

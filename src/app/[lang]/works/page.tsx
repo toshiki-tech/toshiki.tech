@@ -29,8 +29,19 @@ export default async function WorksPage({ params: { lang } }: { params: { lang: 
           return (
             <div key={work.id} className="group card h-full flex flex-col justify-between">
               <div className="space-y-6">
-                <div className="h-40 bg-[var(--muted)] rounded-lg flex items-center justify-center text-xs uppercase tracking-widest text-[var(--muted-foreground)] opacity-50 mb-6 border border-dashed border-[var(--border)]">
-                  Project Visual
+                <div className="aspect-[16/10] overflow-hidden rounded-xl bg-[var(--muted)] relative mb-6">
+                  <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[var(--muted)]/50 to-transparent z-10" />
+                  {work.imageUrl ? (
+                    <img 
+                      src={work.imageUrl} 
+                      alt={t.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center text-xs uppercase tracking-widest text-[var(--muted-foreground)] opacity-50 border border-dashed border-[var(--border)] rounded-lg">
+                      Project Visual
+                    </div>
+                  )}
                 </div>
                 <h3 className="text-2xl font-bold tracking-tight mb-2 group-hover:text-[rgb(var(--accent))] transition-colors">{t.title}</h3>
                 <p className="text-[var(--muted-foreground)] leading-relaxed text-sm">

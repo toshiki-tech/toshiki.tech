@@ -47,8 +47,10 @@
     "contact": {
       "title": "Start a collaboration",
       "name": "Your name",
+      "placeholderName": "John Doe",
       "email": "Your email",
       "company": "Company",
+      "placeholderCompany": "Acme Corp / Personal Project",
       "message": "Project details or message",
       "submit": "Send Request",
       "submitting": "Sending...",

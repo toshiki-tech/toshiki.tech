@@ -36,6 +36,7 @@ export const works: Work[] = [
       }
     },
     techStack: ["Next.js", "Tailwind CSS", "Framer Motion"],
+    imageUrl: "/images/works/corp-redesign.png",
   },
   {
     id: "ai-crm",
@@ -54,6 +55,7 @@ export const works: Work[] = [
       }
     },
     techStack: ["Python", "FastAPI", "OpenAI", "React"],
+    imageUrl: "/images/works/ai-crm.png",
   },
   {
     id: "inventory-dash",
@@ -72,5 +74,6 @@ export const works: Work[] = [
       }
     },
     techStack: ["TypeScript", "PostgreSQL", "Next.js"],
+    imageUrl: "/images/works/inventory-dash.png",
   }
 ];

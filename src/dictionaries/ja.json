@@ -47,8 +47,10 @@
     "contact": {
       "title": "コラボレーションを開始する",
       "name": "お名前",
+      "placeholderName": "田中 太郎",
       "email": "メールアドレス",
       "company": "貴社名",
+      "placeholderCompany": "株式会社〇〇 / 個人プロジェクト",
       "message": "プロジェクトの詳細またはメッセージ",
       "submit": "リクエストを送信",
       "submitting": "送信中...",

@@ -27,6 +27,7 @@ export interface Product {
     url: string;
   }[];
   imageUrl?: string;
+  gallery?: string[];
 }
 
 export const products: Product[] = [
@@ -72,7 +73,12 @@ export const products: Product[] = [
     externalLinks: [
       { label: "View on App Store", url: "#" }
     ],
-    imageUrl: "/products/yomiplay.png"
+    imageUrl: "/images/products/yomiplay-final.png",
+    gallery: [
+      "/images/products/yomiplay-s1.jpg",
+      "/images/products/yomiplay-s2.jpg",
+      "/images/products/yomiplay-s3.jpg"
+    ]
   },
   {
     id: "yomimark",
@@ -116,6 +122,6 @@ export const products: Product[] = [
     externalLinks: [
       { label: "Install from Chrome Store", url: "#" }
     ],
-    imageUrl: "/products/yomimark.png"
+    imageUrl: "/images/products/yomimark-promo.png"
   }
 ];

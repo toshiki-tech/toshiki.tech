@@ -28,11 +28,20 @@ export default async function ProductsPage({ params: { lang } }: { params: { lan
           const t = product.translations[lang];
           return (
             <div key={product.id} className={`flex flex-col ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} gap-12 md:gap-20 items-center`}>
-              <div className="flex-1 w-full">
-                <div className="aspect-[16/10] bg-[var(--muted)] rounded-2xl border border-[var(--border)] relative overflow-hidden group shadow-sm transition-all hover:shadow-md">
-                  <div className="absolute inset-0 flex items-center justify-center text-sm uppercase tracking-widest text-[var(--muted-foreground)] border-2 border-dashed border-[var(--border)] m-8 rounded-xl opacity-50">
-                    Product Preview
-                  </div>
+              <div className="flex-1 w-full order-1">
+                <div className="aspect-[16/10] bg-[var(--muted)] rounded-2xl border border-[var(--border)] relative overflow-hidden group shadow-2xl transition-all hover:-translate-y-1 duration-500">
+                  <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[var(--muted)]/50 to-transparent z-10" />
+                  {product.imageUrl ? (
+                    <img 
+                      src={product.imageUrl} 
+                      alt={t.title}
+                      className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center text-sm uppercase tracking-widest text-[var(--muted-foreground)] border-2 border-dashed border-[var(--border)] m-8 rounded-xl opacity-50">
+                      Product Preview
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="flex-1 w-full space-y-6">

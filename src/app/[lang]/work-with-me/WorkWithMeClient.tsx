@@ -68,7 +68,7 @@ export default function WorkWithMeClient({ lang, dict }: { lang: string; dict: a
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 className="w-full bg-[var(--card)] border border-[var(--border)] rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--accent))]/20 focus:border-[rgb(var(--accent))] transition-all text-[rgb(var(--foreground-rgb))] placeholder-[var(--muted-foreground)]/50"
-                placeholder={lang === 'en' ? 'Taro Tanaka' : '田所 太郎'}
+                placeholder={cDict.placeholderName}
               />
             </div>
             <div className="space-y-2">
@@ -97,7 +97,7 @@ export default function WorkWithMeClient({ lang, dict }: { lang: string; dict: a
               value={formData.company}
               onChange={(e) => setFormData({ ...formData, company: e.target.value })}
               className="w-full bg-[var(--card)] border border-[var(--border)] rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--accent))]/20 focus:border-[rgb(var(--accent))] transition-all text-[rgb(var(--foreground-rgb))] placeholder-[var(--muted-foreground)]/50"
-              placeholder={lang === 'en' ? 'Company Name' : '公司名称或个人项目'}
+              placeholder={cDict.placeholderCompany}
             />
           </div>
           
