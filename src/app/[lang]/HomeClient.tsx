@@ -54,12 +54,12 @@ export default function HomeClient({ lang, dict }: { lang: Locale; dict: any }) 
   return (
     <div className="container-custom py-12 space-y-40">
       {/* Hero Section */}
-      <section className="min-h-[80vh] flex flex-col md:flex-row items-center justify-between relative gap-12 pt-20 md:pt-0">
+      <section className="min-h-[80vh] flex flex-col md:flex-row items-center justify-between relative gap-12">
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8 }}
-          className="flex-1 space-y-8 z-10"
+          className="flex-1 flex flex-col justify-center space-y-8 z-10"
         >
           <div 
              className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[var(--border)] bg-[var(--muted)]/50 text-[10px] font-bold uppercase tracking-widest text-[var(--muted-foreground)] mb-4"
