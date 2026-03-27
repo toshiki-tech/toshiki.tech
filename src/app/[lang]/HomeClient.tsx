@@ -54,39 +54,32 @@ export default function HomeClient({ lang, dict }: { lang: Locale; dict: any }) 
   return (
     <div className="container-custom py-12 space-y-40">
       {/* Hero Section */}
-      <section className="min-h-[85vh] flex flex-col justify-center relative">
-        <div className="absolute top-0 right-0 -z-20 w-full h-full max-w-4xl pointer-events-none select-none opacity-40 md:opacity-100">
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1.5, ease: "easeOut" }}
-            className="w-full h-full relative"
-          >
-            <img 
-              src="/images/hero-bg.png" 
-              alt="Toshiki Tech Abstract" 
-              className="w-full h-full object-contain object-right-top mix-blend-screen opacity-20 dark:opacity-60" 
-            />
-            <div className="absolute inset-0 bg-gradient-to-l from-transparent via-[var(--background-start-rgb)] to-[var(--background-start-rgb)]" />
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[var(--background-start-rgb)]" />
-          </motion.div>
-        </div>
-        
-        <div className="absolute top-0 right-0 -z-10 w-64 h-64 bg-[rgb(var(--accent))]/5 rounded-full blur-[100px] pointer-events-none" />
-        
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8 }}
+      <section className="flex flex-col relative">
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1 }}
+          className="w-full aspect-[21/9] md:aspect-[3/1] bg-[var(--muted)] rounded-3xl border border-[var(--border)] overflow-hidden relative mb-12 shadow-sm"
         >
-          <motion.div 
-             initial={{ opacity: 0, y: 20 }}
-             animate={{ opacity: 1, y: 0 }}
+          <img 
+            src="/images/hero-banner.png" 
+            alt="Toshiki Tech Banner" 
+            className="w-full h-full object-cover opacity-80 dark:opacity-60 mix-blend-multiply dark:mix-blend-normal" 
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[var(--background-start-rgb)]/20 to-transparent" />
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+        >
+          <div 
              className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[var(--border)] bg-[var(--muted)]/50 text-[10px] font-bold uppercase tracking-widest text-[var(--muted-foreground)] mb-8"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
             {lang === 'en' ? 'Active Building' : lang === 'zh' ? '正在构建中' : '構築中'}
-          </motion.div>
+          </div>
           
           <h1 className="text-6xl md:text-8xl font-black tracking-tight mb-8 bg-clip-text text-transparent bg-gradient-to-br from-[var(--foreground-rgb)] to-[var(--muted-foreground)] leading-[0.95]">
             {hDict.hero.title}
