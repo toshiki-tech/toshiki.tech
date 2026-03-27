@@ -61,14 +61,19 @@ const Navbar = ({ lang, dict }: { lang: Locale; dict: any }) => {
             <span className="whitespace-nowrap">{navDict.workWithMe}</span>
           </NavLink>
           
-          <div className="flex gap-2 ml-2 lg:ml-4 border-l border-[var(--border)] pl-4 lg:pl-6 shrink-0">
-            {['en', 'zh', 'ja'].map((loc) => (
+          <div className="flex gap-1 ml-2 lg:ml-4 border-l border-[var(--border)] pl-4 lg:pl-6 shrink-0">
+            {[
+              { id: 'en', label: 'EN' },
+              { id: 'zh', label: 'ZH' },
+              { id: 'zh-tw', label: 'TW' },
+              { id: 'ja', label: 'JA' }
+            ].map((loc) => (
               <Link
-                key={loc}
-                href={redirectedPathName(loc)}
-                className={`text-[10px] font-black uppercase px-2 py-1 rounded border ${lang === loc ? 'bg-[rgb(var(--accent))] text-white border-[rgb(var(--accent))]' : 'text-[var(--muted-foreground)] border-transparent hover:border-[var(--border)]'}`}
+                key={loc.id}
+                href={redirectedPathName(loc.id)}
+                className={`text-[10px] font-black uppercase px-1.5 py-1 rounded border ${lang === loc.id ? 'bg-[rgb(var(--accent))] text-white border-[rgb(var(--accent))]' : 'text-[var(--muted-foreground)] border-transparent hover:border-[var(--border)]'}`}
               >
-                {loc}
+                {loc.label}
               </Link>
             ))}
           </div>

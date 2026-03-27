@@ -1,0 +1,61 @@
+{
+  "common": {
+    "nav": {
+      "products": "產品",
+      "works": "案例",
+      "experiments": "AI 實驗室",
+      "about": "關於",
+      "workWithMe": "商務合作"
+    },
+    "footer": {
+      "desc": "以代碼、AI 和系統思緒構建現實世界的產品。駐地日本東京。",
+      "pages": "頁面",
+      "connect": "聯繫",
+      "rights": "版權所有。"
+    }
+  },
+  "home": {
+    "hero": {
+      "title": "Toshiki Tech",
+      "subtitle": "用代碼、AI 與系統思緒，構建真正可用的產品。",
+      "intro": "我致力於開發軟體產品、瀏覽器工具及應用級 AI 系統。",
+      "cta": {
+        "viewProducts": "查看產品",
+        "exploreWork": "探索案例"
+      }
+    },
+    "products": {
+      "title": "核心產品",
+      "subtitle": "軟體開發者親手打造，旨在解決日語沉浸學習中的核心痛點。",
+      "all": "所有產品"
+    },
+    "works": {
+      "title": "精選案例",
+      "subtitle": "我與企業合作，構建穩健、現代的數位系統和定制化 Web 解決方案。",
+      "all": "合作詳情"
+    },
+    "beyondCode": {
+      "title": "代碼之外",
+      "desc": "並非所有靈感都應歸於代碼。有些思緒，需要一個更開闊的地方去呼吸。",
+      "cta": "在 dogiant.com 閱讀更多"
+    },
+    "productDetail": {
+      "back": "返回產品列表",
+      "features": "核心功能",
+      "techStack": "技術棧"
+    },
+    "contact": {
+      "title": "開始合作",
+      "name": "您的姓名",
+      "placeholderName": "張先生",
+      "email": "您的郵箱",
+      "company": "所在公司",
+      "placeholderCompany": "騰訊 / 個人工作室",
+      "message": "項目需求或詳細資訊",
+      "submit": "提交申請",
+      "submitting": "提交中...",
+      "success": "提交成功！我会儘快與您聯繫。",
+      "error": "提交失敗，請重試或直接聯繫我。"
+    }
+  }
+}

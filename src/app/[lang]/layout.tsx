@@ -1,13 +1,11 @@
 import { Inter } from "next/font/google";
 import "../globals.css";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import { Locale, getDictionary } from "@/lib/get-dictionary";
+import { Locale } from "@/lib/get-dictionary";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export async function generateStaticParams() {
-  return [{ lang: 'en' }, { lang: 'zh' }, { lang: 'ja' }]
+  return [{ lang: 'en' }, { lang: 'zh' }, { lang: 'ja' }, { lang: 'zh-tw' }]
 }
 
 export async function generateMetadata({ params }: { params: { lang: Locale } }) {
@@ -24,16 +22,10 @@ export default async function RootLayout({
   children: React.ReactNode;
   params: { lang: Locale };
 }>) {
-  const dict = await getDictionary(params.lang);
-
   return (
     <html lang={params.lang} className="scroll-smooth">
       <body className={inter.className}>
-        <Navbar lang={params.lang} dict={dict} />
-        <main className="min-h-screen pt-24">
-          {children}
-        </main>
-        <Footer lang={params.lang} dict={dict} />
+        {children}
       </body>
     </html>
   );
