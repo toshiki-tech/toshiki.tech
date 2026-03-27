@@ -120,7 +120,7 @@ export const products: Product[] = [
     },
     techStack: ["TypeScript", "React", "Chrome Extension API", "Wasm"],
     externalLinks: [
-      { label: "Install from Chrome Store", url: "#" }
+      { label: "Install from Chrome Store", url: "https://chromewebstore.google.com/detail/yomimark-%E2%80%94-instant-furiga/ldfcjpnjokhdoihapfcnimchieaofhin" }
     ],
     imageUrl: "/images/products/yomimark-promo.png"
   }
