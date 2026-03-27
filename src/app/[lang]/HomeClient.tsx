@@ -54,7 +54,24 @@ export default function HomeClient({ lang, dict }: { lang: Locale; dict: any }) 
   return (
     <div className="container-custom py-12 space-y-40">
       {/* Hero Section */}
-      <section className="min-h-[70vh] flex flex-col justify-center relative">
+      <section className="min-h-[85vh] flex flex-col justify-center relative">
+        <div className="absolute top-0 right-0 -z-20 w-full h-full max-w-4xl pointer-events-none select-none opacity-40 md:opacity-100">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1.5, ease: "easeOut" }}
+            className="w-full h-full relative"
+          >
+            <img 
+              src="/images/hero-bg.png" 
+              alt="Toshiki Tech Abstract" 
+              className="w-full h-full object-contain object-right-top mix-blend-screen opacity-20 dark:opacity-60" 
+            />
+            <div className="absolute inset-0 bg-gradient-to-l from-transparent via-[var(--background-start-rgb)] to-[var(--background-start-rgb)]" />
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[var(--background-start-rgb)]" />
+          </motion.div>
+        </div>
+        
         <div className="absolute top-0 right-0 -z-10 w-64 h-64 bg-[rgb(var(--accent))]/5 rounded-full blur-[100px] pointer-events-none" />
         
         <motion.div
