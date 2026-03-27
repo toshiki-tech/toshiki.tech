@@ -13,6 +13,10 @@ export interface Experiment {
       title: string;
       description: string;
     };
+    'zh-tw': {
+      title: string;
+      description: string;
+    };
   };
   status: "research" | "prototype" | "shipped";
 }

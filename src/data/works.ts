@@ -13,6 +13,10 @@ export interface Work {
       title: string;
       description: string;
     };
+    'zh-tw': {
+      title: string;
+      description: string;
+    };
   };
   techStack: string[];
   imageUrl?: string;
@@ -33,6 +37,10 @@ export const works: Work[] = [
       ja: {
         title: "コーポレートサイトのリニューアル",
         description: "Next.jsとTailwindを使用し、日本の技術コンサルティング会社向けに高性能でSEO最適化されたランディングページを構築。"
+      },
+      'zh-tw': {
+        title: "企業官網重構",
+        description: "使用 Next.js 和 Tailwind 為一家日本技術諮詢公司構建了高性能、SEO 優化的落地頁。"
       }
     },
     techStack: ["Next.js", "Tailwind CSS", "Framer Motion"],
@@ -52,6 +60,10 @@ export const works: Work[] = [
       ja: {
         title: "AI CRM 統合",
         description: "OpenAI APIと連携し、セールスチーム向けの自動リードスコアリングシステムを設計・実装。"
+      },
+      'zh-tw': {
+        title: "AI CRM 深度集成",
+        description: "為銷售團隊設計並實現了一套自動線索評分系統，深度集成了 OpenAI API。"
       }
     },
     techStack: ["Python", "FastAPI", "OpenAI", "React"],
@@ -71,6 +83,10 @@ export const works: Work[] = [
       ja: {
         title: "在庫管理ダッシュボード",
         description: "ローカル小売チェーン向けのリアルタイム在庫追跡システム。スピードと直感的なUXに重点を置いています。"
+      },
+      'zh-tw': {
+        title: "產品庫存實時儀表盤",
+        description: "為當地零售連鎖店打造的實時庫存追蹤系統，專注於響應速度和直觀的用户體驗。"
       }
     },
     techStack: ["TypeScript", "PostgreSQL", "Next.js"],

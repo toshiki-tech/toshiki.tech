@@ -20,6 +20,12 @@ export interface Product {
       description: string;
       features: string[];
     };
+    'zh-tw': {
+      title: string;
+      subtitle: string;
+      description: string;
+      features: string[];
+    };
   };
   techStack: string[];
   externalLinks: {
@@ -66,6 +72,17 @@ export const products: Product[] = [
           "外来語・カタカナ語の英語原義注釈機能",
           "オフラインAI認識による自動字幕生成",
           "字幕編集機能と学習リソースの共有"
+        ]
+      },
+      'zh-tw': {
+        title: "YomiPlay",
+        subtitle: "基於 AI 語音識別的影音日語學習 iOS 應用",
+        description: "YomiPlay 是一款專為 iOS 設計的沉浸式日語學習應用。它將您喜愛的影音轉化為多功能學習材料，利用離線 AI 識別技術構建精準字幕，助您在「影子跟讀」中自然掌握語言。同時支持字幕完善與優質資料共享。",
+        features: [
+          "自動假名 (Furigana) 標注系統",
+          "外來詞 (Gairaigo) 英語原詞標注",
+          "基於離線 AI 識別技術的自動字幕",
+          "支持字幕編輯與優質資料共享"
         ]
       }
     },
@@ -115,6 +132,17 @@ export const products: Product[] = [
           "全自動ふりがな（振假名）付与システム",
           "划詞（選択範囲）注釈表示サポート",
           "Chrome対応のブラウザ拡張機能"
+        ]
+      },
+      'zh-tw': {
+        title: "YomiMark",
+        subtitle: "為瀏覽器打造的網頁日語閱讀增強工具",
+        description: "YomiMark 是一款讓網頁日語閱讀變得無障礙的瀏覽器擴充。它能為漢字添加振假名（Furigana），支持片假名外來詞 (Gairaigo) 英語原詞映射，助您提升閱讀速度，實現更高效的語言學習。",
+        features: [
+          "外來詞 (Gairaigo) 英語原詞映射",
+          "全自動振假名注音系統",
+          "支持劃詞標注功能",
+          "支持 Chrome 的瀏覽器擴充"
         ]
       }
     },
