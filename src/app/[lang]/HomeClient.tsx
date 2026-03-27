@@ -52,68 +52,59 @@ export default function HomeClient({ lang, dict }: { lang: Locale; dict: any }) 
   const hDict = dict.home;
 
   return (
-    <div className="container-custom py-12 space-y-40">
-      {/* Hero Section */}
-      <section className="min-h-[80vh] flex flex-col md:flex-row items-center justify-between relative gap-12">
+    <>
+      {/* Hero Section — full-width, outside container */}
+      <section className="relative overflow-hidden" style={{ minHeight: '60vh' }}>
+        {/* Full-width background image */}
         <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8 }}
-          className="flex-1 flex flex-col justify-center space-y-8 z-10"
+          initial={{ opacity: 0, scale: 1.05 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1.5, ease: 'easeOut' }}
+          className="absolute inset-0"
         >
-          <div 
-             className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[var(--border)] bg-[var(--muted)]/50 text-[10px] font-bold uppercase tracking-widest text-[var(--muted-foreground)] mb-4"
-          >
+          <img
+            src="/images/hero-banner.png"
+            alt=""
+            aria-hidden="true"
+            className="w-full h-full object-cover object-center"
+          />
+          {/* Gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[rgb(var(--background-start-rgb))] from-20% via-[rgb(var(--background-start-rgb))]/60 via-50% to-transparent" />
+        </motion.div>
+
+        {/* Text content — contained width */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+          className="container-custom relative z-10 flex flex-col justify-end space-y-5 pb-14 pt-40"
+        >
+          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/20 bg-white/10 backdrop-blur-sm text-[10px] font-bold uppercase tracking-widest text-[var(--foreground-rgb)]/60 w-fit">
             <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
             {lang === 'en' ? 'Active Building' : lang === 'zh' ? '正在构建中' : '構築中'}
-          </div>
-          
-          <h1 className="text-6xl md:text-8xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-br from-[var(--foreground-rgb)] to-[var(--muted-foreground)] leading-[0.9] md:leading-[1]">
-            {hDict.hero.title}
-          </h1>
-          
-          <div className="max-w-xl space-y-6">
-            <p className="text-2xl md:text-3xl font-medium text-[var(--foreground-rgb)] leading-tight">
-              {hDict.hero.subtitle}
-            </p>
-            <p className="text-lg md:text-xl text-[var(--muted-foreground)] leading-relaxed">
-              {hDict.hero.intro}
-            </p>
-          </div>
+          </span>
 
-          <div className="flex flex-wrap gap-5 pt-4">
-            <Link href={`/${lang}/products`} className="btn-primary flex items-center gap-2 shadow-lg shadow-blue-500/10 hover:shadow-blue-500/20 px-8 py-3.5 rounded-xl">
+          <h1 className="text-3xl md:text-4xl font-bold leading-snug max-w-xl">
+            {hDict.hero.subtitle}
+          </h1>
+
+          <p className="text-base text-[var(--muted-foreground)] leading-relaxed max-w-md">
+            {hDict.hero.intro}
+          </p>
+
+          <div className="flex flex-wrap gap-4 pt-1">
+            <Link href={`/${lang}/products`} className="btn-primary flex items-center gap-2 shadow-lg shadow-blue-500/10 hover:shadow-blue-500/20 px-7 py-3 rounded-xl">
               {hDict.hero.cta.viewProducts}
-              <ArrowUpRight size={18} />
+              <ArrowUpRight size={16} />
             </Link>
-            <Link href={`/${lang}/works`} className="btn-secondary px-8 py-3.5 rounded-xl">
+            <Link href={`/${lang}/works`} className="btn-secondary px-7 py-3 rounded-xl">
               {hDict.hero.cta.exploreWork}
             </Link>
           </div>
         </motion.div>
-
-        <div className="flex-1 w-full relative h-[400px] md:h-[600px] pointer-events-none select-none">
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9, x: 40 }}
-            animate={{ opacity: 1, scale: 1, x: 0 }}
-            transition={{ duration: 1.5, ease: "easeOut" }}
-            className="w-full h-full relative"
-          >
-            <img 
-              src="/images/hero-banner.png" 
-              alt="Toshiki Tech Abstract" 
-              className="w-full h-full object-contain object-center opacity-80 dark:opacity-90 rounded-3xl"
-              style={{
-                maskImage: 'linear-gradient(to right, transparent 0%, black 30%, black 100%)',
-                WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 30%, black 100%)'
-              }}
-            />
-            {/* Ambient glows */}
-            <div className="absolute top-1/4 right-1/4 -z-10 w-80 h-80 bg-[rgb(var(--accent))]/15 rounded-full blur-[120px]" />
-          </motion.div>
-        </div>
       </section>
 
+    <div className="container-custom py-12 space-y-40">
       {/* Featured Products */}
       <section id="products">
         <SectionHeader 
@@ -257,5 +248,6 @@ export default function HomeClient({ lang, dict }: { lang: Locale; dict: any }) 
          </div>
       </section>
     </div>
+    </>
   );
 }
