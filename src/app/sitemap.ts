@@ -4,7 +4,7 @@ import { products } from '@/data/products'
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://toshiki.tech'
 
-  const routes = ['', '/products', '/works', '/experiments', '/work-with-me', '/about'].map(
+  const routes = ['', '/products', '/works', '/ai-lab', '/work-with-me', '/about'].map(
     (route) => ({
       url: `${baseUrl}${route}`,
       lastModified: new Date(),

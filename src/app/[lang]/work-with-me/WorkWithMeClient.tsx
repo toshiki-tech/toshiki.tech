@@ -67,7 +67,7 @@ export default function WorkWithMeClient({ lang, dict }: { lang: string; dict: a
                 required
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full bg-[var(--muted)]/50 border border-[var(--border)] rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--accent))]/20 focus:border-[rgb(var(--accent))] transition-all"
+                className="w-full bg-[var(--card)] border border-[var(--border)] rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--accent))]/20 focus:border-[rgb(var(--accent))] transition-all text-[rgb(var(--foreground-rgb))] placeholder-[var(--muted-foreground)]/50"
                 placeholder={lang === 'en' ? 'Taro Tanaka' : '田所 太郎'}
               />
             </div>
@@ -81,7 +81,7 @@ export default function WorkWithMeClient({ lang, dict }: { lang: string; dict: a
                 required
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full bg-[var(--muted)]/50 border border-[var(--border)] rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--accent))]/20 focus:border-[rgb(var(--accent))] transition-all"
+                className="w-full bg-[var(--card)] border border-[var(--border)] rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--accent))]/20 focus:border-[rgb(var(--accent))] transition-all text-[rgb(var(--foreground-rgb))] placeholder-[var(--muted-foreground)]/50"
                 placeholder="contact@example.com"
               />
             </div>
@@ -96,7 +96,7 @@ export default function WorkWithMeClient({ lang, dict }: { lang: string; dict: a
               id="company"
               value={formData.company}
               onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-              className="w-full bg-[var(--muted)]/50 border border-[var(--border)] rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--accent))]/20 focus:border-[rgb(var(--accent))] transition-all"
+              className="w-full bg-[var(--card)] border border-[var(--border)] rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--accent))]/20 focus:border-[rgb(var(--accent))] transition-all text-[rgb(var(--foreground-rgb))] placeholder-[var(--muted-foreground)]/50"
               placeholder={lang === 'en' ? 'Company Name' : '公司名称或个人项目'}
             />
           </div>
@@ -111,7 +111,7 @@ export default function WorkWithMeClient({ lang, dict }: { lang: string; dict: a
               rows={5}
               value={formData.message}
               onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-              className="w-full bg-[var(--muted)]/50 border border-[var(--border)] rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--accent))]/20 focus:border-[rgb(var(--accent))] transition-all resize-none"
+              className="w-full bg-[var(--card)] border border-[var(--border)] rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--accent))]/20 focus:border-[rgb(var(--accent))] transition-all resize-none text-[rgb(var(--foreground-rgb))] placeholder-[var(--muted-foreground)]/50"
               placeholder={lang === 'en' ? 'Tell me about your project...' : '请分享您的项目背景与目标...'}
             />
           </div>

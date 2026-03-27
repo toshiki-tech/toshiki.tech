@@ -189,7 +189,7 @@ export default function HomeClient({ lang, dict }: { lang: Locale; dict: any }) 
           <SectionHeader 
             title={dict.common.nav.experiments} 
             subtitle={lang === 'en' ? "Deep tech exploration, research prototypes, and system designs." : lang === 'zh' ? "深度技术探索、研究原型与系统设计。" : "深層技術の探求、リサーチプロトタイプ、そしてシステム設計。"}
-            href="/experiments"
+            href="/ai-lab"
             cta={lang === 'en' ? "all experiments" : lang === 'zh' ? "所有实验" : "全ラボ実績"}
             lang={lang}
           />
