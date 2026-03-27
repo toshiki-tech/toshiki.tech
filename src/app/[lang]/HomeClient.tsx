@@ -54,38 +54,25 @@ export default function HomeClient({ lang, dict }: { lang: Locale; dict: any }) 
   return (
     <div className="container-custom py-12 space-y-40">
       {/* Hero Section */}
-      <section className="flex flex-col relative">
-        <motion.div 
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1 }}
-          className="w-full aspect-[21/9] md:aspect-[3/1] bg-[var(--muted)] rounded-3xl border border-[var(--border)] overflow-hidden relative mb-12 shadow-sm"
-        >
-          <img 
-            src="/images/hero-banner.png" 
-            alt="Toshiki Tech Banner" 
-            className="w-full h-full object-cover opacity-80 dark:opacity-60 mix-blend-multiply dark:mix-blend-normal" 
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-[var(--background-start-rgb)]/20 to-transparent" />
-        </motion.div>
-
+      <section className="min-h-[80vh] flex flex-col md:flex-row items-center justify-between relative gap-12 pt-20 md:pt-0">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8 }}
+          className="flex-1 space-y-8 z-10"
         >
           <div 
-             className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[var(--border)] bg-[var(--muted)]/50 text-[10px] font-bold uppercase tracking-widest text-[var(--muted-foreground)] mb-8"
+             className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[var(--border)] bg-[var(--muted)]/50 text-[10px] font-bold uppercase tracking-widest text-[var(--muted-foreground)] mb-4"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
             {lang === 'en' ? 'Active Building' : lang === 'zh' ? '正在构建中' : '構築中'}
           </div>
           
-          <h1 className="text-6xl md:text-8xl font-black tracking-tight mb-8 bg-clip-text text-transparent bg-gradient-to-br from-[var(--foreground-rgb)] to-[var(--muted-foreground)] leading-[0.95]">
+          <h1 className="text-6xl md:text-8xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-br from-[var(--foreground-rgb)] to-[var(--muted-foreground)] leading-[0.9] md:leading-[1]">
             {hDict.hero.title}
           </h1>
           
-          <div className="max-w-2xl space-y-6">
+          <div className="max-w-xl space-y-6">
             <p className="text-2xl md:text-3xl font-medium text-[var(--foreground-rgb)] leading-tight">
               {hDict.hero.subtitle}
             </p>
@@ -94,7 +81,7 @@ export default function HomeClient({ lang, dict }: { lang: Locale; dict: any }) 
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-5 mt-12">
+          <div className="flex flex-wrap gap-5 pt-4">
             <Link href={`/${lang}/products`} className="btn-primary flex items-center gap-2 shadow-lg shadow-blue-500/10 hover:shadow-blue-500/20 px-8 py-3.5 rounded-xl">
               {hDict.hero.cta.viewProducts}
               <ArrowUpRight size={18} />
@@ -104,6 +91,28 @@ export default function HomeClient({ lang, dict }: { lang: Locale; dict: any }) 
             </Link>
           </div>
         </motion.div>
+
+        <div className="flex-1 w-full relative h-[400px] md:h-[600px] pointer-events-none select-none overflow-hidden">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9, x: 40 }}
+            animate={{ opacity: 1, scale: 1, x: 0 }}
+            transition={{ duration: 1.5, ease: "easeOut" }}
+            className="w-full h-full relative"
+          >
+            <img 
+              src="/images/hero-banner.png" 
+              alt="Toshiki Tech Abstract" 
+              className="w-full h-full object-contain object-right opacity-70 dark:opacity-80 mix-blend-screen dark:mix-blend-normal" 
+              style={{
+                maskImage: 'linear-gradient(to right, transparent, black, black, transparent)',
+                WebkitMaskImage: 'linear-gradient(to right, transparent, black, black, transparent)'
+              }}
+            />
+            {/* Ambient glows */}
+            <div className="absolute top-1/4 right-0 -z-10 w-64 h-64 bg-[rgb(var(--accent))]/10 rounded-full blur-[100px] animate-pulse" />
+            <div className="absolute bottom-1/4 left-1/2 -z-10 w-40 h-40 bg-blue-500/5 rounded-full blur-[80px]" />
+          </motion.div>
+        </div>
       </section>
 
       {/* Featured Products */}
