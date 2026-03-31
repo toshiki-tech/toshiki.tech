@@ -22,6 +22,8 @@ export default async function ExperimentsPage({ params: { lang } }: { params: { 
              ? "The engineering lab where curiosity meets code. These are research prototypes and deep dives into technology that pushes the boundaries of our current products." 
              : lang === 'zh'
              ? "好奇心与代码碰撞的工程实验室。这些是研究原型和深入技术探索，旨在推向现有产品的边界。"
+             : lang === 'zh-tw'
+             ? "好奇心與代碼碰撞的工程實驗室。這些是研究原型和深入技術探索，旨在推向現有產品的邊界。"
              : "好奇心がコードと出会うエンジニアリングラボ。これらはリサーチプロトタイプであり、現在のプロダクトの限界を押し広げる技術の深掘りです。"}
         </p>
       </div>
@@ -34,13 +36,15 @@ export default async function ExperimentsPage({ params: { lang } }: { params: { 
                 <div className="w-2 h-2 rounded-full bg-[rgb(var(--accent))] animate-pulse" />
               </div>
               <p className="text-[var(--muted-foreground)] font-mono tracking-widest text-xs uppercase opacity-60">
-                {lang === 'en' ? 'AI Lab expansion in progress' : lang === 'zh' ? 'AI 实验室项目筹备中' : 'AIラボ・プロジェクト準備中'}
+                {lang === 'en' ? 'AI Lab expansion in progress' : (lang === 'zh' || lang === 'zh-tw') ? (lang === 'zh' ? 'AI 实验室项目筹备中' : 'AI 實驗室項目籌備中') : 'AIラボ・プロジェクト準備中'}
               </p>
               <p className="text-sm text-[var(--muted-foreground)]/40 px-8">
                 {lang === 'en' 
                   ? 'I am currently refining new internal research initiatives. Detailed logs and prototypes will be published here soon.'
                   : lang === 'zh'
                   ? '目前正在筹备新的内部研究项目。详细的研究日志与原型将很快在此发布。'
+                  : lang === 'zh-tw'
+                  ? '目前正在籌備新的內部研究項目。詳細的研究日誌與原型將很快在此發佈。'
                   : '現在、新しい内部研究プロジェクトを準備しています。詳細なログとプロトタイプは近日公開予定です。'}
               </p>
             </div>

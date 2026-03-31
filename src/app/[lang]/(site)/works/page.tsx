@@ -57,7 +57,7 @@ export default async function WorksPage({ params: { lang } }: { params: { lang: 
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 text-[rgb(var(--accent))] hover:underline text-sm font-bold w-fit group/link"
                   >
-                    {lang === 'en' ? 'Visit Website' : lang === 'zh' ? '访问网站' : 'ウェブサイトを訪問'}
+                    {lang === 'en' ? 'Visit Website' : (lang === 'zh' || lang === 'zh-tw') ? (lang === 'zh' ? '访问网站' : '造訪網站') : 'ウェブサイトを訪問'}
                     <svg className="w-3.5 h-3.5 transition-transform group-hover/link:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                       <line x1="7" y1="17" x2="17" y2="7"></line>
                       <polyline points="7 7 17 7 17 17"></polyline>
@@ -79,13 +79,15 @@ export default async function WorksPage({ params: { lang } }: { params: { lang: 
 
       <div className="bg-[rgb(var(--accent))]/5 dark:bg-[rgb(var(--accent))]/10 rounded-3xl p-12 md:p-20 text-center space-y-8">
         <h2 className="text-3xl font-extrabold tracking-tight">
-          {lang === 'en' ? 'Looking to build something?' : lang === 'zh' ? '想要开始构建吗？' : '構築をお考えですか？'}
+          {lang === 'en' ? 'Looking to build something?' : (lang === 'zh' || lang === 'zh-tw') ? (lang === 'zh' ? '想要开始构建吗？' : '想要開始構築嗎？') : '構築をお考えですか？'}
         </h2>
         <p className="text-lg text-[var(--muted-foreground)] max-w-xl mx-auto leading-relaxed">
            {lang === 'en' 
              ? 'Whether you need a full product build or an AI-driven internal tool, I can help you bridge the gap between idea and deployment.' 
              : lang === 'zh'
              ? '无论是完整的产品构建还是 AI 驱动的内部工具，我都能协助您跨过创意到部署的鸿沟。'
+             : lang === 'zh-tw'
+             ? '無論是完整的产品構築還是 AI 驅動的內部工具，我都能協助您跨過創意到部署的鴻溝。'
              : 'フルプロダクトの構築からAI主導の内部ツールまで、アイデアからデプロイメントまでのギャップを埋めるお手伝いをします。'}
         </p>
         <div className="pt-4">
