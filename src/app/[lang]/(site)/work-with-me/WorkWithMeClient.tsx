@@ -112,7 +112,7 @@ export default function WorkWithMeClient({ lang, dict }: { lang: string; dict: a
               value={formData.message}
               onChange={(e) => setFormData({ ...formData, message: e.target.value })}
               className="w-full bg-[var(--card)] border border-[var(--border)] rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--accent))]/20 focus:border-[rgb(var(--accent))] transition-all resize-none text-[rgb(var(--foreground-rgb))] placeholder-[var(--muted-foreground)]/50"
-              placeholder={lang === 'en' ? 'Tell me about your project...' : '请分享您的项目背景与目标...'}
+              placeholder={lang === 'en' ? 'Tell me about your project...' : lang === 'zh' ? '请分享您的项目背景与目标...' : lang === 'zh-tw' ? '請分享您的項目背景與目標...' : 'プロジェクトの背景や目標について教えてください...'}
             />
           </div>
           
