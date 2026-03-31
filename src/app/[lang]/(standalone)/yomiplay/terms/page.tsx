@@ -51,6 +51,7 @@ const content = {
     linksTitle: 'Links',
     links: [
       { label: 'Privacy Policy', url: 'https://toshiki.tech/en/yomiplay/privacy' },
+      { label: 'Support & Help', url: 'https://toshiki.tech/en/yomiplay/support' },
       { label: 'Email Support', url: 'mailto:toshiki.tech.jp@gmail.com' }
     ]
   },
@@ -103,6 +104,7 @@ const content = {
     linksTitle: '链接',
     links: [
       { label: '隐私政策', url: 'https://toshiki.tech/zh/yomiplay/privacy' },
+      { label: '支持与帮助', url: 'https://toshiki.tech/zh/yomiplay/support' },
       { label: '邮件支持', url: 'mailto:toshiki.tech.jp@gmail.com' }
     ]
   },
@@ -155,6 +157,7 @@ const content = {
     linksTitle: '連結',
     links: [
       { label: '隱私政策', url: 'https://toshiki.tech/zh-tw/yomiplay/privacy' },
+      { label: '支援與幫助', url: 'https://toshiki.tech/zh-tw/yomiplay/support' },
       { label: '郵件支援', url: 'mailto:toshiki.tech.jp@gmail.com' }
     ]
   },
@@ -207,6 +210,7 @@ const content = {
     linksTitle: 'リンク',
     links: [
       { label: 'プライバシーポリシー', url: 'https://toshiki.tech/ja/yomiplay/privacy' },
+      { label: 'サポートとヘルプ', url: 'https://toshiki.tech/ja/yomiplay/support' },
       { label: 'メールサポート', url: 'mailto:toshiki.tech.jp@gmail.com' }
     ]
   }

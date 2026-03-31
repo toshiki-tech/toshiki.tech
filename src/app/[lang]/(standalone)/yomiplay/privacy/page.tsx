@@ -41,7 +41,7 @@ const content = {
       },
       {
         title: '8. Contact Us',
-        body: 'If you have any questions regarding this Privacy Policy, please contact us via email: toshiki.tech.jp@gmail.com'
+        body: 'If you have any questions regarding this Privacy Policy, please visit our Support Page (https://toshiki.tech/en/yomiplay/support) or contact us via email: toshiki.tech.jp@gmail.com'
       }
     ]
   },
@@ -84,7 +84,7 @@ const content = {
       },
       {
         title: '8. 联系我们',
-        body: '如果您对本隐私政策有任何疑问，请通过电子邮件与我们联系： toshiki.tech.jp@gmail.com'
+        body: '如果您对本隐私政策有任何疑问，请访问我们的 支持页面 (https://toshiki.tech/zh/yomiplay/support) 或通过电子邮件与我们联系： toshiki.tech.jp@gmail.com'
       }
     ]
   },
@@ -127,7 +127,7 @@ const content = {
       },
       {
         title: '8. 聯絡我們',
-        body: '如果您對本隱私政策有任何疑問，請透過電子郵件與我們聯絡： toshiki.tech.jp@gmail.com'
+        body: '如果您對本隱私政策有任何疑問，請訪問我們的 支援頁面 (https://toshiki.tech/zh-tw/yomiplay/support) 或透過電子郵件與我們聯絡： toshiki.tech.jp@gmail.com'
       }
     ]
   },
@@ -170,7 +170,7 @@ const content = {
       },
       {
         title: '8. お問い合わせ',
-        body: '本ポリシーに関するご質問は、メールでお寄せください： toshiki.tech.jp@gmail.com'
+        body: '本ポリシーに関するご質問は、サポートページ (https://toshiki.tech/ja/yomiplay/support) をご覧いただくか、メールでお寄せください： toshiki.tech.jp@gmail.com'
       }
     ]
   }
