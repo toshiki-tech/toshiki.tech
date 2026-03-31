@@ -105,7 +105,7 @@ export default async function ProductDetailPage({ params }: { params: { lang: Lo
                 <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black/20 to-transparent z-10" />
                 {product.imageUrl ? (
                   <img 
-                    src={product.imageUrl} 
+                    src={product.portraitImageUrl || product.imageUrl} 
                     alt={t.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                   />

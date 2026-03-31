@@ -33,6 +33,7 @@ export interface Product {
     url: string;
   }[];
   imageUrl?: string;
+  portraitImageUrl?: string;
   gallery?: string[];
 }
 
@@ -91,11 +92,7 @@ export const products: Product[] = [
       { label: "View on App Store", url: "#" }
     ],
     imageUrl: "/images/products/yomiplay-final.png",
-    gallery: [
-      "/images/products/yomiplay-s1.jpg",
-      "/images/products/yomiplay-s2.jpg",
-      "/images/products/yomiplay-s3.jpg"
-    ]
+    portraitImageUrl: "/images/products/yomiplay-portrait.png"
   },
   {
     id: "yomimark",
