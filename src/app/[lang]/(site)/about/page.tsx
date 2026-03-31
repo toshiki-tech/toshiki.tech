@@ -98,28 +98,26 @@ export default async function AboutPage({ params: { lang } }: { params: { lang: 
           </div>
           
           {/* Abstract Map of Japan */}
-          <div className="w-full max-w-sm aspect-[4/3] relative flex items-center justify-center opacity-40 group-hover:opacity-60 transition-opacity duration-700">
-            <svg viewBox="0 0 400 300" className="w-full h-full text-[var(--muted-foreground)] fill-current">
-              {/* Simplified Japan Shape using Dots */}
-              <g className="dot-grid">
-                {/* Hokkaido */}
-                <circle cx="340" cy="40" r="1.5" /> <circle cx="355" cy="45" r="1.5" /> <circle cx="345" cy="60" r="1.5" />
-                {/* Honshu */}
-                <circle cx="310" cy="90" r="1.5" /> <circle cx="290" cy="110" r="1.5" /> <circle cx="270" cy="130" r="1.5" />
-                <circle cx="250" cy="150" r="1.5" /> <circle cx="220" cy="170" r="1.5" /> <circle cx="190" cy="185" r="1.5" />
-                <circle cx="160" cy="195" r="1.5" /> <circle cx="130" cy="205" r="1.5" /> <circle cx="100" cy="215" r="1.5" />
-                {/* Tokyo Area Marker */}
-                <g className="relative">
-                  <circle cx="250" cy="150" r="4" className="text-[rgb(var(--accent))] fill-current" />
-                  <circle cx="250" cy="150" r="8" className="text-[rgb(var(--accent))] fill-none stroke-current opacity-20 animate-ping" />
-                </g>
-                {/* Shikoku */}
-                <circle cx="120" cy="225" r="1.5" />
-                {/* Kyushu */}
-                <circle cx="80" cy="235" r="1.5" /> <circle cx="60" cy="250" r="1.5" />
+          <div className="w-full max-w-sm aspect-[4/3] relative flex items-center justify-center opacity-30 group-hover:opacity-50 transition-opacity duration-700">
+            <svg viewBox="0 0 400 300" className="w-full h-full text-[var(--muted-foreground)] fill-current stroke-current" strokeWidth="0.5">
+              {/* Simplified Clear Outline of Japan */}
+              <path 
+                d="M330,40 L345,30 L365,45 L355,75 L335,80 L330,40 Z M315,90 L325,110 L290,135 L265,145 L245,170 L220,180 L195,190 L175,195 L145,210 L125,220 L105,225 L90,240 L70,250 L60,255 L55,245 L80,225 L110,210 L140,200 L170,195 L200,185 L230,170 L260,150 L280,130 L300,110 L315,90 Z M120,230 L140,225 L150,235 L125,240 L120,230 Z M90,255 L110,250 L115,260 L95,265 L90,255 Z" 
+                fill="none" 
+                className="stroke-current opacity-40"
+              />
+              {/* Dot Grid overlaying the outline */}
+              <g className="dot-grid opacity-30">
+                <circle cx="345" cy="50" r="1" /> <circle cx="355" cy="60" r="1" />
+                <circle cx="310" cy="100" r="1" /> <circle cx="280" cy="125" r="1" /> <circle cx="250" cy="150" r="1" />
+                <circle cx="220" cy="175" r="1" /> <circle cx="190" cy="190" r="1" /> <circle cx="160" cy="200" r="1" />
+                <circle cx="130" cy="215" r="1" /> <circle cx="100" cy="230" r="1" /> <circle cx="70" cy="250" r="1" />
               </g>
-              {/* Subtle Connection Lines */}
-              <path d="M60,250 L355,45" className="stroke-current opacity-5" fill="none" strokeWidth="0.5" strokeDasharray="4 4" />
+              {/* Tokyo Marker */}
+              <g>
+                <circle cx="265" cy="148" r="4" className="text-[rgb(var(--accent))] fill-current" />
+                <circle cx="265" cy="148" r="10" className="text-[rgb(var(--accent))] fill-none stroke-current opacity-20 animate-ping" strokeWidth="1" />
+              </g>
             </svg>
             
             {/* Ambient Glow */}
@@ -128,7 +126,7 @@ export default async function AboutPage({ params: { lang } }: { params: { lang: 
 
           <p className="text-xs font-medium text-[var(--muted-foreground)] tracking-tight italic opacity-60">
             {lang === 'en'
-              ? '&quot;Working across zones, building for the world.&quot;'
+              ? '"Working across zones, building for the world."'
               : lang === 'zh'
                 ? '“跨时区协作，为世界而建。”'
                 : '「タイムゾーンを越え、世界のために。」'}
