@@ -86,18 +86,54 @@ export default async function AboutPage({ params: { lang } }: { params: { lang: 
         </section>
       </div>
 
-      <section className="pt-20 border-t border-[var(--border)] text-center space-y-6">
-        <p className="text-sm font-semibold tracking-widest uppercase text-[var(--muted-foreground)]">
-          {lang === 'en' ? 'Location' : lang === 'zh' ? '驻地' : '拠点'}
-        </p>
-        <p className="text-lg font-medium">Tokyo, Japan</p>
-        <p className="text-xs text-[var(--muted-foreground)]">
-          {lang === 'en'
-            ? 'Working across zones, building for the world.'
-            : lang === 'zh'
-              ? '跨时区协作，为世界而建。'
-              : 'タイムゾーンを越え、世界のために。'}
-        </p>
+      <section className="pt-24 border-t border-[var(--border)] relative overflow-hidden group">
+        <div className="flex flex-col items-center text-center space-y-8 relative z-10">
+          <div className="space-y-2">
+            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-[rgb(var(--accent))]">
+              {lang === 'en' ? 'Location' : lang === 'zh' ? '驻地' : '拠点'}
+            </p>
+            <h3 className="text-2xl font-black tracking-tight text-[var(--foreground-rgb)] lowercase">
+              tokyo, japan
+            </h3>
+          </div>
+          
+          {/* Abstract Map of Japan */}
+          <div className="w-full max-w-sm aspect-[4/3] relative flex items-center justify-center opacity-40 group-hover:opacity-60 transition-opacity duration-700">
+            <svg viewBox="0 0 400 300" className="w-full h-full text-[var(--muted-foreground)] fill-current">
+              {/* Simplified Japan Shape using Dots */}
+              <g className="dot-grid">
+                {/* Hokkaido */}
+                <circle cx="340" cy="40" r="1.5" /> <circle cx="355" cy="45" r="1.5" /> <circle cx="345" cy="60" r="1.5" />
+                {/* Honshu */}
+                <circle cx="310" cy="90" r="1.5" /> <circle cx="290" cy="110" r="1.5" /> <circle cx="270" cy="130" r="1.5" />
+                <circle cx="250" cy="150" r="1.5" /> <circle cx="220" cy="170" r="1.5" /> <circle cx="190" cy="185" r="1.5" />
+                <circle cx="160" cy="195" r="1.5" /> <circle cx="130" cy="205" r="1.5" /> <circle cx="100" cy="215" r="1.5" />
+                {/* Tokyo Area Marker */}
+                <g className="relative">
+                  <circle cx="250" cy="150" r="4" className="text-[rgb(var(--accent))] fill-current" />
+                  <circle cx="250" cy="150" r="8" className="text-[rgb(var(--accent))] fill-none stroke-current opacity-20 animate-ping" />
+                </g>
+                {/* Shikoku */}
+                <circle cx="120" cy="225" r="1.5" />
+                {/* Kyushu */}
+                <circle cx="80" cy="235" r="1.5" /> <circle cx="60" cy="250" r="1.5" />
+              </g>
+              {/* Subtle Connection Lines */}
+              <path d="M60,250 L355,45" className="stroke-current opacity-5" fill="none" strokeWidth="0.5" strokeDasharray="4 4" />
+            </svg>
+            
+            {/* Ambient Glow */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-32 bg-[rgb(var(--accent))]/10 blur-[80px] -z-10" />
+          </div>
+
+          <p className="text-xs font-medium text-[var(--muted-foreground)] tracking-tight italic opacity-60">
+            {lang === 'en'
+              ? '&quot;Working across zones, building for the world.&quot;'
+              : lang === 'zh'
+                ? '“跨时区协作，为世界而建。”'
+                : '「タイムゾーンを越え、世界のために。」'}
+          </p>
+        </div>
       </section>
     </div>
   );
