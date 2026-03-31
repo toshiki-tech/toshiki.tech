@@ -20,6 +20,7 @@ export interface Work {
   };
   techStack: string[];
   imageUrl?: string;
+  url?: string;
 }
 
 export const works: Work[] = [
@@ -27,24 +28,25 @@ export const works: Work[] = [
     id: "corp-redesign",
     translations: {
       en: {
-        title: "Corporate Website Redesign",
-        description: "Built a high-performance, SEO-optimized landing page for a Japanese tech consultancy using Next.js and Tailwind."
+        title: "Educational Institution Portal",
+        description: "Built with Next.js and Tailwind, this high-performance website for a Japanese educational institution integrates consulting, marketing, and registration conversion, optimizing both SEO and UX."
       },
       zh: {
-        title: "企业官网重构",
-        description: "使用 Next.js 和 Tailwind 为一家日本技术咨询公司构建了高性能、SEO 优化的落地页。"
+        title: "教育培训机构官网",
+        description: "基于 Next.js 与 Tailwind 构建，为日本教育培训机构打造了一体化咨询、推广与报名转化的高性能网站，兼顾 SEO 优化与用户体验，有效提升品牌曝光与转化效率。"
       },
       ja: {
-        title: "コーポレートサイトのリニューアル",
-        description: "Next.jsとTailwindを使用し、日本の技術コンサルティング会社向けに高性能でSEO最適化されたランディングページを構築。"
+        title: "教育研修機関向けポータルサイト",
+        description: "Next.jsとTailwindをベースに、日本の教育研修機関向けにコンサルティング、マーケティング、申し込みコンバージョンを一体化した高性能サイトを構築。SEOとUXを両立。"
       },
       'zh-tw': {
-        title: "企業官網重構",
-        description: "使用 Next.js 和 Tailwind 為一家日本技術諮詢公司構建了高性能、SEO 優化的落地頁。"
+        title: "教育培訓機構官網",
+        description: "基於 Next.js 與 Tailwind 構建，為日本教育培訓機構打造了一體化諮詢、推廣與報名轉化的高性能網站，兼顧 SEO 優化與用戶體驗，有效提升品牌曝光與轉化效率。"
       }
     },
     techStack: ["Next.js", "Tailwind CSS", "Framer Motion"],
     imageUrl: "/images/works/corp-redesign.png",
+    url: "https://dcxy.jp"
   },
   {
     id: "ai-crm",

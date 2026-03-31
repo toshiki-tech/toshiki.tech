@@ -181,20 +181,43 @@ export default function HomeClient({ lang, dict }: { lang: Locale; dict: any }) 
             className="grid grid-cols-1 md:grid-cols-3 gap-6"
           >
             {works.map((work) => (
-              <motion.div key={work.id} variants={item} className="p-8 card bg-[var(--card)] flex flex-col justify-between hover:border-[rgb(var(--accent))] transition-colors">
-                <div className="space-y-4">
-                  <h3 className="text-xl font-bold">{work.translations[lang].title}</h3>
-                  <p className="text-sm text-[var(--muted-foreground)] leading-relaxed mb-6">
-                    {work.translations[lang].description}
-                  </p>
-                </div>
-                <div className="mt-8 pt-6 border-t border-[var(--border)] flex justify-between items-center text-[10px] font-bold text-[var(--muted-foreground)] tracking-widest uppercase">
-                  <span>READY.SYS</span>
-                  <div className="flex gap-2">
-                    <div className="w-2 h-2 rounded-full border border-[var(--border)]" />
-                    <div className="w-2 h-2 rounded-full border border-[rgb(var(--accent))] bg-[rgb(var(--accent))]" />
+              <motion.div key={work.id} variants={item} className="group relative">
+                {work.url ? (
+                  <a href={work.url} target="_blank" rel="noopener noreferrer" className="block p-8 card h-full bg-[var(--card)] flex flex-col justify-between hover:border-[rgb(var(--accent))] transition-all hover:-translate-y-1">
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-start">
+                        <h3 className="text-xl font-bold group-hover:text-[rgb(var(--accent))] transition-colors">{work.translations[lang].title}</h3>
+                        <ArrowUpRight size={18} className="text-[rgb(var(--accent))] opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                      <p className="text-sm text-[var(--muted-foreground)] leading-relaxed mb-6">
+                        {work.translations[lang].description}
+                      </p>
+                    </div>
+                    <div className="mt-8 pt-6 border-t border-[var(--border)] flex justify-between items-center text-[10px] font-bold text-[var(--muted-foreground)] tracking-widest uppercase">
+                      <span>{work.url.replace('https://', '')}</span>
+                      <div className="flex gap-2">
+                        <div className="w-2 h-2 rounded-full border border-[var(--border)]" />
+                        <div className="w-2 h-2 rounded-full border border-[rgb(var(--accent))] bg-[rgb(var(--accent))]" />
+                      </div>
+                    </div>
+                  </a>
+                ) : (
+                  <div className="p-8 card h-full bg-[var(--card)] flex flex-col justify-between hover:border-[rgb(var(--accent))] transition-colors">
+                    <div className="space-y-4">
+                      <h3 className="text-xl font-bold">{work.translations[lang].title}</h3>
+                      <p className="text-sm text-[var(--muted-foreground)] leading-relaxed mb-6">
+                        {work.translations[lang].description}
+                      </p>
+                    </div>
+                    <div className="mt-8 pt-6 border-t border-[var(--border)] flex justify-between items-center text-[10px] font-bold text-[var(--muted-foreground)] tracking-widest uppercase">
+                      <span>READY.SYS</span>
+                      <div className="flex gap-2">
+                        <div className="w-2 h-2 rounded-full border border-[var(--border)]" />
+                        <div className="w-2 h-2 rounded-full border border-[rgb(var(--accent))] bg-[rgb(var(--accent))]" />
+                      </div>
+                    </div>
                   </div>
-                </div>
+                )}
               </motion.div>
             ))}
           </motion.div>

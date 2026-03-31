@@ -49,7 +49,21 @@ export default async function WorksPage({ params: { lang } }: { params: { lang: 
                 </p>
               </div>
               
-              <div className="pt-10 flex flex-col gap-4">
+              <div className="pt-10 flex flex-col gap-6">
+                {work.url && (
+                  <a 
+                    href={work.url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-[rgb(var(--accent))] hover:underline text-sm font-bold w-fit group/link"
+                  >
+                    {lang === 'en' ? 'Visit Website' : lang === 'zh' ? '访问网站' : 'ウェブサイトを訪問'}
+                    <svg className="w-3.5 h-3.5 transition-transform group-hover/link:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="7" y1="17" x2="17" y2="7"></line>
+                      <polyline points="7 7 17 7 17 17"></polyline>
+                    </svg>
+                  </a>
+                )}
                 <div className="flex flex-wrap gap-2">
                   {work.techStack.map((tech) => (
                     <span key={tech} className="text-[10px] font-mono uppercase tracking-tight text-[var(--muted-foreground)] px-2 py-1 rounded border border-[var(--border)]">
