@@ -101,7 +101,7 @@ export default async function ProductDetailPage({ params }: { params: { lang: Lo
             <div className="order-1 lg:order-2">
             <div className="order-1 lg:order-2 space-y-12">
               {/* Primary Image */}
-              <div className="aspect-[4/5] md:aspect-square bg-[var(--card)] rounded-3xl border border-[var(--border)] shadow-2xl overflow-hidden relative group">
+              <div className={`${product.portraitImageUrl ? 'aspect-[3/4.5] md:aspect-[3/4.5] lg:aspect-[2/3]' : 'aspect-[4/5] md:aspect-square'} bg-[var(--card)] rounded-3xl border border-[var(--border)] shadow-2xl overflow-hidden relative group`}>
                 <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black/20 to-transparent z-10" />
                 {product.imageUrl ? (
                   <img 
