@@ -99,7 +99,7 @@ export default async function AboutPage({ params: { lang } }: { params: { lang: 
       </div>
 
       <section className="pt-24 border-t border-[var(--border)] relative overflow-hidden group">
-        <div className="flex flex-col items-center text-center space-y-8 relative z-10">
+        <div className="flex flex-col items-center text-center space-y-12 relative z-10">
           <div className="space-y-2">
             <p className="text-[10px] font-black uppercase tracking-[0.4em] text-[rgb(var(--accent))]">
               {lang === 'en' ? 'Location' : (lang === 'zh' || lang === 'zh-tw') ? (lang === 'zh' ? '驻地' : '駐地') : '拠点'}
@@ -108,63 +108,9 @@ export default async function AboutPage({ params: { lang } }: { params: { lang: 
               tokyo, japan
             </h3>
           </div>
-          
-          {/* Abstract Map of Japan */}
-          <div className="w-full max-w-sm aspect-[4/3] relative flex items-center justify-center group/map">
-            {/* Topographic Lines Background */}
-            <div className="absolute inset-0 opacity-10 pointer-events-none overflow-hidden h-full flex items-center justify-center">
-              <svg viewBox="0 0 400 300" className="w-[150%] h-[150%] blur-[2px] transition-transform duration-1000 group-hover/map:scale-110">
-                <circle cx="265" cy="148" r="40" fill="none" stroke="currentColor" strokeWidth="0.5" strokeDasharray="1 3" />
-                <circle cx="265" cy="148" r="80" fill="none" stroke="currentColor" strokeWidth="0.5" strokeDasharray="1 4" />
-                <circle cx="265" cy="148" r="120" fill="none" stroke="currentColor" strokeWidth="0.5" strokeDasharray="1 5" />
-                <circle cx="265" cy="148" r="160" fill="none" stroke="currentColor" strokeWidth="0.5" strokeDasharray="1 6" />
-                <circle cx="265" cy="148" r="200" fill="none" stroke="currentColor" strokeWidth="0.5" strokeDasharray="1 7" />
-              </svg>
-            </div>
-
-            <svg viewBox="0 0 400 300" className="w-full h-full relative z-10 drop-shadow-[0_0_15px_rgba(var(--accent-rgb),0.3)]">
-              {/* Detailed Japan Outline */}
-              <g className="text-[rgb(var(--accent))] fill-none stroke-current" strokeWidth="1.2" strokeLinejoin="round">
-                {/* Hokkaido */}
-                <path d="M335,35 L355,25 L370,40 L360,70 L340,75 L335,35 Z" fill="rgba(var(--accent), 0.05)" className="animate-pulse" />
-                {/* Honshu */}
-                <path d="M320,85 L325,105 L295,130 L270,140 L250,165 L225,175 L200,185 L180,190 L150,205 L130,215 L110,220 L95,235 L75,245 L65,250 L60,240 L85,220 L115,205 L145,195 L175,190 L205,180 L235,165 L265,145 L285,125 L305,105 L320,85 Z" fill="rgba(var(--accent), 0.08)" />
-                {/* Shikoku */}
-                <path d="M125,225 L145,220 L155,230 L130,235 L125,225 Z" fill="rgba(var(--accent), 0.1)" />
-                {/* Kyushu */}
-                <path d="M95,250 L115,245 L120,255 L100,260 L95,250 Z" fill="rgba(var(--accent), 0.1)" />
-              </g>
-
-              {/* Circuit Path Glow (Abstract) */}
-              <path 
-                d="M360,35 Q300,100 265,148" 
-                className="stroke-[rgb(var(--accent))] opacity-20" 
-                fill="none" 
-                strokeWidth="0.5" 
-                strokeDasharray="4 4"
-              />
-              <path 
-                d="M60,240 Q150,200 265,148" 
-                className="stroke-[rgb(var(--accent))] opacity-20" 
-                fill="none" 
-                strokeWidth="0.5" 
-                strokeDasharray="4 4"
-              />
-
-              {/* Tokyo Marker (Core Glow) */}
-              <g className="filter drop-shadow-[0_0_8px_rgba(var(--accent-rgb),0.8)]">
-                <circle cx="265" cy="148" r="4" className="text-[rgb(var(--accent))] fill-current" />
-                <circle cx="265" cy="148" r="12" className="text-[rgb(var(--accent))] fill-none stroke-current opacity-30 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite]" strokeWidth="2" />
-                <circle cx="265" cy="148" r="20" className="text-[rgb(var(--accent))] fill-none stroke-current opacity-10 animate-[ping_4s_cubic-bezier(0,0,0.2,1)_infinite]" strokeWidth="1" />
-              </g>
-            </svg>
-            
-            {/* Background Atmosphere */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_265px_148px,rgb(var(--accent))_0%,transparent_70%)] opacity-[0.07] pointer-events-none" />
-          </div>
 
           <div className="space-y-4">
-            <p className="text-xs font-bold text-[var(--muted-foreground)] tracking-tight italic opacity-60">
+            <p className="text-sm font-bold text-[var(--muted-foreground)] tracking-tight italic opacity-60 max-w-sm">
               {lang === 'en'
                 ? '"Working across zones, building for the world."'
                 : lang === 'zh'
@@ -173,10 +119,6 @@ export default async function AboutPage({ params: { lang } }: { params: { lang: 
                     ? '「跨時區協作，為世界而建。」'
                     : '「タイムゾーンを越え、世界のために。」'}
             </p>
-            <div className="inline-flex items-center gap-3 px-3 py-1 rounded-full bg-[var(--muted)] border border-[var(--border)] text-[8px] font-mono text-[var(--muted-foreground)] uppercase tracking-widest">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              Tokyo Status: Active / UTC+9
-            </div>
           </div>
         </div>
       </section>
