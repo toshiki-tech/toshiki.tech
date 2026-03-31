@@ -13,7 +13,7 @@ const content = {
       },
       { text: 'Correction: Support manual correction and adjustment of generated subtitles and translations.' },
       { text: 'Translation: Support subtitle translation (system language packs may be required).' },
-      { text: 'Basic Export: Export subtitles to common formats such as SRT or .yomi files.' }
+      { text: 'Basic Export: Export subtitles to .yomi format or common formats such as SRT.' }
     ],
     proTitle: 'Pro Benefits (Subscription Required)',
     proItems: [
@@ -66,7 +66,7 @@ const content = {
       },
       { text: '手动修正：支持用户对生成的字幕与翻译内容进行修正与处理。' },
       { text: '字幕翻译：支持多语言翻译功能（可能需要下载系统语言包）。' },
-      { text: '基础导出：支持将字幕导出为 SRT / .yomi 等常见格式。' }
+      { text: '基础导出：支持将字幕导出为 .yomi 格式 / 或 .SRT 等常见格式。' }
     ],
     proTitle: 'Pro 权益（订阅解锁）',
     proItems: [
@@ -119,7 +119,7 @@ const content = {
       },
       { text: '手動修正：支援用戶對產生的字幕與翻譯內容進行修正與處理。' },
       { text: '字幕翻譯：支援多語言翻譯功能（可能需要下載系統語言套件）。' },
-      { text: '基礎匯出：支援將字幕匯出為 SRT / .yomi 等常見格式。' }
+      { text: '基礎匯出：支援將字幕匯出為 .yomi 格式 / 或 .SRT 等常見格式。' }
     ],
     proTitle: 'Pro 權益（訂閱解鎖）',
     proItems: [
@@ -172,7 +172,7 @@ const content = {
       },
       { text: '手動修正：生成された字幕や翻訳内容の修正・加工に対応しています。' },
       { text: '字幕翻訳：多言語翻訳功能に対応しています（システム言語パックが必要な場合があります）。' },
-      { text: '標準書き出し：SRT や .yomi などの一般的な形式での書き出しに対応しています。' }
+      { text: '標準書き出し：.yomi 形式、または SRT などの一般的な形式での書き出しに対応しています。' }
     ],
     proTitle: 'Pro 諸機能（購読で解放）',
     proItems: [
