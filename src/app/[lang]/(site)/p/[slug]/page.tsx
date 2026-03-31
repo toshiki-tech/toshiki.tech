@@ -5,7 +5,7 @@ import { ArrowLeft, CheckCircle2, Cpu, ArrowRight } from 'lucide-react';
 import { Locale, getDictionary } from '@/lib/get-dictionary';
 
 export async function generateStaticParams() {
-  const locales: Locale[] = ['en', 'zh', 'ja'];
+  const locales: Locale[] = ['en', 'zh', 'ja', 'zh-tw'];
   const params: { lang: Locale; slug: string }[] = [];
 
   for (const locale of locales) {
@@ -46,7 +46,7 @@ export default async function ProductDetailPage({ params }: { params: { lang: Lo
         <div className="container-custom">
           <Link href={`/${params.lang}/products`} className="inline-flex items-center gap-2 mb-16 text-sm font-bold text-[var(--muted-foreground)] hover:text-[rgb(var(--accent))] transition-colors group">
             <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-1" />
-            {params.lang === 'en' ? 'Back to Products' : params.lang === 'zh' ? '返回产品列表' : 'プロダクト一覧へ'}
+            {params.lang === 'en' ? 'Back to Products' : (params.lang === 'zh' || params.lang === 'zh-tw') ? (params.lang === 'zh' ? '返回产品列表' : '返回產品列表') : 'プロダクト一覧へ'}
           </Link>
 
           <div className="max-w-4xl mx-auto text-center space-y-8">
@@ -73,14 +73,16 @@ export default async function ProductDetailPage({ params }: { params: { lang: Lo
             <div className="space-y-12 order-2 lg:order-1">
               <div className="space-y-6">
                 <h2 className="text-3xl font-bold tracking-tight">
-                  {params.lang === 'en' ? 'Core Features' : params.lang === 'zh' ? '核心功能' : '主な機能'}
+                  {params.lang === 'en' ? 'Core Features' : (params.lang === 'zh' || params.lang === 'zh-tw') ? (params.lang === 'zh' ? '核心功能' : '核心功能') : '主な機能'}
                 </h2>
                 <p className="text-[var(--muted-foreground)]">
                   {params.lang === 'en'
                     ? 'Built by a developer to solve real-world Japanese immersion pain points.'
                     : params.lang === 'zh'
                       ? '由开发者亲历打造，旨在解决日语沉浸学习中的核心痛点。'
-                      : '開発者自らが日本語学習で直面した課題を解決するために設計されています。'}
+                      : params.lang === 'zh-tw'
+                        ? '由開發端親歷打造，旨在解決日語沉浸學習中的核心痛點。'
+                        : '開発者自らが日本語学習で直面した課題を解決するために設計されています。'}
                 </p>
               </div>
 
@@ -140,10 +142,10 @@ export default async function ProductDetailPage({ params }: { params: { lang: Lo
           <div className="max-w-3xl mx-auto space-y-12">
             <div className="text-center space-y-4">
               <h2 className="text-xs font-black uppercase tracking-[0.4em] text-[rgb(var(--accent))]">
-                {params.lang === 'en' ? 'Technical Stack' : params.lang === 'zh' ? '技术栈详情' : '技術スタック詳細'}
+                {params.lang === 'en' ? 'Technical Stack' : (params.lang === 'zh' || params.lang === 'zh-tw') ? (params.lang === 'zh' ? '技术栈详情' : '技術棧詳情') : '技術スタック詳細'}
               </h2>
               <h3 className="text-4xl font-black tracking-tight">
-                {params.lang === 'en' ? 'Powered by.' : params.lang === 'zh' ? '驱动产品的技术' : 'プロダクトを支える技術'}
+                {params.lang === 'en' ? 'Powered by.' : (params.lang === 'zh' || params.lang === 'zh-tw') ? (params.lang === 'zh' ? '驱动产品的技术' : '驅動產品的技術') : 'プロダクトを支える技術'}
               </h3>
             </div>
 
@@ -161,14 +163,18 @@ export default async function ProductDetailPage({ params }: { params: { lang: Lo
                   ? 'Interested in the implementation?'
                   : params.lang === 'zh'
                     ? '对此项目的实现感兴趣吗？'
-                    : 'この実装に興味がありますか？'}
+                    : params.lang === 'zh-tw'
+                      ? '對此項目的實現感興趣嗎？'
+                      : 'この実装に興味がありますか？'}
               </h4>
               <p className="text-gray-400">
                 {params.lang === 'en'
                   ? 'This project is part of the Toshiki Tech internal ecosystem.'
                   : params.lang === 'zh'
                     ? '该项目是 Toshiki Tech 内部生态系统的一部分。'
-                    : 'このプロジェクトは Toshiki Tech の内部エコシステムの一部です。'}
+                    : params.lang === 'zh-tw'
+                      ? '該項目是 Toshiki Tech 內部生態系統的一部分。'
+                      : 'このプロジェクトは Toshiki Tech の内部エコシステムの一部です。'}
               </p>
               <Link href={`/${params.lang}/work-with-me`} className="btn-primary inline-flex gap-2 items-center">
                 {dict.common.nav.workWithMe}

@@ -39,7 +39,7 @@ export default async function ProductsPage({ params: { lang } }: { params: { lan
                     />
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center text-sm uppercase tracking-widest text-[var(--muted-foreground)] border-2 border-dashed border-[var(--border)] m-8 rounded-xl opacity-50">
-                      Product Preview
+                      {lang === 'en' ? 'Product Preview' : (lang === 'zh' || lang === 'zh-tw') ? (lang === 'zh' ? '产品预览' : '產品預覽') : 'プロダクトプレビュー'}
                     </div>
                   )}
                 </div>
@@ -66,7 +66,7 @@ export default async function ProductsPage({ params: { lang } }: { params: { lan
                 </ul>
                 <div className="flex gap-4">
                   <Link href={`/${lang}/p/${product.slug}`} className="btn-primary">
-                    {lang === 'en' ? 'View Details' : lang === 'zh' ? '查看详情' : '詳細を見る'}
+                    {lang === 'en' ? 'View Details' : (lang === 'zh' || lang === 'zh-tw') ? (lang === 'zh' ? '查看详情' : '查看詳情') : '詳細を見る'}
                   </Link>
                   {product.externalLinks.length > 0 && (
                     <a href={product.externalLinks[0].url} target="_blank" className="btn-secondary">

@@ -18,7 +18,7 @@ const SectionHeader = ({ title, subtitle, href, cta, lang }: { title: string; su
         transition={{ duration: 0.5 }}
         className="text-[rgb(var(--accent))] font-mono text-xs uppercase tracking-[0.2em] mb-3 font-bold"
       >
-        Explore
+        {lang === 'en' ? 'Explore' : (lang === 'zh' || lang === 'zh-tw') ? (lang === 'zh' ? '探索' : '探索') : 'エクスプローラー'}
       </motion.p>
       <h2 className="section-title text-4xl md:text-5xl">{title}</h2>
       <p className="text-lg text-[var(--muted-foreground)] leading-relaxed">{subtitle}</p>
@@ -82,8 +82,8 @@ export default function HomeClient({ lang, dict }: { lang: Locale; dict: any }) 
         >
           <div className="flex flex-col space-y-6">
             <h1 className="text-3xl md:text-4xl lg:text-[42px] font-black tracking-tight text-white leading-[1.2] drop-shadow-2xl">
-              {lang === 'zh' ? (
-                <>用代码、AI 与系统思维，构建真正可用的产品。</>
+              {(lang === 'zh' || lang === 'zh-tw') ? (
+                lang === 'zh' ? <>用代码、AI 与系统思维，构建真正可用的产品。</> : <>用代碼、AI 與系統思維，構築真正可用的產品。</>
               ) : hDict.hero.subtitle}
             </h1>
 
@@ -228,9 +228,9 @@ export default function HomeClient({ lang, dict }: { lang: Locale; dict: any }) 
           <div className="mb-12">
             <SectionHeader
               title={dict.common.nav.experiments}
-              subtitle={lang === 'en' ? "Deep tech exploration, research prototypes, and system designs." : lang === 'zh' ? "深度技术探索、研究原型与系统设计。" : "深層技術の探求、リサーチプロトタイプ、そしてシステム設計。"}
+              subtitle={lang === 'en' ? "Deep tech exploration, research prototypes, and system designs." : (lang === 'zh' || lang === 'zh-tw') ? (lang === 'zh' ? "深度技术探索、研究原型与系统设计。" : "深度技術探索、研究原型與系統設計。") : "深層技術の探求、リサーチプロトタイプ、そしてシステム設計。"}
               href="/ai-lab"
-              cta={lang === 'en' ? "all experiments" : lang === 'zh' ? "所有实验" : "全ラボ実績"}
+              cta={lang === 'en' ? "all experiments" : (lang === 'zh' || lang === 'zh-tw') ? (lang === 'zh' ? "所有实验" : "所有實驗") : "全ラボ実績"}
               lang={lang}
             />
           </div>
@@ -263,14 +263,16 @@ export default function HomeClient({ lang, dict }: { lang: Locale; dict: any }) 
         {/* CTA Section */}
         <section className="text-center space-y-10 py-20 pb-40">
           <h2 className="text-4xl font-extrabold tracking-tight">
-            {lang === 'en' ? 'Need a builder?' : lang === 'zh' ? '有产品构建需求吗？' : '構築のご相談はありますか？'}
+            {lang === 'en' ? 'Need a builder?' : (lang === 'zh' || lang === 'zh-tw') ? (lang === 'zh' ? '有产品构建需求吗？' : '有產品構築需求嗎？') : '構築のご相談はありますか？'}
           </h2>
           <p className="text-lg text-[var(--muted-foreground)] max-w-lg mx-auto leading-relaxed">
             {lang === 'en'
               ? "I partner with founders and teams to build high-quality products and scalable technical systems."
               : lang === 'zh'
                 ? "我与创始人及团队合作，构建高品质产品和可扩展的技术系统。"
-                : "創業者やチームと協力し、高品質なプロダクトと拡張性のある技術システムの構築を支援します。"}
+                : lang === 'zh-tw'
+                  ? "我與創始人及團隊合作，構築高品質產品和可擴展的技术系統。"
+                  : "創業者やチームと協力し、高品質なプロダクトと拡張性のある技術システムの構築を支援します。"}
           </p>
           <div className="flex justify-center gap-4">
             <Link href={`/${lang}/work-with-me`} className="btn-primary px-8">
