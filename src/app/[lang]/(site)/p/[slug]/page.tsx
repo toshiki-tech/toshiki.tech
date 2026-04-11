@@ -69,7 +69,7 @@ export default async function ProductDetailPage({ params }: { params: { lang: Lo
       {/* Product Layout */}
       <section className="py-24 border-t border-[var(--border)] bg-[var(--muted)]/20">
         <div className="container-custom">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-start">
             <div className="space-y-12 order-2 lg:order-1">
               <div className="space-y-6">
                 <h2 className="text-3xl font-bold tracking-tight">
@@ -100,7 +100,6 @@ export default async function ProductDetailPage({ params }: { params: { lang: Lo
               </div>
             </div>
 
-            <div className="order-1 lg:order-2">
             <div className="order-1 lg:order-2 space-y-12">
               {/* Primary Image */}
               <div className={`${product.portraitImageUrl ? 'aspect-[3/4.5] md:aspect-[3/4.5] lg:aspect-[2/3]' : 'aspect-[4/5] md:aspect-square'} bg-[var(--card)] rounded-3xl border border-[var(--border)] shadow-2xl overflow-hidden relative group`}>
@@ -130,7 +129,6 @@ export default async function ProductDetailPage({ params }: { params: { lang: Lo
                   ))}
                 </div>
               )}
-            </div>
             </div>
           </div>
         </div>
