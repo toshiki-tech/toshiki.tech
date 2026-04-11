@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(npm run:*)",
+      "Bash(mkdir -p /Users/dogiant/toshiki-lab/toshiki.tech/src/app/\\\\[lang\\\\]/\\\\\\(standalone\\\\\\)/yomiplay/community/\\\\[id\\\\])",
+      "Bash(mkdir -p /Users/dogiant/toshiki-lab/toshiki.tech/src/app/api/yomi/download/\\\\[id\\\\])"
+    ]
+  }
+}

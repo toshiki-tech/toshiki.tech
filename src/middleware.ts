@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from 'next/server'
 import { match } from '@formatjs/intl-localematcher'
 import Negotiator from 'negotiator'
+import { createServerClient } from '@supabase/ssr'
 
 const locales = ['en', 'zh', 'ja', 'zh-tw']
 const defaultLocale = 'en'
@@ -13,7 +14,7 @@ function getLocale(request: NextRequest): string {
   return match(languages, locales, defaultLocale)
 }
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
 
   // Check if there is any supported locale in the pathname
@@ -24,13 +25,46 @@ export function middleware(request: NextRequest) {
   // Redirect if there is no locale
   if (pathnameIsMissingLocale) {
     const locale = getLocale(request)
-
-    // e.g. incoming request is /products
-    // The new URL is now /en/products
     return NextResponse.redirect(
       new URL(`/${locale}${pathname}`, request.url)
     )
   }
+
+  // Refresh Supabase Auth session (keeps cookies alive)
+  let response = NextResponse.next({
+    request: { headers: request.headers },
+  })
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnonKey =
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY ||
+    process.env.PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY
+
+  if (supabaseUrl && supabaseAnonKey) {
+    const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll()
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) =>
+            request.cookies.set(name, value)
+          )
+          response = NextResponse.next({
+            request: { headers: request.headers },
+          })
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          )
+        },
+      },
+    })
+
+    await supabase.auth.getUser()
+  }
+
+  return response
 }
 
 export const config = {

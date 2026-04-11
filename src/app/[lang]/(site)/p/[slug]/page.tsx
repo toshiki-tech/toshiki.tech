@@ -1,7 +1,7 @@
 import { products } from '@/data/products';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, CheckCircle2, Cpu, ArrowRight } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Cpu, ArrowRight, Users, Upload, Download } from 'lucide-react';
 import { Locale, getDictionary } from '@/lib/get-dictionary';
 
 export async function generateStaticParams() {
@@ -135,6 +135,103 @@ export default async function ProductDetailPage({ params }: { params: { lang: Lo
           </div>
         </div>
       </section>
+
+      {/* Community Section - YomiPlay only */}
+      {product.slug === 'yomiplay' && (
+        <section className="py-24 border-t border-[var(--border)]">
+          <div className="container-custom">
+            <div className="max-w-3xl mx-auto space-y-12">
+              <div className="text-center space-y-4">
+                <h2 className="text-xs font-black uppercase tracking-[0.4em] text-[rgb(var(--accent))]">
+                  {params.lang === 'en' ? 'Community' : params.lang === 'zh' ? '社区' : params.lang === 'zh-tw' ? '社區' : 'コミュニティ'}
+                </h2>
+                <h3 className="text-4xl font-black tracking-tight">
+                  {params.lang === 'en'
+                    ? 'Subtitle Sharing Platform'
+                    : params.lang === 'zh'
+                      ? '字幕分享平台'
+                      : params.lang === 'zh-tw'
+                        ? '字幕分享平台'
+                        : '字幕共有プラットフォーム'}
+                </h3>
+                <p className="text-lg text-[var(--muted-foreground)] max-w-2xl mx-auto">
+                  {params.lang === 'en'
+                    ? 'Browse and download community-shared .yomi subtitle files, or upload your own polished subtitles to help other learners.'
+                    : params.lang === 'zh'
+                      ? '浏览和下载社区分享的 .yomi 字幕文件，或上传你精修的字幕帮助其他学习者。'
+                      : params.lang === 'zh-tw'
+                        ? '瀏覽和下載社區分享的 .yomi 字幕檔案，或上傳你精修的字幕幫助其他學習者。'
+                        : 'コミュニティが共有する .yomi 字幕ファイルをダウンロード、またはあなたの字幕をアップロードして他の学習者をサポートしましょう。'}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="p-6 rounded-2xl border border-[var(--border)] bg-[var(--card)] text-center space-y-3">
+                  <div className="w-12 h-12 rounded-xl bg-[rgb(var(--accent))]/10 flex items-center justify-center text-[rgb(var(--accent))] mx-auto">
+                    <Download size={24} />
+                  </div>
+                  <h4 className="font-bold">
+                    {params.lang === 'en' ? 'Download Subtitles' : params.lang === 'zh' ? '下载字幕' : params.lang === 'zh-tw' ? '下載字幕' : '字幕をダウンロード'}
+                  </h4>
+                  <p className="text-sm text-[var(--muted-foreground)]">
+                    {params.lang === 'en'
+                      ? 'Find high-quality .yomi files for podcasts, news, and more.'
+                      : params.lang === 'zh'
+                        ? '获取播客、新闻等内容的高质量 .yomi 字幕文件。'
+                        : params.lang === 'zh-tw'
+                          ? '取得播客、新聞等內容的高品質 .yomi 字幕檔案。'
+                          : 'ポッドキャスト、ニュースなどの高品質な .yomi ファイルを取得。'}
+                  </p>
+                </div>
+                <div className="p-6 rounded-2xl border border-[var(--border)] bg-[var(--card)] text-center space-y-3">
+                  <div className="w-12 h-12 rounded-xl bg-[rgb(var(--accent))]/10 flex items-center justify-center text-[rgb(var(--accent))] mx-auto">
+                    <Upload size={24} />
+                  </div>
+                  <h4 className="font-bold">
+                    {params.lang === 'en' ? 'Share Your Work' : params.lang === 'zh' ? '分享你的成果' : params.lang === 'zh-tw' ? '分享你的成果' : 'あなたの成果を共有'}
+                  </h4>
+                  <p className="text-sm text-[var(--muted-foreground)]">
+                    {params.lang === 'en'
+                      ? 'Upload polished subtitles to help learners with lower-spec devices.'
+                      : params.lang === 'zh'
+                        ? '上传精修字幕，帮助设备性能较低的学习者。'
+                        : params.lang === 'zh-tw'
+                          ? '上傳精修字幕，幫助裝置效能較低的學習者。'
+                          : '精修した字幕をアップロードし、低スペックデバイスの学習者を支援。'}
+                  </p>
+                </div>
+                <div className="p-6 rounded-2xl border border-[var(--border)] bg-[var(--card)] text-center space-y-3">
+                  <div className="w-12 h-12 rounded-xl bg-[rgb(var(--accent))]/10 flex items-center justify-center text-[rgb(var(--accent))] mx-auto">
+                    <Users size={24} />
+                  </div>
+                  <h4 className="font-bold">
+                    {params.lang === 'en' ? 'Community Driven' : params.lang === 'zh' ? '社区驱动' : params.lang === 'zh-tw' ? '社區驅動' : 'コミュニティ主導'}
+                  </h4>
+                  <p className="text-sm text-[var(--muted-foreground)]">
+                    {params.lang === 'en'
+                      ? 'Built by learners, for learners. Quality subtitles from real users.'
+                      : params.lang === 'zh'
+                        ? '学习者为学习者打造，来自真实用户的高质量字幕。'
+                        : params.lang === 'zh-tw'
+                          ? '學習者為學習者打造，來自真實用戶的高品質字幕。'
+                          : '学習者が学習者のために。実際のユーザーによる高品質字幕。'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="text-center">
+                <Link
+                  href={`/${params.lang}/yomiplay/community`}
+                  className="btn-primary inline-flex gap-2 items-center px-8 py-3 rounded-xl font-bold"
+                >
+                  {params.lang === 'en' ? 'Explore Community' : params.lang === 'zh' ? '进入社区' : params.lang === 'zh-tw' ? '進入社區' : 'コミュニティを見る'}
+                  <ArrowRight size={18} />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Tech Breakdown */}
       <section className="py-24 border-t border-[var(--border)]">
