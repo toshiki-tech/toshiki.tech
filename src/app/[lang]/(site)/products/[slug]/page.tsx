@@ -1,4 +1,4 @@
-import { products } from '@/data/products';
+import { products, localizeAppStoreUrl } from '@/data/products';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Locale, getDictionary } from '@/lib/get-dictionary';
@@ -91,7 +91,7 @@ export default async function ProductDetailPage({ params }: { params: { lang: Lo
 
           <div className="flex flex-col gap-3">
              {product.externalLinks.map((link) => (
-               <a key={link.url} href={link.url} target="_blank" className="btn-primary text-center">
+               <a key={link.url} href={localizeAppStoreUrl(link.url, params.lang)} target="_blank" className="btn-primary text-center">
                  {link.label}
                </a>
              ))}

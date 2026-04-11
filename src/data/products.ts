@@ -37,6 +37,20 @@ export interface Product {
   gallery?: string[];
 }
 
+const APP_STORE_LOCALE_MAP: Record<string, string> = {
+  en: 'us',
+  zh: 'cn',
+  'zh-tw': 'tw',
+  ja: 'jp',
+};
+
+export function localizeAppStoreUrl(url: string, locale: string): string {
+  const match = url.match(/^https:\/\/apps\.apple\.com\/(\w+)\//);
+  if (!match) return url;
+  const targetCountry = APP_STORE_LOCALE_MAP[locale] || match[1];
+  return url.replace(/^(https:\/\/apps\.apple\.com\/)\w+\//, `$1${targetCountry}/`);
+}
+
 export const products: Product[] = [
   {
     id: "yomiplay",

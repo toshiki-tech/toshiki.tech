@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { products } from '@/data/products';
+import { products, localizeAppStoreUrl } from '@/data/products';
 import { Locale, getDictionary } from '@/lib/get-dictionary';
 
 export async function generateMetadata({ params }: { params: { lang: Locale } }) {
@@ -69,7 +69,7 @@ export default async function ProductsPage({ params: { lang } }: { params: { lan
                     {lang === 'en' ? 'View Details' : (lang === 'zh' || lang === 'zh-tw') ? (lang === 'zh' ? '查看详情' : '查看詳情') : '詳細を見る'}
                   </Link>
                   {product.externalLinks.length > 0 && (
-                    <a href={product.externalLinks[0].url} target="_blank" className="btn-secondary">
+                    <a href={localizeAppStoreUrl(product.externalLinks[0].url, lang)} target="_blank" className="btn-secondary">
                       {product.externalLinks[0].label}
                     </a>
                   )}
