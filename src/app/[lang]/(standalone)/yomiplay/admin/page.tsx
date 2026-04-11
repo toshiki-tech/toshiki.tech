@@ -103,7 +103,8 @@ export default async function AdminPage({ params: { lang } }: { params: { lang: 
     .from('toshiki_tech_yomi_pro_requests')
     .select('*, toshiki_tech_yomi_profiles!inner(display_name, points)')
     .eq('status', 'pending')
-    .order('created_at', { ascending: true }) as any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .order('created_at', { ascending: true }) as { data: any[] | null };
 
   return (
     <div className="container-custom py-12">
@@ -271,6 +272,7 @@ export default async function AdminPage({ params: { lang } }: { params: { lang: 
           <Crown size={18} className="text-purple-500" />
           Pro Membership Requests ({(proRequests || []).length})
         </h2>
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         <ProRequests requests={(proRequests || []) as any} />
       </section>
     </div>
