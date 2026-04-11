@@ -93,7 +93,7 @@ export const products: Product[] = [
     },
     techStack: ["Swift", "SwiftUI", "CoreML", "Whisper (On-Device)"],
     externalLinks: [
-      { label: "View on App Store", url: "#" }
+      { label: "View on App Store", url: "https://apps.apple.com/jp/app/yomiplay/id6760715932" }
     ],
     imageUrl: "/images/products/yomiplay-final.png",
     portraitImageUrl: "/images/products/yomiplay-portrait.png"
