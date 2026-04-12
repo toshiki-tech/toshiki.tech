@@ -3,7 +3,7 @@ import { Metadata } from 'next';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
-import { Download, Upload, Search, FileText, Music } from 'lucide-react';
+import { Download, Upload, Search, FileText, Music, Crown, FolderOpen } from 'lucide-react';
 import { SOURCE_PLATFORMS, CONTENT_LANGUAGES } from '@/lib/yomi-constants';
 import Filters from './Filters';
 import CommunityIntro from './CommunityIntro';
@@ -66,6 +66,10 @@ const content = {
       pro_threshold: 'Points needed to apply for Pro membership',
     },
     pointsUnit: 'pts',
+    myUploads: 'My Uploads',
+    proCtaTitle: 'Earn points, unlock Pro',
+    proCtaBody: 'Share .yomi files with the community, collect points from uploads and downloads, and redeem them for a Pro membership.',
+    proCtaButton: 'View points & apply for Pro',
   },
   zh: {
     title: 'YomiPlay 社区',
@@ -105,6 +109,10 @@ const content = {
       pro_threshold: '申请 Pro 会员所需积分',
     },
     pointsUnit: '分',
+    myUploads: '我的上传',
+    proCtaTitle: '赚取积分，解锁 Pro',
+    proCtaBody: '向社区分享你的 .yomi 字幕文件，通过上传和他人下载累积积分，达到门槛后可兑换 Pro 会员。',
+    proCtaButton: '查看积分 & 申请 Pro',
   },
   'zh-tw': {
     title: 'YomiPlay 社區',
@@ -144,6 +152,10 @@ const content = {
       pro_threshold: '申請 Pro 會員所需積分',
     },
     pointsUnit: '分',
+    myUploads: '我的上傳',
+    proCtaTitle: '賺取積分，解鎖 Pro',
+    proCtaBody: '向社區分享你的 .yomi 字幕檔案，透過上傳和他人下載累積積分，達到門檻後可兌換 Pro 會員。',
+    proCtaButton: '查看積分 & 申請 Pro',
   },
   ja: {
     title: 'YomiPlay コミュニティ',
@@ -183,6 +195,10 @@ const content = {
       pro_threshold: 'Pro メンバーシップ申請に必要なポイント',
     },
     pointsUnit: 'pt',
+    myUploads: 'マイ投稿',
+    proCtaTitle: 'ポイントを貯めて Pro を解放',
+    proCtaBody: 'コミュニティに .yomi 字幕ファイルを共有し、アップロードとダウンロードでポイントを貯めて、Pro メンバーシップと交換しましょう。',
+    proCtaButton: 'ポイント確認 & Pro 申請',
   },
 };
 
@@ -270,13 +286,22 @@ export default async function CommunityPage({
           <h1 className="text-3xl font-bold mb-2">{t.title}</h1>
           <p className="text-[var(--muted-foreground)] text-sm">{t.subtitle}</p>
         </div>
-        <Link
-          href={`/${lang}/yomiplay/community/upload`}
-          className="btn-primary px-5 py-2.5 rounded-xl font-bold inline-flex items-center gap-2 shrink-0"
-        >
-          <Upload size={16} />
-          {t.upload}
-        </Link>
+        <div className="flex items-center gap-2 shrink-0">
+          <Link
+            href={`/${lang}/yomiplay/community/my-uploads`}
+            className="px-4 py-2.5 rounded-xl font-bold text-sm inline-flex items-center gap-2 border border-[var(--border)] bg-[var(--card)] hover:border-[rgb(var(--accent))]/50 text-[var(--foreground-rgb)] transition-colors"
+          >
+            <FolderOpen size={16} />
+            {t.myUploads}
+          </Link>
+          <Link
+            href={`/${lang}/yomiplay/community/upload`}
+            className="btn-primary px-5 py-2.5 rounded-xl font-bold inline-flex items-center gap-2"
+          >
+            <Upload size={16} />
+            {t.upload}
+          </Link>
+        </div>
       </div>
 
       {/* Community intro & terms */}
@@ -300,6 +325,31 @@ export default async function CommunityPage({
         rules={t.pointsRules}
         unit={t.pointsUnit}
       />
+
+      {/* Pro CTA banner */}
+      <Link
+        href={`/${lang}/yomiplay/community/my-uploads`}
+        className="group relative mb-8 block p-6 rounded-2xl border border-purple-500/30 bg-gradient-to-br from-purple-500/10 via-purple-500/5 to-transparent hover:border-purple-500/60 transition-colors overflow-hidden"
+      >
+        <div className="absolute -right-8 -top-8 opacity-10 group-hover:opacity-20 transition-opacity">
+          <Crown size={160} className="text-purple-500" />
+        </div>
+        <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-2">
+              <Crown size={20} className="text-purple-500" />
+              <h3 className="text-lg font-bold">{t.proCtaTitle}</h3>
+            </div>
+            <p className="text-sm text-[var(--muted-foreground)] leading-relaxed">
+              {t.proCtaBody}
+            </p>
+          </div>
+          <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-purple-500 text-white text-sm font-bold hover:bg-purple-600 transition-colors shrink-0">
+            <Crown size={14} />
+            {t.proCtaButton}
+          </span>
+        </div>
+      </Link>
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3 mb-8">
