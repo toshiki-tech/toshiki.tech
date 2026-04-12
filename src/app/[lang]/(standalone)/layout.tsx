@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import Logo from '@/components/Logo';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { createClient } from '@/lib/supabase-browser';
+import LangSwitcher from './LangSwitcher';
 
 function AuthNav({ lang }: { lang: Locale }) {
   const { user, isLoading, signOut } = useAuth();
@@ -121,22 +122,7 @@ function StandaloneLayoutInner({
 
           <div className="flex items-center gap-4">
             <AuthNav lang={params.lang} />
-            <div className="flex gap-2">
-              {[
-                { id: 'en', label: 'EN' },
-                { id: 'zh', label: 'ZH' },
-                { id: 'zh-tw', label: 'TW' },
-                { id: 'ja', label: 'JA' }
-              ].map((loc) => (
-                <Link
-                  key={loc.id}
-                  href={redirectedPathName(loc.id)}
-                  className={`text-[10px] font-bold uppercase px-2 py-1 rounded border transition-colors ${params.lang === loc.id ? 'bg-[rgb(var(--accent))] text-white border-[rgb(var(--accent))]' : 'text-[var(--muted-foreground)] border-transparent hover:border-[var(--border)] hover:text-[var(--foreground-rgb)]'}`}
-                >
-                  {loc.label}
-                </Link>
-              ))}
-            </div>
+            <LangSwitcher currentLang={params.lang} redirectedPathName={redirectedPathName} />
           </div>
         </div>
       </header>

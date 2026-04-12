@@ -4,7 +4,7 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { Shield, Music, FileText, AlertTriangle, List, Settings, Crown } from 'lucide-react';
+import { Shield, Music, FileText, AlertTriangle, List, Settings, Crown, ArrowLeft } from 'lucide-react';
 import { SOURCE_PLATFORMS, CONTENT_LANGUAGES } from '@/lib/yomi-constants';
 import AdminActions from './AdminActions';
 import ReportActions from './ReportActions';
@@ -108,9 +108,16 @@ export default async function AdminPage({ params: { lang } }: { params: { lang: 
 
   return (
     <div className="container-custom py-12">
+      <Link
+        href="/admin"
+        className="inline-flex items-center gap-1 text-sm font-bold text-[var(--muted-foreground)] hover:text-[rgb(var(--accent))] transition-colors mb-4"
+      >
+        <ArrowLeft size={14} />
+        Back to Site Admin
+      </Link>
       <div className="flex items-center gap-3 mb-8">
         <Shield size={24} className="text-[rgb(var(--accent))]" />
-        <h1 className="text-3xl font-bold">Admin Panel</h1>
+        <h1 className="text-3xl font-bold">YomiPlay Admin</h1>
       </div>
 
       {/* Pending Reports */}

@@ -22,6 +22,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
+  // Skip locale redirect for non-localized pages (e.g. site-wide admin)
+  if (pathname === '/admin' || pathname.startsWith('/admin/')) {
+    return NextResponse.next()
+  }
+
   // Short links — redirect to localized destination based on browser language
   const shortLinks: Record<string, string> = {
     '/yomiplay': '/yomiplay/community',
