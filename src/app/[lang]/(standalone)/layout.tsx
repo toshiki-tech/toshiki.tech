@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import Logo from '@/components/Logo';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { createClient } from '@/lib/supabase-browser';
-import LangSwitcher from './LangSwitcher';
+import LangSwitcher from '@/components/LangSwitcher';
 
 function AuthNav({ lang }: { lang: Locale }) {
   const { user, isLoading, signOut } = useAuth();

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Logo from '@/components/Logo';
+import LangSwitcher from '@/components/LangSwitcher';
 import { Locale } from '@/lib/get-dictionary';
 
 const NavLink = ({ href, children, active }: { href: string; children: React.ReactNode; active: boolean }) => (
@@ -44,39 +45,26 @@ const Navbar = ({ lang, dict }: { lang: Locale; dict: any }) => {
             Toshiki Tech
           </span>
         </Link>
-        <div className="hidden md:flex gap-4 lg:gap-10 items-center">
-          <NavLink href={`/${lang}/products`} active={pathname.includes('/products') || pathname.includes('/p/')}>
-            <span className="whitespace-nowrap">{navDict.products}</span>
-          </NavLink>
-          <NavLink href={`/${lang}/works`} active={pathname.includes('/works')}>
-            <span className="whitespace-nowrap">{navDict.works}</span>
-          </NavLink>
-          <NavLink href={`/${lang}/ai-lab`} active={pathname.includes('/ai-lab')}>
-            <span className="whitespace-nowrap">{navDict.experiments}</span>
-          </NavLink>
-          <NavLink href={`/${lang}/about`} active={pathname.includes('/about')}>
-            <span className="whitespace-nowrap">{navDict.about}</span>
-          </NavLink>
-          <NavLink href={`/${lang}/work-with-me`} active={pathname.includes('/work-with-me')}>
-            <span className="whitespace-nowrap">{navDict.workWithMe}</span>
-          </NavLink>
-          
-          <div className="flex gap-1 ml-2 lg:ml-4 border-l border-[var(--border)] pl-4 lg:pl-6 shrink-0">
-            {[
-              { id: 'en', label: 'EN' },
-              { id: 'zh', label: 'ZH' },
-              { id: 'zh-tw', label: 'TW' },
-              { id: 'ja', label: 'JA' }
-            ].map((loc) => (
-              <Link
-                key={loc.id}
-                href={redirectedPathName(loc.id)}
-                className={`text-[10px] font-black uppercase px-1.5 py-1 rounded border ${lang === loc.id ? 'bg-[rgb(var(--accent))] text-white border-[rgb(var(--accent))]' : 'text-[var(--muted-foreground)] border-transparent hover:border-[var(--border)]'}`}
-              >
-                {loc.label}
-              </Link>
-            ))}
+        <div className="flex items-center gap-4 lg:gap-10">
+          <div className="hidden md:flex gap-4 lg:gap-10 items-center">
+            <NavLink href={`/${lang}/products`} active={pathname.includes('/products') || pathname.includes('/p/')}>
+              <span className="whitespace-nowrap">{navDict.products}</span>
+            </NavLink>
+            <NavLink href={`/${lang}/works`} active={pathname.includes('/works')}>
+              <span className="whitespace-nowrap">{navDict.works}</span>
+            </NavLink>
+            <NavLink href={`/${lang}/ai-lab`} active={pathname.includes('/ai-lab')}>
+              <span className="whitespace-nowrap">{navDict.experiments}</span>
+            </NavLink>
+            <NavLink href={`/${lang}/about`} active={pathname.includes('/about')}>
+              <span className="whitespace-nowrap">{navDict.about}</span>
+            </NavLink>
+            <NavLink href={`/${lang}/work-with-me`} active={pathname.includes('/work-with-me')}>
+              <span className="whitespace-nowrap">{navDict.workWithMe}</span>
+            </NavLink>
           </div>
+
+          <LangSwitcher currentLang={lang} redirectedPathName={redirectedPathName} />
         </div>
       </div>
     </nav>
