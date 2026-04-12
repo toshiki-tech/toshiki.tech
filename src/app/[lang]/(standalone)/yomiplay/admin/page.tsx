@@ -10,6 +10,7 @@ import AdminActions from './AdminActions';
 import ReportActions from './ReportActions';
 import PointsConfig from './PointsConfig';
 import ProRequests from './ProRequests';
+import EditUpload from './EditUpload';
 
 interface AdminUpload {
   id: string;
@@ -20,8 +21,10 @@ interface AdminUpload {
   status: string;
   source_platform: string | null;
   source_show: string | null;
+  source_episode: string | null;
   audio_storage_path: string | null;
   language: string;
+  translation_language: string | null;
   created_at: string;
   toshiki_tech_yomi_profiles: { display_name: string } | null;
 }
@@ -199,7 +202,10 @@ export default async function AdminPage({ params: { lang } }: { params: { lang: 
                         <span>· {date}</span>
                       </div>
                     </div>
-                    <AdminActions uploadId={upload.id} />
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <EditUpload upload={upload} />
+                      <AdminActions uploadId={upload.id} />
+                    </div>
                   </div>
                 </div>
               );
@@ -255,7 +261,10 @@ export default async function AdminPage({ params: { lang } }: { params: { lang: 
                         <span>· {date}</span>
                       </div>
                     </div>
-                    <AdminActions uploadId={upload.id} />
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <EditUpload upload={upload} />
+                      <AdminActions uploadId={upload.id} />
+                    </div>
                   </div>
                 </div>
               );
