@@ -4,7 +4,7 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { Upload, FileText, Music, Clock, CheckCircle2, XCircle } from 'lucide-react';
+import { Upload, FileText, Music, Clock, CheckCircle2, XCircle, ArrowLeft } from 'lucide-react';
 import { SOURCE_PLATFORMS, CONTENT_LANGUAGES } from '@/lib/yomi-constants';
 import DeleteButton from './DeleteButton';
 import ShareButton from './ShareButton';
@@ -125,6 +125,13 @@ export default async function MyUploadsPage({ params: { lang } }: { params: { la
 
   return (
     <div className="container-custom py-12">
+      <Link
+        href={`/${lang}/yomiplay/community`}
+        className="inline-flex items-center gap-2 text-sm font-bold text-[var(--muted-foreground)] hover:text-[rgb(var(--accent))] transition-colors mb-6"
+      >
+        <ArrowLeft size={16} />
+        {t.community}
+      </Link>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold mb-2">{t.title}</h1>

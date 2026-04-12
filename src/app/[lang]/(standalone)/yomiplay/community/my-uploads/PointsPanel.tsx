@@ -24,6 +24,13 @@ const labels = {
     screenshotHint2: '2. iPhone model & iOS version (Settings > General > About)',
     screenshotRequired: 'Screenshot is required',
     selectScreenshot: 'Select screenshot',
+    actions: {
+      daily_login: 'Daily login bonus',
+      upload_yomi: '.yomi upload approved',
+      upload_zip: 'ZIP upload approved',
+      download_received: 'Content downloaded',
+      pro_redemption: 'Redeemed for Pro membership',
+    },
   },
   zh: {
     myPoints: '我的积分',
@@ -43,6 +50,13 @@ const labels = {
     screenshotHint2: '2. iPhone 型号和 iOS 版本（设置 > 通用 > 关于本机）',
     screenshotRequired: '需要上传截图',
     selectScreenshot: '选择截图',
+    actions: {
+      daily_login: '每日登录奖励',
+      upload_yomi: '.yomi 上传审核通过',
+      upload_zip: 'ZIP 上传审核通过',
+      download_received: '内容被下载',
+      pro_redemption: '兑换 Pro 会员',
+    },
   },
   'zh-tw': {
     myPoints: '我的積分',
@@ -62,6 +76,13 @@ const labels = {
     screenshotHint2: '2. iPhone 型號和 iOS 版本（設定 > 一般 > 關於）',
     screenshotRequired: '需要上傳截圖',
     selectScreenshot: '選擇截圖',
+    actions: {
+      daily_login: '每日登入獎勵',
+      upload_yomi: '.yomi 上傳審核通過',
+      upload_zip: 'ZIP 上傳審核通過',
+      download_received: '內容被下載',
+      pro_redemption: '兌換 Pro 會員',
+    },
   },
   ja: {
     myPoints: 'マイポイント',
@@ -81,6 +102,13 @@ const labels = {
     screenshotHint2: '2. iPhone のモデルと iOS バージョン（設定 > 一般 > 情報）',
     screenshotRequired: 'スクリーンショットが必要です',
     selectScreenshot: 'スクリーンショットを選択',
+    actions: {
+      daily_login: '毎日ログインボーナス',
+      upload_yomi: '.yomi のアップロードが承認されました',
+      upload_zip: 'ZIP のアップロードが承認されました',
+      download_received: 'コンテンツがダウンロードされました',
+      pro_redemption: 'Pro メンバーシップに交換',
+    },
   },
 };
 
@@ -309,7 +337,9 @@ export default function PointsPanel({ lang }: { lang: string }) {
             logs.map(log => (
               <div key={log.id} className="flex items-center justify-between text-xs py-1.5 border-b border-[var(--border)] last:border-0">
                 <div>
-                  <span className="font-medium">{log.description || log.action}</span>
+                  <span className="font-medium">
+                    {(t.actions as Record<string, string>)[log.action] || log.description || log.action}
+                  </span>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
                   <span className={`font-bold ${log.points > 0 ? 'text-green-500' : 'text-red-500'}`}>
