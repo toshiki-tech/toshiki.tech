@@ -3,7 +3,8 @@
 import { Locale } from "@/lib/get-dictionary";
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { ChevronDown, FolderOpen, LogOut, Star } from 'lucide-react';
 import Logo from '@/components/Logo';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { createClient } from '@/lib/supabase-browser';
@@ -15,6 +16,8 @@ function AuthNav({ lang }: { lang: Locale }) {
   const isCommunityPage = pathname?.includes('/yomiplay/community') || pathname?.includes('/yomiplay/admin');
   const [points, setPoints] = useState<number | null>(null);
   const [isPro, setIsPro] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -39,6 +42,14 @@ function AuthNav({ lang }: { lang: Locale }) {
     }
   }, [user]);
 
+  useEffect(() => {
+    function onClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
+    }
+    document.addEventListener('mousedown', onClickOutside);
+    return () => document.removeEventListener('mousedown', onClickOutside);
+  }, []);
+
   if (!isCommunityPage) return null;
 
   if (isLoading) {
@@ -47,31 +58,54 @@ function AuthNav({ lang }: { lang: Locale }) {
 
   if (user) {
     const displayName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
+    const myUploadsLabel = lang === 'zh' ? '我的上传' : lang === 'zh-tw' ? '我的上傳' : lang === 'ja' ? 'マイ投稿' : 'My Uploads';
+    const signOutLabel = lang === 'zh' ? '退出' : lang === 'zh-tw' ? '登出' : lang === 'ja' ? 'ログアウト' : 'Sign Out';
+
     return (
-      <div className="flex items-center gap-3">
-        <span className="text-xs font-bold text-[var(--foreground-rgb)] hidden sm:inline">
-          {displayName}
-          {isPro && (
-            <span className="ml-1 px-1.5 py-0.5 rounded text-[10px] bg-purple-500/20 text-purple-400">PRO</span>
-          )}
-        </span>
-        {points !== null && (
-          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-600 hidden sm:inline">
-            {points} pts
-          </span>
-        )}
-        <Link
-          href={`/${lang}/yomiplay/community/my-uploads`}
-          className="text-xs font-bold text-[var(--muted-foreground)] hover:text-[rgb(var(--accent))] transition-colors"
-        >
-          {lang === 'zh' ? '我的上传' : lang === 'zh-tw' ? '我的上傳' : lang === 'ja' ? 'マイ投稿' : 'My Uploads'}
-        </Link>
+      <div ref={menuRef} className="relative">
         <button
-          onClick={() => signOut()}
-          className="text-xs font-bold text-[var(--muted-foreground)] hover:text-red-500 transition-colors"
+          onClick={() => setMenuOpen(!menuOpen)}
+          className="inline-flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-[var(--muted)] transition-colors"
         >
-          {lang === 'zh' ? '退出' : lang === 'zh-tw' ? '登出' : lang === 'ja' ? 'ログアウト' : 'Sign Out'}
+          <span className="text-xs font-bold text-[var(--foreground-rgb)] hidden sm:inline">
+            {displayName}
+          </span>
+          {isPro && (
+            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-500/20 text-purple-400">
+              PRO
+            </span>
+          )}
+          {points !== null && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-600">
+              <Star size={10} />
+              {points}
+            </span>
+          )}
+          <ChevronDown size={12} className="text-[var(--muted-foreground)]" />
         </button>
+
+        {menuOpen && (
+          <div className="absolute right-0 top-full mt-2 w-44 rounded-xl border border-[var(--border)] bg-[var(--card)] shadow-lg py-1 z-50">
+            <div className="px-3 py-2 border-b border-[var(--border)] sm:hidden">
+              <p className="text-xs font-bold truncate">{displayName}</p>
+            </div>
+            <Link
+              href={`/${lang}/yomiplay/community/my-uploads`}
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center gap-2 px-3 py-2 text-xs text-[var(--foreground-rgb)] hover:bg-[var(--muted)] transition-colors"
+            >
+              <FolderOpen size={14} />
+              {myUploadsLabel}
+            </Link>
+            <button
+              onClick={() => { setMenuOpen(false); signOut(); }}
+              className="flex w-full items-center gap-2 px-3 py-2 text-xs text-red-500 hover:bg-[var(--muted)] transition-colors"
+            >
+              <LogOut size={14} />
+              {signOutLabel}
+            </button>
+          </div>
+        )}
       </div>
     );
   }
