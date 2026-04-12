@@ -138,7 +138,7 @@ export default async function SubtitleDetailPage({
               {t.original}
             </span>
           )}
-          {upload.audio_storage_path && (
+          {(upload.audio_storage_path || upload.yomi_storage_path?.startsWith('zip/')) && (
             <span className="inline-flex items-center gap-1 text-xs font-bold uppercase px-3 py-1 rounded-full bg-green-500/10 text-green-600">
               <Music size={12} />
               {t.hasAudio}
@@ -206,7 +206,7 @@ export default async function SubtitleDetailPage({
             className="btn-primary px-6 py-3 rounded-xl font-bold inline-flex items-center gap-2"
           >
             <Download size={18} />
-            {upload.audio_storage_path ? t.downloadBundle : t.download}
+            {(upload.audio_storage_path || upload.yomi_storage_path?.startsWith('zip/')) ? t.downloadBundle : t.download}
           </a>
         </div>
       )}

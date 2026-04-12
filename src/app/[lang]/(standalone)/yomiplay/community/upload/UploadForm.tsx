@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Locale } from '@/lib/get-dictionary';
-import { SOURCE_PLATFORMS, CONTENT_LANGUAGES } from '@/lib/yomi-constants';
+import { SOURCE_PLATFORMS, CONTENT_LANGUAGES, MAX_YOMI_FILE_SIZE, MAX_ZIP_FILE_SIZE } from '@/lib/yomi-constants';
 import { Upload, FileText, Music, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 const content = {
@@ -167,7 +167,8 @@ export default function UploadForm({ lang }: { lang: Locale }) {
   const [sourceEpisode, setSourceEpisode] = useState('');
   const [visibility, setVisibility] = useState<'public' | 'unlisted'>('public');
   const [file, setFile] = useState<File | null>(null);
-  const [status, setStatus] = useState<'idle' | 'submitting' | 'success_pending' | 'success_approved' | 'error'>('idle');
+  const [status, setStatus] = useState<'idle' | 'uploading' | 'creating' | 'success_pending' | 'success_approved' | 'error'>('idle');
+  const [progress, setProgress] = useState(0);
   const [errorMessage, setErrorMessage] = useState('');
 
   if (isLoading) {
@@ -190,25 +191,84 @@ export default function UploadForm({ lang }: { lang: Locale }) {
     e.preventDefault();
     if (!file) return;
 
-    setStatus('submitting');
+    // Client-side validation
+    const fileName = file.name.toLowerCase();
+    const isZip = fileName.endsWith('.zip');
+    if (!isZip && !fileName.endsWith('.yomi')) {
+      setErrorMessage('Only .zip or .yomi files are accepted');
+      setStatus('error');
+      return;
+    }
+    if (isZip && file.size > MAX_ZIP_FILE_SIZE) {
+      setErrorMessage(`ZIP file too large (max ${MAX_ZIP_FILE_SIZE / 1024 / 1024}MB)`);
+      setStatus('error');
+      return;
+    }
+    if (!isZip && file.size > MAX_YOMI_FILE_SIZE) {
+      setErrorMessage(`.yomi file too large (max ${MAX_YOMI_FILE_SIZE / 1024 / 1024}MB)`);
+      setStatus('error');
+      return;
+    }
+
+    setStatus('uploading');
+    setProgress(0);
     setErrorMessage('');
 
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('title', title);
-    formData.append('contentType', contentTypeChoice);
-    formData.append('visibility', visibility);
-    formData.append('language', language);
-    if (description) formData.append('description', description);
-    if (translationLanguage) formData.append('translationLanguage', translationLanguage);
-    if (sourcePlatform) formData.append('sourcePlatform', sourcePlatform);
-    if (sourceShow) formData.append('sourceShow', sourceShow);
-    if (sourceEpisode) formData.append('sourceEpisode', sourceEpisode);
-
     try {
+      // 1. Get presigned upload URL from our API
+      const urlRes = await fetch('/api/yomi/upload-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fileName: file.name, fileSize: file.size, isZip }),
+      });
+      const urlData = await urlRes.json();
+      if (!urlRes.ok) {
+        setErrorMessage(urlData.error || 'Failed to prepare upload');
+        setStatus('error');
+        return;
+      }
+      const { uploadId, storagePath, presignedUrl, contentType: uploadContentType } = urlData;
+
+      // 2. PUT file directly to R2 via presigned URL, tracking progress
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('PUT', presignedUrl);
+        xhr.setRequestHeader('Content-Type', uploadContentType);
+
+        xhr.upload.addEventListener('progress', (event) => {
+          if (event.lengthComputable) {
+            setProgress(Math.round((event.loaded / event.total) * 100));
+          }
+        });
+
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) resolve();
+          else reject(new Error(`Upload failed: ${xhr.status} ${xhr.responseText}`));
+        };
+        xhr.onerror = () => reject(new Error('Network error during upload'));
+        xhr.send(file);
+      });
+
+      // Now create DB record
+      setStatus('creating');
       const res = await fetch('/api/yomi/upload', {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          uploadId,
+          storagePath,
+          fileName: file.name,
+          isZip,
+          title,
+          description: description || undefined,
+          contentType: contentTypeChoice,
+          visibility,
+          language,
+          translationLanguage: translationLanguage || undefined,
+          sourcePlatform: sourcePlatform || undefined,
+          sourceShow: sourceShow || undefined,
+          sourceEpisode: sourceEpisode || undefined,
+        }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -217,8 +277,8 @@ export default function UploadForm({ lang }: { lang: Locale }) {
         return;
       }
       setStatus(data.status === 'pending' ? 'success_pending' : 'success_approved');
-    } catch {
-      setErrorMessage(t.error);
+    } catch (err) {
+      setErrorMessage(err instanceof Error ? err.message : t.error);
       setStatus('error');
     }
   };
@@ -438,6 +498,27 @@ export default function UploadForm({ lang }: { lang: Locale }) {
         </div>
       </div>
 
+      {/* Progress bar */}
+      {(status === 'uploading' || status === 'creating') && (
+        <div>
+          <div className="flex justify-between text-xs text-[var(--muted-foreground)] mb-1">
+            <span>
+              {status === 'uploading'
+                ? (lang === 'zh' ? '上传中...' : lang === 'zh-tw' ? '上傳中...' : lang === 'ja' ? 'アップロード中...' : 'Uploading...')
+                : (lang === 'zh' ? '创建记录...' : lang === 'zh-tw' ? '建立記錄...' : lang === 'ja' ? 'レコード作成中...' : 'Creating record...')
+              }
+            </span>
+            <span>{status === 'uploading' ? `${progress}%` : ''}</span>
+          </div>
+          <div className="h-2 bg-[var(--muted)] rounded-full overflow-hidden">
+            <div
+              className="h-full bg-[rgb(var(--accent))] transition-all"
+              style={{ width: status === 'creating' ? '100%' : `${progress}%` }}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Error */}
       {status === 'error' && (
         <div className="flex items-center gap-2 text-red-500 text-sm">
@@ -449,11 +530,11 @@ export default function UploadForm({ lang }: { lang: Locale }) {
       {/* Submit */}
       <button
         type="submit"
-        disabled={status === 'submitting' || !file}
+        disabled={status === 'uploading' || status === 'creating' || !file}
         className="btn-primary w-full py-3 rounded-xl font-bold disabled:opacity-50 flex items-center justify-center gap-2"
       >
         <Upload size={18} />
-        {status === 'submitting' ? t.submitting : t.submit}
+        {status === 'uploading' || status === 'creating' ? t.submitting : t.submit}
       </button>
     </form>
   );

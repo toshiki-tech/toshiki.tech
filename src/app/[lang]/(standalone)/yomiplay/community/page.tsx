@@ -18,6 +18,7 @@ interface YomiUpload {
   source_show: string | null;
   source_episode: string | null;
   audio_storage_path: string | null;
+  yomi_storage_path: string | null;
   language: string;
   download_count: number;
   created_at: string;
@@ -213,10 +214,10 @@ export default async function CommunityPage({
                   <h3 className="font-bold text-lg group-hover:text-[rgb(var(--accent))] transition-colors line-clamp-1">
                     {upload.title}
                   </h3>
-                  {upload.audio_storage_path && (
+                  {(upload.audio_storage_path || upload.yomi_storage_path?.startsWith('zip/')) && (
                     <span className="shrink-0 ml-2 inline-flex items-center gap-1 text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-green-500/10 text-green-600">
                       <Music size={10} />
-                      Audio
+                      Bundle
                     </span>
                   )}
                 </div>
