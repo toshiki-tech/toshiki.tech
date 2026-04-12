@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Download, Upload, Search, FileText, Music } from 'lucide-react';
 import { SOURCE_PLATFORMS, CONTENT_LANGUAGES } from '@/lib/yomi-constants';
 import Filters from './Filters';
+import CommunityIntro from './CommunityIntro';
 
 interface YomiUpload {
   id: string;
@@ -39,6 +40,20 @@ const content = {
     by: 'by',
     original: 'Original',
     episode: 'EP',
+    aboutTitle: 'About this community',
+    aboutBody: 'YomiPlay Community is a place for Japanese learners to share .yomi subtitle files (transcripts with furigana, timing, and annotations) they have created for their favorite podcasts, videos, and audio programs. Share your work, benefit from others\', and help each other progress.',
+    termsTitle: 'Terms & disclaimer',
+    termsBody: 'Please read before uploading or downloading:',
+    terms: [
+      'Upload only content you have the right to share. Do not upload copyrighted audio/video without permission from the rights holder.',
+      'For third-party content (podcasts, YouTube, etc.), please upload .yomi subtitle files only — do not redistribute the original audio or video.',
+      'Users are responsible for the content they upload. The platform is not liable for user-generated content but will remove infringing material upon valid request.',
+      'Uploaded content is shared as-is without warranty. Downloaders are responsible for how they use it.',
+      'Prohibited: malware, illegal content, hate speech, personal information of others, or content that violates local laws.',
+      'Report issues by clicking the report button on any content page, or contact the admin directly.',
+    ],
+    viewTerms: 'View terms',
+    hideTerms: 'Hide terms',
   },
   zh: {
     title: 'YomiPlay 社区',
@@ -53,6 +68,20 @@ const content = {
     by: '来自',
     original: '原创',
     episode: '第',
+    aboutTitle: '关于本社区',
+    aboutBody: 'YomiPlay 社区是一个供日语学习者分享 .yomi 字幕文件（含假名注音、时间轴、注释的文稿）的平台。你可以分享自己为喜爱的播客、视频、音频节目制作的字幕，也能从别人的成果中受益，大家一起进步。',
+    termsTitle: '使用条款与免责声明',
+    termsBody: '上传或下载前请阅读：',
+    terms: [
+      '请仅上传你有权分享的内容。未经版权方授权，请勿上传受版权保护的音视频原文件。',
+      '对于第三方平台内容（播客、YouTube 等），请只上传 .yomi 字幕文件，不要重新分发原始音视频。',
+      '用户需对自己上传的内容负责。本平台对用户生成的内容不承担法律责任，但会在收到有效投诉后及时删除侵权内容。',
+      '上传内容按现状分享，不提供任何担保。下载使用者需自行承担使用后果。',
+      '严禁上传：恶意软件、非法内容、仇恨言论、他人隐私信息，或违反当地法律的内容。',
+      '发现问题请通过内容页的"举报"按钮反馈，或直接联系管理员。',
+    ],
+    viewTerms: '查看使用条款',
+    hideTerms: '收起使用条款',
   },
   'zh-tw': {
     title: 'YomiPlay 社區',
@@ -67,6 +96,20 @@ const content = {
     by: '來自',
     original: '原創',
     episode: '第',
+    aboutTitle: '關於本社區',
+    aboutBody: 'YomiPlay 社區是一個供日語學習者分享 .yomi 字幕檔案（含假名注音、時間軸、注釋的文稿）的平台。你可以分享自己為喜愛的播客、影片、音訊節目製作的字幕，也能從別人的成果中受益，大家一起進步。',
+    termsTitle: '使用條款與免責聲明',
+    termsBody: '上傳或下載前請閱讀：',
+    terms: [
+      '請僅上傳你有權分享的內容。未經版權方授權，請勿上傳受版權保護的音視訊原檔案。',
+      '對於第三方平台內容（播客、YouTube 等），請只上傳 .yomi 字幕檔案，不要重新散佈原始音視訊。',
+      '用戶需對自己上傳的內容負責。本平台對用戶生成的內容不承擔法律責任，但會在收到有效投訴後及時刪除侵權內容。',
+      '上傳內容按現狀分享，不提供任何擔保。下載使用者需自行承擔使用後果。',
+      '嚴禁上傳：惡意軟體、非法內容、仇恨言論、他人隱私資訊，或違反當地法律的內容。',
+      '發現問題請透過內容頁的「舉報」按鈕反饋，或直接聯繫管理員。',
+    ],
+    viewTerms: '查看使用條款',
+    hideTerms: '收起使用條款',
   },
   ja: {
     title: 'YomiPlay コミュニティ',
@@ -81,6 +124,20 @@ const content = {
     by: '投稿者',
     original: 'オリジナル',
     episode: 'EP',
+    aboutTitle: 'このコミュニティについて',
+    aboutBody: 'YomiPlay コミュニティは、日本語学習者が自作の .yomi 字幕ファイル（ふりがな、タイムライン、注釈付きの文字起こし）を共有する場です。お気に入りのポッドキャスト、動画、音声番組のために作成した字幕を共有し、他の人の成果からも学びながら、一緒に日本語学習を進めましょう。',
+    termsTitle: '利用規約と免責事項',
+    termsBody: 'アップロードまたはダウンロードの前にお読みください：',
+    terms: [
+      '共有する権利を有するコンテンツのみをアップロードしてください。権利者の許可なく著作権保護された音声・動画原本を投稿しないでください。',
+      '第三者プラットフォームのコンテンツ（ポッドキャスト、YouTube 等）については、.yomi 字幕ファイルのみをアップロードし、元の音声・動画を再配布しないでください。',
+      'アップロードしたコンテンツに対してはユーザーが責任を負います。本プラットフォームはユーザー生成コンテンツについて法的責任を負いませんが、正当な申立てを受けた場合は侵害コンテンツを速やかに削除します。',
+      'アップロードされたコンテンツは現状有姿で共有され、いかなる保証もありません。ダウンロードしたユーザーはその使用について自己責任となります。',
+      '禁止事項：マルウェア、違法コンテンツ、ヘイトスピーチ、他人の個人情報、現地法律に違反するコンテンツ。',
+      '問題を発見した場合はコンテンツページの「通報」ボタンからご報告いただくか、管理者に直接ご連絡ください。',
+    ],
+    viewTerms: '利用規約を見る',
+    hideTerms: '利用規約を閉じる',
   },
 };
 
@@ -167,6 +224,17 @@ export default async function CommunityPage({
           {t.upload}
         </Link>
       </div>
+
+      {/* Community intro & terms */}
+      <CommunityIntro
+        aboutTitle={t.aboutTitle}
+        aboutBody={t.aboutBody}
+        termsTitle={t.termsTitle}
+        termsBody={t.termsBody}
+        terms={t.terms}
+        expandLabel={t.viewTerms}
+        collapseLabel={t.hideTerms}
+      />
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3 mb-8">
