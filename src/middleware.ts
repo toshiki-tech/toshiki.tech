@@ -17,6 +17,11 @@ function getLocale(request: NextRequest): string {
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
 
+  // Skip verification / static files at the root (e.g. WeChat site verification .txt files)
+  if (/^\/[^\/]+\.(txt|xml|html)$/.test(pathname)) {
+    return NextResponse.next()
+  }
+
   // Check if there is any supported locale in the pathname
   const pathnameIsMissingLocale = locales.every(
     (locale) => !pathname.startsWith(`/${locale}/`) && pathname !== `/${locale}`
