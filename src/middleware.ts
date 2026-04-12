@@ -22,6 +22,19 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
+  // Short links — redirect to localized destination based on browser language
+  const shortLinks: Record<string, string> = {
+    '/yomiplay': '/yomiplay/community',
+    '/y': '/yomiplay/community',
+    '/yomiplay/admin': '/yomiplay/admin',
+  }
+  if (shortLinks[pathname]) {
+    const locale = getLocale(request)
+    return NextResponse.redirect(
+      new URL(`/${locale}${shortLinks[pathname]}`, request.url)
+    )
+  }
+
   // Check if there is any supported locale in the pathname
   const pathnameIsMissingLocale = locales.every(
     (locale) => !pathname.startsWith(`/${locale}/`) && pathname !== `/${locale}`
