@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getSupabase, awardPoints } from '@/lib/supabase-server-api';
+import { getSupabase } from '@/lib/supabase-server-api';
 import { getDownloadPresignedUrl } from '@/lib/r2';
 
 export async function GET(
@@ -21,22 +21,15 @@ export async function GET(
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
 
-  // Increment download count
-  await supabase
-    .from('toshiki_tech_yomi_uploads')
-    .update({ download_count: (upload.download_count || 0) + 1 })
-    .eq('id', params.id);
-
-  // Award points to uploader for download received (skip if downloader is uploader)
+  // Record download + award points atomically via SECURITY DEFINER function
+  // (Works for both anonymous and authenticated users, bypassing RLS safely)
   const { data: { user: currentUser } } = await supabase.auth.getUser();
-  if (upload.user_id && (!currentUser || currentUser.id !== upload.user_id)) {
-    const { data: config } = await supabase
-      .from('toshiki_tech_yomi_points_config')
-      .select('value')
-      .eq('key', 'download_received')
-      .single();
-    const pts = config?.value || 1;
-    await awardPoints(supabase, upload.user_id, 'download_received', pts, `Content downloaded: ${params.id}`);
+  const { error: rpcError } = await supabase.rpc('record_yomi_download', {
+    upload_id: params.id,
+    downloader_id: currentUser?.id || null,
+  });
+  if (rpcError) {
+    console.error('record_yomi_download error:', rpcError);
   }
 
   // Generate presigned download URL from R2
