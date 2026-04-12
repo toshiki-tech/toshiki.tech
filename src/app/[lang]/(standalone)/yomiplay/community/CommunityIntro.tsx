@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { Info, ChevronDown, ChevronUp, ShieldAlert } from 'lucide-react';
 
 interface Props {
@@ -11,6 +12,8 @@ interface Props {
   terms: string[];
   expandLabel: string;
   collapseLabel: string;
+  learnMoreLabel: string;
+  learnMoreHref: string;
 }
 
 export default function CommunityIntro({
@@ -21,6 +24,8 @@ export default function CommunityIntro({
   terms,
   expandLabel,
   collapseLabel,
+  learnMoreLabel,
+  learnMoreHref,
 }: Props) {
   const [open, setOpen] = useState(false);
 
@@ -31,6 +36,12 @@ export default function CommunityIntro({
         <div className="flex-1 min-w-0">
           <h2 className="font-bold text-sm mb-1">{aboutTitle}</h2>
           <p className="text-sm text-[var(--muted-foreground)] leading-relaxed">{aboutBody}</p>
+          <Link
+            href={learnMoreHref}
+            className="mt-2 inline-block text-xs font-bold text-[rgb(var(--accent))] hover:underline"
+          >
+            {learnMoreLabel}
+          </Link>
         </div>
       </div>
 

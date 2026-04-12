@@ -54,6 +54,7 @@ const content = {
     ],
     viewTerms: 'View terms',
     hideTerms: 'Hide terms',
+    learnMore: 'Learn more about YomiPlay →',
   },
   zh: {
     title: 'YomiPlay 社区',
@@ -82,6 +83,7 @@ const content = {
     ],
     viewTerms: '查看使用条款',
     hideTerms: '收起使用条款',
+    learnMore: '了解更多 YomiPlay →',
   },
   'zh-tw': {
     title: 'YomiPlay 社區',
@@ -110,6 +112,7 @@ const content = {
     ],
     viewTerms: '查看使用條款',
     hideTerms: '收起使用條款',
+    learnMore: '了解更多 YomiPlay →',
   },
   ja: {
     title: 'YomiPlay コミュニティ',
@@ -138,6 +141,7 @@ const content = {
     ],
     viewTerms: '利用規約を見る',
     hideTerms: '利用規約を閉じる',
+    learnMore: 'YomiPlay について詳しく →',
   },
 };
 
@@ -234,6 +238,8 @@ export default async function CommunityPage({
         terms={t.terms}
         expandLabel={t.viewTerms}
         collapseLabel={t.hideTerms}
+        learnMoreLabel={t.learnMore}
+        learnMoreHref={`/${lang}/p/yomiplay`}
       />
 
       {/* Filters */}
