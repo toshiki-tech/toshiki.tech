@@ -7,6 +7,7 @@ import { Download, Upload, Search, FileText, Music } from 'lucide-react';
 import { SOURCE_PLATFORMS, CONTENT_LANGUAGES } from '@/lib/yomi-constants';
 import Filters from './Filters';
 import CommunityIntro from './CommunityIntro';
+import PointsRules from './PointsRules';
 
 interface YomiUpload {
   id: string;
@@ -55,6 +56,16 @@ const content = {
     viewTerms: 'View terms',
     hideTerms: 'Hide terms',
     learnMore: 'Learn more about YomiPlay →',
+    pointsTitle: 'How to earn points',
+    pointsSubtitle: 'Earn points through community contributions. Redeem for Pro membership once you reach the threshold.',
+    pointsRules: {
+      upload_yomi: 'Upload a .yomi file (once approved)',
+      upload_zip: 'Upload a ZIP bundle (once approved)',
+      download_received: 'Each time someone downloads your content',
+      daily_login: 'Daily login bonus',
+      pro_threshold: 'Points needed to apply for Pro membership',
+    },
+    pointsUnit: 'pts',
   },
   zh: {
     title: 'YomiPlay 社区',
@@ -84,6 +95,16 @@ const content = {
     viewTerms: '查看使用条款',
     hideTerms: '收起使用条款',
     learnMore: '了解更多 YomiPlay →',
+    pointsTitle: '如何获取积分',
+    pointsSubtitle: '通过社区贡献获得积分，积累到门槛后可申请 Pro 会员。',
+    pointsRules: {
+      upload_yomi: '上传 .yomi 文件（审核通过后）',
+      upload_zip: '上传 ZIP 压缩包（审核通过后）',
+      download_received: '你的内容每被下载一次',
+      daily_login: '每日登录奖励',
+      pro_threshold: '申请 Pro 会员所需积分',
+    },
+    pointsUnit: '分',
   },
   'zh-tw': {
     title: 'YomiPlay 社區',
@@ -113,6 +134,16 @@ const content = {
     viewTerms: '查看使用條款',
     hideTerms: '收起使用條款',
     learnMore: '了解更多 YomiPlay →',
+    pointsTitle: '如何獲取積分',
+    pointsSubtitle: '透過社區貢獻獲得積分，達到門檻後可申請 Pro 會員。',
+    pointsRules: {
+      upload_yomi: '上傳 .yomi 檔案（審核通過後）',
+      upload_zip: '上傳 ZIP 壓縮包（審核通過後）',
+      download_received: '你的內容每被下載一次',
+      daily_login: '每日登入獎勵',
+      pro_threshold: '申請 Pro 會員所需積分',
+    },
+    pointsUnit: '分',
   },
   ja: {
     title: 'YomiPlay コミュニティ',
@@ -142,6 +173,16 @@ const content = {
     viewTerms: '利用規約を見る',
     hideTerms: '利用規約を閉じる',
     learnMore: 'YomiPlay について詳しく →',
+    pointsTitle: 'ポイントの獲得方法',
+    pointsSubtitle: 'コミュニティへの貢献でポイントを獲得。一定数を達成すると Pro メンバーシップの申請ができます。',
+    pointsRules: {
+      upload_yomi: '.yomi ファイルのアップロード（審査通過後）',
+      upload_zip: 'ZIP バンドルのアップロード（審査通過後）',
+      download_received: 'あなたの投稿がダウンロードされるたびに',
+      daily_login: '毎日ログインボーナス',
+      pro_threshold: 'Pro メンバーシップ申請に必要なポイント',
+    },
+    pointsUnit: 'pt',
   },
 };
 
@@ -200,6 +241,15 @@ export default async function CommunityPage({
   const { data: uploads, count } = await query;
   const totalPages = Math.ceil((count || 0) / pageSize);
 
+  // Fetch points config
+  const { data: pointsConfigData } = await supabase
+    .from('toshiki_tech_yomi_points_config')
+    .select('key, value');
+  const pointsConfig: Record<string, number> = {};
+  (pointsConfigData || []).forEach((c: { key: string; value: number }) => {
+    pointsConfig[c.key] = c.value;
+  });
+
   const buildUrl = (params: Record<string, string>) => {
     const sp = new URLSearchParams();
     if (searchParams.q) sp.set('q', searchParams.q);
@@ -240,6 +290,15 @@ export default async function CommunityPage({
         collapseLabel={t.hideTerms}
         learnMoreLabel={t.learnMore}
         learnMoreHref={`/${lang}/p/yomiplay`}
+      />
+
+      {/* Points rules */}
+      <PointsRules
+        config={pointsConfig}
+        title={t.pointsTitle}
+        subtitle={t.pointsSubtitle}
+        rules={t.pointsRules}
+        unit={t.pointsUnit}
       />
 
       {/* Filters */}
