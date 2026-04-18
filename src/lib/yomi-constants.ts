@@ -26,5 +26,9 @@ export const MAX_YOMI_FILE_SIZE = 10_485_760; // 10MB
 export const MAX_AUDIO_FILE_SIZE = 157_286_400; // 150MB
 export const MAX_ZIP_FILE_SIZE = 524_288_000; // 500MB
 
+// Feature flag: controls visibility of the community "How to earn points" rules
+// and the "Earn points, unlock Pro" CTA banner. Set to true to re-enable.
+export const SHOW_POINTS_FEATURE = false;
+
 export type SourcePlatformId = typeof SOURCE_PLATFORMS[number]['id'];
 export type ContentLanguageId = typeof CONTENT_LANGUAGES[number]['id'];

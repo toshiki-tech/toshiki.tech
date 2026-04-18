@@ -4,7 +4,7 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { Download, Upload, Search, FileText, Music, Crown, FolderOpen } from 'lucide-react';
-import { SOURCE_PLATFORMS, CONTENT_LANGUAGES } from '@/lib/yomi-constants';
+import { SOURCE_PLATFORMS, CONTENT_LANGUAGES, SHOW_POINTS_FEATURE } from '@/lib/yomi-constants';
 import Filters from './Filters';
 import CommunityIntro from './CommunityIntro';
 import PointsRules from './PointsRules';
@@ -317,39 +317,43 @@ export default async function CommunityPage({
         learnMoreHref={`/${lang}/p/yomiplay`}
       />
 
-      {/* Points rules */}
-      <PointsRules
-        config={pointsConfig}
-        title={t.pointsTitle}
-        subtitle={t.pointsSubtitle}
-        rules={t.pointsRules}
-        unit={t.pointsUnit}
-      />
+      {SHOW_POINTS_FEATURE && (
+        <>
+          {/* Points rules */}
+          <PointsRules
+            config={pointsConfig}
+            title={t.pointsTitle}
+            subtitle={t.pointsSubtitle}
+            rules={t.pointsRules}
+            unit={t.pointsUnit}
+          />
 
-      {/* Pro CTA banner */}
-      <Link
-        href={`/${lang}/yomiplay/community/my-uploads`}
-        className="group relative mb-8 block p-6 rounded-2xl border border-purple-500/30 bg-gradient-to-br from-purple-500/10 via-purple-500/5 to-transparent hover:border-purple-500/60 transition-colors overflow-hidden"
-      >
-        <div className="absolute -right-8 -top-8 opacity-10 group-hover:opacity-20 transition-opacity">
-          <Crown size={160} className="text-purple-500" />
-        </div>
-        <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-2">
-              <Crown size={20} className="text-purple-500" />
-              <h3 className="text-lg font-bold">{t.proCtaTitle}</h3>
+          {/* Pro CTA banner */}
+          <Link
+            href={`/${lang}/yomiplay/community/my-uploads`}
+            className="group relative mb-8 block p-6 rounded-2xl border border-purple-500/30 bg-gradient-to-br from-purple-500/10 via-purple-500/5 to-transparent hover:border-purple-500/60 transition-colors overflow-hidden"
+          >
+            <div className="absolute -right-8 -top-8 opacity-10 group-hover:opacity-20 transition-opacity">
+              <Crown size={160} className="text-purple-500" />
             </div>
-            <p className="text-sm text-[var(--muted-foreground)] leading-relaxed">
-              {t.proCtaBody}
-            </p>
-          </div>
-          <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-purple-500 text-white text-sm font-bold hover:bg-purple-600 transition-colors shrink-0">
-            <Crown size={14} />
-            {t.proCtaButton}
-          </span>
-        </div>
-      </Link>
+            <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-2">
+                  <Crown size={20} className="text-purple-500" />
+                  <h3 className="text-lg font-bold">{t.proCtaTitle}</h3>
+                </div>
+                <p className="text-sm text-[var(--muted-foreground)] leading-relaxed">
+                  {t.proCtaBody}
+                </p>
+              </div>
+              <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-purple-500 text-white text-sm font-bold hover:bg-purple-600 transition-colors shrink-0">
+                <Crown size={14} />
+                {t.proCtaButton}
+              </span>
+            </div>
+          </Link>
+        </>
+      )}
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3 mb-8">
