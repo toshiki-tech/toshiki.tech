@@ -4,7 +4,7 @@ import { Locale } from "@/lib/get-dictionary";
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
-import { ChevronDown, FolderOpen, LogOut, Star } from 'lucide-react';
+import { ChevronDown, FolderOpen, LogOut, Star, Shield } from 'lucide-react';
 import Logo from '@/components/Logo';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { createClient } from '@/lib/supabase-browser';
@@ -16,6 +16,7 @@ function AuthNav({ lang }: { lang: Locale }) {
   const isCommunityPage = pathname?.includes('/yomiplay/community') || pathname?.includes('/yomiplay/admin');
   const [points, setPoints] = useState<number | null>(null);
   const [isPro, setIsPro] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -25,13 +26,14 @@ function AuthNav({ lang }: { lang: Locale }) {
     // Fetch points and pro status
     supabase
       .from('toshiki_tech_yomi_profiles')
-      .select('points, is_pro')
+      .select('points, is_pro, role')
       .eq('id', user.id)
       .single()
       .then(({ data }) => {
         if (data) {
           setPoints(data.points || 0);
           setIsPro(data.is_pro || false);
+          setIsAdmin(data.role === 'admin');
         }
       });
     // Trigger daily login (once per session)
@@ -59,6 +61,7 @@ function AuthNav({ lang }: { lang: Locale }) {
   if (user) {
     const displayName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
     const myUploadsLabel = lang === 'zh' ? '我的上传' : lang === 'zh-tw' ? '我的上傳' : lang === 'ja' ? 'マイ投稿' : 'My Uploads';
+    const adminLabel = lang === 'zh' ? '管理后台' : lang === 'zh-tw' ? '管理後台' : lang === 'ja' ? '管理画面' : 'Admin Panel';
     const signOutLabel = lang === 'zh' ? '退出' : lang === 'zh-tw' ? '登出' : lang === 'ja' ? 'ログアウト' : 'Sign Out';
 
     return (
@@ -97,6 +100,16 @@ function AuthNav({ lang }: { lang: Locale }) {
               <FolderOpen size={14} />
               {myUploadsLabel}
             </Link>
+            {isAdmin && (
+              <Link
+                href={`/${lang}/yomiplay/admin`}
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-[rgb(var(--accent))] hover:bg-[var(--muted)] transition-colors border-t border-[var(--border)]"
+              >
+                <Shield size={14} />
+                {adminLabel}
+              </Link>
+            )}
             <button
               onClick={() => { setMenuOpen(false); signOut(); }}
               className="flex w-full items-center gap-2 px-3 py-2 text-xs text-red-500 hover:bg-[var(--muted)] transition-colors"
