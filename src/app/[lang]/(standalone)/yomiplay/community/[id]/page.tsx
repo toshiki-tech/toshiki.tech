@@ -4,7 +4,7 @@ import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Download, Music, FileText, Calendar, User, ExternalLink } from 'lucide-react';
-import { SOURCE_PLATFORMS, CONTENT_LANGUAGES } from '@/lib/yomi-constants';
+import { SOURCE_PLATFORMS, CONTENT_LANGUAGES, CONTENT_CATEGORIES } from '@/lib/yomi-constants';
 import ReportForm from './ReportForm';
 
 const content = {
@@ -106,6 +106,9 @@ export default async function SubtitleDetailPage({
   const profile = upload.toshiki_tech_yomi_profiles as Record<string, string> | null;
   const platform = SOURCE_PLATFORMS.find(p => p.id === upload.source_platform);
   const langLabel = CONTENT_LANGUAGES.find(l => l.id === upload.language);
+  const categoryDef = CONTENT_CATEGORIES.find(c => c.id === upload.category);
+  const categoryLabel = categoryDef ? (categoryDef.labels[lang] || categoryDef.labels.en) : null;
+  const tagList: string[] = Array.isArray(upload.tags) ? upload.tags : [];
   const createdDate = new Date(upload.created_at).toLocaleDateString(
     lang === 'ja' ? 'ja-JP' : lang === 'zh' ? 'zh-CN' : lang === 'zh-tw' ? 'zh-TW' : 'en-US',
     { year: 'numeric', month: 'long', day: 'numeric' }
@@ -132,8 +135,16 @@ export default async function SubtitleDetailPage({
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-4">{upload.title}</h1>
         <div className="flex flex-wrap gap-2">
+          {categoryLabel && (
+            <Link
+              href={`/${lang}/yomiplay/community?category=${upload.category}`}
+              className="inline-flex items-center gap-1 text-xs font-bold uppercase px-3 py-1 rounded-full bg-[rgb(var(--accent))]/10 text-[rgb(var(--accent))] hover:bg-[rgb(var(--accent))]/20 transition-colors"
+            >
+              {categoryLabel}
+            </Link>
+          )}
           {upload.content_type === 'original' && (
-            <span className="inline-flex items-center gap-1 text-xs font-bold uppercase px-3 py-1 rounded-full bg-[rgb(var(--accent))]/10 text-[rgb(var(--accent))]">
+            <span className="inline-flex items-center gap-1 text-xs font-bold uppercase px-3 py-1 rounded-full bg-purple-500/10 text-purple-600">
               <FileText size={12} />
               {t.original}
             </span>
@@ -150,6 +161,19 @@ export default async function SubtitleDetailPage({
             </span>
           )}
         </div>
+        {tagList.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mt-3">
+            {tagList.map((tag) => (
+              <Link
+                key={tag}
+                href={`/${lang}/yomiplay/community?tag=${encodeURIComponent(tag)}`}
+                className="inline-block text-xs font-medium px-2.5 py-1 rounded-full bg-[var(--muted)] text-[var(--muted-foreground)] hover:bg-[rgb(var(--accent))]/10 hover:text-[rgb(var(--accent))] transition-colors"
+              >
+                #{tag}
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Meta info */}

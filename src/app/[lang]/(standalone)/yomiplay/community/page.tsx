@@ -4,7 +4,7 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { Download, Upload, Search, FileText, Music, Crown, FolderOpen, Apple } from 'lucide-react';
-import { SOURCE_PLATFORMS, CONTENT_LANGUAGES, SHOW_POINTS_FEATURE } from '@/lib/yomi-constants';
+import { SOURCE_PLATFORMS, CONTENT_LANGUAGES, CONTENT_CATEGORIES, SHOW_POINTS_FEATURE } from '@/lib/yomi-constants';
 import { localizeAppStoreUrl } from '@/data/products';
 import Filters from './Filters';
 import CommunityIntro from './CommunityIntro';
@@ -25,6 +25,8 @@ interface YomiUpload {
   audio_storage_path: string | null;
   yomi_storage_path: string | null;
   language: string;
+  category: string | null;
+  tags: string[] | null;
   download_count: number;
   created_at: string;
   toshiki_tech_yomi_profiles: { display_name: string } | null;
@@ -38,6 +40,10 @@ const content = {
     searchPlaceholder: 'Search subtitles...',
     allLanguages: 'All Languages',
     allPlatforms: 'All Platforms',
+    allCategories: 'All Categories',
+    sortLabel: 'Sort',
+    tagFilterLabel: 'Filtered by tag',
+    clearFilter: 'Clear',
     noResults: 'No subtitles found. Be the first to upload!',
     downloads: 'downloads',
     pending: 'Pending Review',
@@ -84,6 +90,10 @@ const content = {
     searchPlaceholder: '搜索字幕...',
     allLanguages: '全部语言',
     allPlatforms: '全部平台',
+    allCategories: '全部分类',
+    sortLabel: '排序',
+    tagFilterLabel: '按标签筛选',
+    clearFilter: '清除',
     noResults: '暂无字幕。成为第一个上传者吧！',
     downloads: '次下载',
     pending: '审核中',
@@ -130,6 +140,10 @@ const content = {
     searchPlaceholder: '搜尋字幕...',
     allLanguages: '全部語言',
     allPlatforms: '全部平台',
+    allCategories: '全部分類',
+    sortLabel: '排序',
+    tagFilterLabel: '依標籤篩選',
+    clearFilter: '清除',
     noResults: '暫無字幕。成為第一個上傳者吧！',
     downloads: '次下載',
     pending: '審核中',
@@ -176,6 +190,10 @@ const content = {
     searchPlaceholder: '字幕を検索...',
     allLanguages: 'すべての言語',
     allPlatforms: 'すべてのプラットフォーム',
+    allCategories: 'すべてのカテゴリ',
+    sortLabel: '並び替え',
+    tagFilterLabel: 'タグで絞り込み',
+    clearFilter: 'クリア',
     noResults: '字幕がまだありません。最初の投稿者になりましょう！',
     downloads: 'ダウンロード',
     pending: '審査中',
@@ -227,9 +245,10 @@ export default async function CommunityPage({
   searchParams,
 }: {
   params: { lang: Locale };
-  searchParams: { q?: string; language?: string; platform?: string; page?: string };
+  searchParams: { q?: string; language?: string; platform?: string; category?: string; sort?: string; tag?: string; page?: string };
 }) {
   const t = content[lang] || content.en;
+  const sort = searchParams.sort || 'newest';
 
   const cookieStore = cookies();
   const supabase = createServerClient(
@@ -255,9 +274,16 @@ export default async function CommunityPage({
     .select('*, toshiki_tech_yomi_profiles!inner(display_name)', { count: 'exact' })
     .eq('status', 'approved')
     .eq('visibility', 'public')
-    .eq('is_removed', false)
-    .order('created_at', { ascending: false })
-    .range(offset, offset + pageSize - 1);
+    .eq('is_removed', false);
+
+  if (sort === 'downloads') {
+    query = query.order('download_count', { ascending: false });
+  } else if (sort === 'updated') {
+    query = query.order('updated_at', { ascending: false });
+  } else {
+    query = query.order('created_at', { ascending: false });
+  }
+  query = query.range(offset, offset + pageSize - 1);
 
   if (searchParams.q) {
     query = query.ilike('title', `%${searchParams.q}%`);
@@ -267,6 +293,12 @@ export default async function CommunityPage({
   }
   if (searchParams.platform) {
     query = query.eq('source_platform', searchParams.platform);
+  }
+  if (searchParams.category) {
+    query = query.eq('category', searchParams.category);
+  }
+  if (searchParams.tag) {
+    query = query.contains('tags', [searchParams.tag]);
   }
 
   const { data: uploads, count } = await query;
@@ -286,6 +318,9 @@ export default async function CommunityPage({
     if (searchParams.q) sp.set('q', searchParams.q);
     if (searchParams.language) sp.set('language', searchParams.language);
     if (searchParams.platform) sp.set('platform', searchParams.platform);
+    if (searchParams.category) sp.set('category', searchParams.category);
+    if (searchParams.tag) sp.set('tag', searchParams.tag);
+    if (searchParams.sort) sp.set('sort', searchParams.sort);
     Object.entries(params).forEach(([k, v]) => {
       if (v) sp.set(k, v); else sp.delete(k);
     });
@@ -405,16 +440,37 @@ export default async function CommunityPage({
           />
           {searchParams.language && <input type="hidden" name="language" value={searchParams.language} />}
           {searchParams.platform && <input type="hidden" name="platform" value={searchParams.platform} />}
+          {searchParams.category && <input type="hidden" name="category" value={searchParams.category} />}
+          {searchParams.sort && <input type="hidden" name="sort" value={searchParams.sort} />}
+          {searchParams.tag && <input type="hidden" name="tag" value={searchParams.tag} />}
         </form>
         <Filters
           lang={lang}
           currentLanguage={searchParams.language}
           currentPlatform={searchParams.platform}
+          currentCategory={searchParams.category}
+          currentSort={sort}
           currentQuery={searchParams.q}
+          currentTag={searchParams.tag}
           allLanguagesLabel={t.allLanguages}
           allPlatformsLabel={t.allPlatforms}
+          allCategoriesLabel={t.allCategories}
+          sortLabel={t.sortLabel}
         />
       </div>
+
+      {searchParams.tag && (
+        <div className="flex items-center gap-2 mb-6 px-4 py-2.5 rounded-xl bg-[rgb(var(--accent))]/5 border border-[rgb(var(--accent))]/20 text-sm">
+          <span className="text-[var(--muted-foreground)]">{t.tagFilterLabel}:</span>
+          <span className="font-bold">#{searchParams.tag}</span>
+          <Link
+            href={buildUrl({ tag: '' })}
+            className="ml-auto text-xs font-bold text-[rgb(var(--accent))] hover:underline"
+          >
+            {t.clearFilter}
+          </Link>
+        </div>
+      )}
 
       {/* Results */}
       {!uploads || uploads.length === 0 ? (
@@ -427,6 +483,9 @@ export default async function CommunityPage({
           {(uploads as YomiUpload[]).map((upload) => {
             const platform = SOURCE_PLATFORMS.find(p => p.id === upload.source_platform);
             const langLabel = CONTENT_LANGUAGES.find(l => l.id === upload.language);
+            const categoryDef = CONTENT_CATEGORIES.find(c => c.id === upload.category);
+            const categoryLabel = categoryDef ? (categoryDef.labels[lang] || categoryDef.labels.en) : null;
+            const tagList = (upload.tags || []).slice(0, 4);
 
             return (
               <Link
@@ -453,11 +512,26 @@ export default async function CommunityPage({
                   </p>
                 )}
 
-                {upload.content_type === 'original' && (
-                  <span className="inline-block text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-[rgb(var(--accent))]/10 text-[rgb(var(--accent))] mb-2">
-                    {t.original}
-                  </span>
-                )}
+                <div className="flex flex-wrap items-center gap-1.5 mb-2">
+                  {categoryLabel && (
+                    <span className="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[rgb(var(--accent))]/10 text-[rgb(var(--accent))]">
+                      {categoryLabel}
+                    </span>
+                  )}
+                  {upload.content_type === 'original' && (
+                    <span className="inline-block text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-600">
+                      {t.original}
+                    </span>
+                  )}
+                  {tagList.map((tag) => (
+                    <span
+                      key={tag}
+                      className="inline-block text-[10px] font-medium px-2 py-0.5 rounded-full bg-[var(--muted)] text-[var(--muted-foreground)]"
+                    >
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
 
                 <div className="flex items-center justify-between mt-3 pt-3 border-t border-[var(--border)]">
                   <div className="flex items-center gap-3 text-xs text-[var(--muted-foreground)]">

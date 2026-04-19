@@ -25,6 +25,8 @@ interface AdminUpload {
   audio_storage_path: string | null;
   language: string;
   translation_language: string | null;
+  category: string | null;
+  tags: string[] | null;
   created_at: string;
   toshiki_tech_yomi_profiles: { display_name: string } | null;
 }
@@ -199,8 +201,18 @@ export default async function AdminPage({ params: { lang } }: { params: { lang: 
                         <span>by {upload.toshiki_tech_yomi_profiles?.display_name || 'Unknown'}</span>
                         {langLabel && <span>· {langLabel.label}</span>}
                         {platform && <span>· {platform.name}</span>}
+                        {upload.category && <span>· {upload.category}</span>}
                         <span>· {date}</span>
                       </div>
+                      {upload.tags && upload.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {upload.tags.map((tag) => (
+                            <span key={tag} className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-[var(--muted)] text-[var(--muted-foreground)]">
+                              #{tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
                       <EditUpload upload={upload} />
@@ -258,8 +270,18 @@ export default async function AdminPage({ params: { lang } }: { params: { lang: 
                         <span>by {upload.toshiki_tech_yomi_profiles?.display_name || 'Unknown'}</span>
                         {langLabel && <span>· {langLabel.label}</span>}
                         {platform && <span>· {platform.name}</span>}
+                        {upload.category && <span>· {upload.category}</span>}
                         <span>· {date}</span>
                       </div>
+                      {upload.tags && upload.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {upload.tags.map((tag) => (
+                            <span key={tag} className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-[var(--muted)] text-[var(--muted-foreground)]">
+                              #{tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
                       <EditUpload upload={upload} />

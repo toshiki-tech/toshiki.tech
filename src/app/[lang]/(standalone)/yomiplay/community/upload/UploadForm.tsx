@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Locale } from '@/lib/get-dictionary';
-import { SOURCE_PLATFORMS, CONTENT_LANGUAGES, MAX_YOMI_FILE_SIZE, MAX_ZIP_FILE_SIZE } from '@/lib/yomi-constants';
+import { SOURCE_PLATFORMS, CONTENT_LANGUAGES, CONTENT_CATEGORIES, MAX_YOMI_FILE_SIZE, MAX_ZIP_FILE_SIZE } from '@/lib/yomi-constants';
 import { Upload, FileText, Music, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 const content = {
@@ -17,6 +17,8 @@ const content = {
     titlePlaceholder: 'e.g., NHK News 2026-01-15',
     descriptionLabel: 'Description (optional)',
     descriptionPlaceholder: 'Brief description of the content...',
+    categoryLabel: 'Category',
+    selectCategory: 'Select category',
     languageLabel: 'Content Language',
     translationLanguageLabel: 'Translation Language',
     selectLanguage: 'Select language',
@@ -53,6 +55,8 @@ const content = {
     titlePlaceholder: '如：NHK 新闻 2026-01-15',
     descriptionLabel: '描述（可选）',
     descriptionPlaceholder: '简要描述内容...',
+    categoryLabel: '内容分类',
+    selectCategory: '选择分类',
     languageLabel: '内容语言',
     translationLanguageLabel: '翻译语言',
     selectLanguage: '选择语言',
@@ -89,6 +93,8 @@ const content = {
     titlePlaceholder: '如：NHK 新聞 2026-01-15',
     descriptionLabel: '描述（可選）',
     descriptionPlaceholder: '簡要描述內容...',
+    categoryLabel: '內容分類',
+    selectCategory: '選擇分類',
     languageLabel: '內容語言',
     translationLanguageLabel: '翻譯語言',
     selectLanguage: '選擇語言',
@@ -125,6 +131,8 @@ const content = {
     titlePlaceholder: '例：NHK ニュース 2026-01-15',
     descriptionLabel: '説明（任意）',
     descriptionPlaceholder: 'コンテンツの簡単な説明...',
+    categoryLabel: 'カテゴリ',
+    selectCategory: 'カテゴリを選択',
     languageLabel: 'コンテンツの言語',
     translationLanguageLabel: '翻訳言語',
     selectLanguage: '言語を選択',
@@ -160,6 +168,7 @@ export default function UploadForm({ lang }: { lang: Locale }) {
   const [contentTypeChoice, setContentTypeChoice] = useState<'original' | 'third_party'>('third_party');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [category, setCategory] = useState('');
   const [language, setLanguage] = useState('');
   const [translationLanguage, setTranslationLanguage] = useState('');
   const [sourcePlatform, setSourcePlatform] = useState('');
@@ -263,6 +272,7 @@ export default function UploadForm({ lang }: { lang: Locale }) {
           description: description || undefined,
           contentType: contentTypeChoice,
           visibility,
+          category: category || undefined,
           language,
           translationLanguage: translationLanguage || undefined,
           sourcePlatform: sourcePlatform || undefined,
@@ -366,6 +376,22 @@ export default function UploadForm({ lang }: { lang: Locale }) {
           placeholder={t.descriptionPlaceholder}
           className={inputClass}
         />
+      </div>
+
+      {/* Category */}
+      <div>
+        <label className={labelClass}>{t.categoryLabel}</label>
+        <select
+          required
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          className={inputClass}
+        >
+          <option value="">{t.selectCategory}</option>
+          {CONTENT_CATEGORIES.map((c) => (
+            <option key={c.id} value={c.id}>{c.labels[lang] || c.labels.en}</option>
+          ))}
+        </select>
       </div>
 
       {/* Language */}

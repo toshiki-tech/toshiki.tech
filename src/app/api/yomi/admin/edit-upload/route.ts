@@ -11,6 +11,8 @@ const ALLOWED_FIELDS = [
   'translation_language',
   'visibility',
   'content_type',
+  'category',
+  'tags',
 ] as const;
 
 export async function PATCH(request: Request) {

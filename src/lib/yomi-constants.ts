@@ -9,6 +9,23 @@ export const SOURCE_PLATFORMS = [
   { id: 'other', name: 'Other', domain: null },
 ] as const;
 
+export const CONTENT_CATEGORIES = [
+  { id: 'podcast', labels: { en: 'Podcast', zh: '播客', 'zh-tw': '播客', ja: 'ポッドキャスト' } },
+  { id: 'news_video', labels: { en: 'News / Video', zh: '新闻·视频', 'zh-tw': '新聞·影片', ja: 'ニュース・動画' } },
+  { id: 'music', labels: { en: 'Music & Lyrics', zh: '音乐歌词', 'zh-tw': '音樂歌詞', ja: '音楽・歌詞' } },
+  { id: 'book_companion', labels: { en: 'Book Companion', zh: '书籍配套', 'zh-tw': '書籍配套', ja: '書籍付属' } },
+  { id: 'other', labels: { en: 'Other', zh: '其他', 'zh-tw': '其他', ja: 'その他' } },
+] as const;
+
+export const CONTENT_SORT_OPTIONS = [
+  { id: 'newest', labels: { en: 'Newest', zh: '最新', 'zh-tw': '最新', ja: '新着順' } },
+  { id: 'downloads', labels: { en: 'Most downloaded', zh: '下载最多', 'zh-tw': '下載最多', ja: 'ダウンロード順' } },
+  { id: 'updated', labels: { en: 'Recently updated', zh: '最近更新', 'zh-tw': '最近更新', ja: '更新順' } },
+] as const;
+
+export type ContentCategoryId = typeof CONTENT_CATEGORIES[number]['id'];
+export type ContentSortId = typeof CONTENT_SORT_OPTIONS[number]['id'];
+
 export const CONTENT_LANGUAGES = [
   { id: 'ja', label: '日本語' },
   { id: 'en', label: 'English' },

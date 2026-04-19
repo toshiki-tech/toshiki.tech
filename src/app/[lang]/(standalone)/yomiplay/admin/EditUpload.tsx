@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Pencil, X, Save } from 'lucide-react';
-import { SOURCE_PLATFORMS, CONTENT_LANGUAGES } from '@/lib/yomi-constants';
+import { SOURCE_PLATFORMS, CONTENT_LANGUAGES, CONTENT_CATEGORIES } from '@/lib/yomi-constants';
 
 interface UploadData {
   id: string;
@@ -15,6 +15,8 @@ interface UploadData {
   source_episode: string | null;
   language: string;
   translation_language: string | null;
+  category: string | null;
+  tags: string[] | null;
 }
 
 export default function EditUpload({ upload }: { upload: UploadData }) {
@@ -30,14 +32,23 @@ export default function EditUpload({ upload }: { upload: UploadData }) {
     source_episode: upload.source_episode || '',
     language: upload.language || '',
     translation_language: upload.translation_language || '',
+    category: upload.category || '',
+    tagsInput: (upload.tags || []).join(', '),
   });
 
   const handleSave = async () => {
     setSaving(true);
+    const tags = form.tagsInput
+      .split(',')
+      .map((t) => t.trim())
+      .filter(Boolean);
+    const { tagsInput, ...rest } = form;
+    void tagsInput;
+    const updates = { ...rest, tags };
     const res = await fetch('/api/yomi/admin/edit-upload', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ uploadId: upload.id, updates: form }),
+      body: JSON.stringify({ uploadId: upload.id, updates }),
     });
     if (res.ok) {
       setOpen(false);
@@ -128,6 +139,32 @@ export default function EditUpload({ upload }: { upload: UploadData }) {
                     <option value="public">Public</option>
                     <option value="unlisted">Unlisted</option>
                   </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className={label}>Category</label>
+                  <select
+                    value={form.category}
+                    onChange={(e) => setForm({ ...form, category: e.target.value })}
+                    className={input}
+                  >
+                    <option value="">—</option>
+                    {CONTENT_CATEGORIES.map((c) => (
+                      <option key={c.id} value={c.id}>{c.labels.en}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className={label}>Tags (comma-separated)</label>
+                  <input
+                    type="text"
+                    value={form.tagsInput}
+                    onChange={(e) => setForm({ ...form, tagsInput: e.target.value })}
+                    placeholder="e.g., JLPT-N2, business, interview"
+                    className={input}
+                  />
                 </div>
               </div>
 
