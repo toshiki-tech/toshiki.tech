@@ -3,7 +3,7 @@ import { Metadata } from 'next';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
-import { Download, Upload, Search, FileText, Music, Crown, FolderOpen, Apple } from 'lucide-react';
+import { Download, Upload, Search, FileText, Music, Crown, FolderOpen, Apple, Megaphone } from 'lucide-react';
 import { SOURCE_PLATFORMS, CONTENT_LANGUAGES, CONTENT_CATEGORIES, SHOW_POINTS_FEATURE } from '@/lib/yomi-constants';
 import { localizeAppStoreUrl } from '@/data/products';
 import Filters from './Filters';
@@ -76,6 +76,9 @@ const content = {
     },
     pointsUnit: 'pts',
     pointsPolicy: 'View points policy',
+    promoNoticeTitle: 'Launch promotion',
+    promoNoticeBody: 'Redeeming points for Pro membership is a launch-period promotion. When the community reaches ~1,000 members, this channel will retire and points will transition to a download-spending model (earn by uploading, spend by downloading).',
+    promoNoticeLink: 'Read the full policy',
     myUploads: 'My Uploads',
     proCtaTitle: 'Earn points, unlock Pro',
     proCtaBody: 'Share .yomi files with the community, collect points from uploads and downloads, and redeem them for a Pro membership.',
@@ -127,6 +130,9 @@ const content = {
     },
     pointsUnit: '分',
     pointsPolicy: '查看积分政策',
+    promoNoticeTitle: '推广期活动',
+    promoNoticeBody: '"积分兑换 Pro 会员"是当前 App 推广期的限时活动。当社区达到约 1,000 用户后，推广期结束，兑换通道将关闭，积分将转为"下载消耗"模式（上传赚取、下载消耗）。',
+    promoNoticeLink: '查看完整政策',
     myUploads: '我的上传',
     proCtaTitle: '赚取积分，解锁 Pro',
     proCtaBody: '向社区分享你的 .yomi 字幕文件，通过上传和他人下载累积积分，达到门槛后可兑换 Pro 会员。',
@@ -178,6 +184,9 @@ const content = {
     },
     pointsUnit: '分',
     pointsPolicy: '查看積分政策',
+    promoNoticeTitle: '推廣期活動',
+    promoNoticeBody: '「積分兌換 Pro 會員」是當前 App 推廣期的限時活動。當社區達到約 1,000 使用者後，推廣期結束，兌換通道將關閉，積分將轉為「下載消耗」模式（上傳賺取、下載消耗）。',
+    promoNoticeLink: '查看完整政策',
     myUploads: '我的上傳',
     proCtaTitle: '賺取積分，解鎖 Pro',
     proCtaBody: '向社區分享你的 .yomi 字幕檔案，透過上傳和他人下載累積積分，達到門檻後可兌換 Pro 會員。',
@@ -229,6 +238,9 @@ const content = {
     },
     pointsUnit: 'pt',
     pointsPolicy: 'ポイント規定を見る',
+    promoNoticeTitle: 'ローンチプロモーション',
+    promoNoticeBody: '「ポイントで Pro メンバーシップと交換」はアプリローンチ期間中の期間限定キャンペーンです。コミュニティが約 1,000 ユーザーに達した時点でこの窓口は終了し、ポイントは「ダウンロード消費」モデル（アップロードで獲得・ダウンロードで消費）へ移行します。',
+    promoNoticeLink: '規定の全文を読む',
     myUploads: 'マイ投稿',
     proCtaTitle: 'ポイントを貯めて Pro を解放',
     proCtaBody: 'コミュニティに .yomi 字幕ファイルを共有し、アップロードとダウンロードでポイントを貯めて、Pro メンバーシップと交換しましょう。',
@@ -395,6 +407,23 @@ export default async function CommunityPage({
 
       {SHOW_POINTS_FEATURE && (
         <>
+          {/* Promotional-phase notice */}
+          <div className="mb-6 p-5 rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent">
+            <div className="flex items-start gap-3">
+              <Megaphone size={20} className="text-amber-600 shrink-0 mt-0.5" />
+              <div className="flex-1 min-w-0">
+                <h2 className="font-bold text-sm text-amber-600 mb-1">{t.promoNoticeTitle}</h2>
+                <p className="text-xs text-[var(--muted-foreground)] leading-relaxed">{t.promoNoticeBody}</p>
+                <Link
+                  href={`/${lang}/yomiplay/community/points-policy`}
+                  className="mt-2 inline-block text-xs font-bold text-amber-600 hover:underline"
+                >
+                  {t.promoNoticeLink} →
+                </Link>
+              </div>
+            </div>
+          </div>
+
           {/* Points rules */}
           <PointsRules
             config={pointsConfig}

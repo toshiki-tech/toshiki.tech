@@ -1,7 +1,7 @@
 import { Locale } from '@/lib/get-dictionary';
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowLeft, ShieldCheck, Star } from 'lucide-react';
+import { ArrowLeft, ShieldCheck, Star, Megaphone } from 'lucide-react';
 
 interface PolicySection {
   title: string;
@@ -13,6 +13,8 @@ interface PolicyContent {
   title: string;
   intro: string;
   lastUpdated: string;
+  promoTitle: string;
+  promoBody: string;
   sections: PolicySection[];
   contactTitle: string;
   contactBody: string;
@@ -25,6 +27,8 @@ const content: Record<Locale, PolicyContent> = {
     title: 'Community Points Policy',
     intro: 'The YomiPlay community rewards contributions with points that can be redeemed for Pro membership. To keep the system flexible while staying fair to contributors, the following commitments define how the rules can change over time.',
     lastUpdated: 'Last updated: April 20, 2026',
+    promoTitle: 'Current phase: launch promotion',
+    promoBody: 'Redeeming points for Pro membership is a launch-period promotion. Once the community grows to approximately 1,000 members, the launch phase ends and the points-to-Pro redemption channel will be retired. Points earned up to that point remain valid — see section 6 for how we plan to transition them to a download-spending model.',
     sections: [
       {
         title: '1. Earned points are never retroactively revoked',
@@ -46,6 +50,10 @@ const content: Record<Locale, PolicyContent> = {
         title: '5. Relationship to App Store Pro subscription',
         body: 'Points-based Pro membership is an in-community reward for contributions and is separate from the Pro subscription sold on the App Store. The points program does not replace, substitute, or route around in-app purchases — it is an internal incentive granted at the platform\'s discretion. Users who prefer may subscribe via the App Store as usual.',
       },
+      {
+        title: '6. Planned future direction: points for downloads',
+        body: 'Once the launch promotion ends, we plan to transition points from a Pro-redemption currency into a community spending currency: uploaders continue to earn points for uploads and downloads received, and downloaders spend a small amount of points to access community-shared materials. This rewards active contributors, balances contribution against consumption, and keeps the economy self-sustaining. Exact spending rates will be announced before the transition and will follow the same advance-notice commitments in section 2.',
+      },
     ],
     contactTitle: 'Questions or feedback?',
     contactBody: 'Use the report button on any content page, or contact the admin directly. We read everything and reply when the situation requires a response.',
@@ -56,6 +64,8 @@ const content: Record<Locale, PolicyContent> = {
     title: '社区积分政策',
     intro: 'YomiPlay 社区通过积分奖励用户的贡献，积分可以兑换 Pro 会员。为了让规则在保留灵活性的同时对贡献者保持公平，我们在这里明确积分规则变更时的几项承诺。',
     lastUpdated: '最后更新：2026 年 4 月 20 日',
+    promoTitle: '当前阶段：App 推广期活动',
+    promoBody: '"积分兑换 Pro 会员"是 YomiPlay 推广期间的限时活动。当社区成员达到约 1,000 人后，推广期结束，届时将停止通过积分兑换 Pro 会员的通道。在此之前已获得的积分仍然有效——关于后续如何把这些积分用于下载消耗，详见下方第 6 条。',
     sections: [
       {
         title: '1. 已获得的积分永不追溯清零',
@@ -77,6 +87,10 @@ const content: Record<Locale, PolicyContent> = {
         title: '5. 与 App Store Pro 订阅的关系',
         body: '积分兑换的 Pro 会员属于社区内部的贡献奖励机制，与 App Store 上销售的 Pro 订阅是两条独立的路径。积分机制不是 App 内购买的替代或绕过方式——它是平台自主决定授予的内部激励。用户如更方便，仍可通过 App Store 正常订阅。',
       },
+      {
+        title: '6. 未来规划方向：积分用于下载消耗',
+        body: '推广期结束后，我们计划将积分从"兑换 Pro 会员"模式转为社区内部的"下载消耗"模式：上传者依旧通过上传和被下载获得积分，下载者则需要消耗少量积分才能下载社区分享的资料。这样既能奖励活跃的贡献者，又能平衡贡献与消费，使积分经济可持续运行。具体消耗数值会在模式切换前公告，并遵守上文第 2 条"提前 14 天通知"的约束。',
+      },
     ],
     contactTitle: '有问题或反馈？',
     contactBody: '在任意内容页点击"举报"按钮，或直接联系管理员。我们会阅读每一条反馈，并在有必要时回复。',
@@ -87,6 +101,8 @@ const content: Record<Locale, PolicyContent> = {
     title: '社區積分政策',
     intro: 'YomiPlay 社區透過積分獎勵使用者的貢獻，積分可以兌換 Pro 會員。為了讓規則保留彈性同時對貢獻者保持公平，我們在此明確積分規則變更時的幾項承諾。',
     lastUpdated: '最後更新：2026 年 4 月 20 日',
+    promoTitle: '當前階段：App 推廣期活動',
+    promoBody: '「積分兌換 Pro 會員」是 YomiPlay 推廣期間的限時活動。當社區成員達到約 1,000 人後，推廣期結束，屆時將停止透過積分兌換 Pro 會員的管道。在此之前已獲得的積分仍然有效——關於後續如何把這些積分用於下載消耗，詳見下方第 6 條。',
     sections: [
       {
         title: '1. 已獲得的積分永不追溯清零',
@@ -108,6 +124,10 @@ const content: Record<Locale, PolicyContent> = {
         title: '5. 與 App Store Pro 訂閱的關係',
         body: '積分兌換的 Pro 會員屬於社區內部的貢獻獎勵機制，與 App Store 上銷售的 Pro 訂閱是兩條獨立的路徑。積分機制不是 App 內購買的替代或繞過方式——它是平台自主決定授予的內部激勵。使用者如更方便，仍可透過 App Store 正常訂閱。',
       },
+      {
+        title: '6. 未來規劃方向：積分用於下載消耗',
+        body: '推廣期結束後，我們計畫將積分從「兌換 Pro 會員」模式轉為社區內部的「下載消耗」模式：上傳者仍透過上傳和被下載獲得積分，下載者則需消耗少量積分才能下載社區分享的資料。這樣既能獎勵活躍的貢獻者，又能平衡貢獻與消費，使積分經濟可持續運行。具體消耗數值會在模式切換前公告，並遵守上文第 2 條「提前 14 天通知」的約束。',
+      },
     ],
     contactTitle: '有問題或反饋？',
     contactBody: '在任意內容頁點擊「舉報」按鈕，或直接聯繫管理員。我們會閱讀每一條反饋，並在必要時回覆。',
@@ -118,6 +138,8 @@ const content: Record<Locale, PolicyContent> = {
     title: 'コミュニティポイント規定',
     intro: 'YomiPlay コミュニティでは、ユーザーの貢献に応じてポイントを付与し、そのポイントで Pro メンバーシップと交換できます。ルールを柔軟に保ちつつ貢献者に公平であり続けるため、ポイント規定の変更に関して以下の方針を明確にします。',
     lastUpdated: '最終更新：2026 年 4 月 20 日',
+    promoTitle: '現在のフェーズ：App ローンチプロモーション',
+    promoBody: '「ポイントで Pro メンバーシップと交換」はアプリのローンチ期間中に提供している期間限定キャンペーンです。コミュニティが約 1,000 ユーザーに達した時点でローンチ期が終了し、ポイントと Pro メンバーシップの交換窓口は停止します。それまでに獲得したポイントは有効なまま残ります — 以降、ポイントを「ダウンロード消費」へ移行する計画については下記の第 6 条をご確認ください。',
     sections: [
       {
         title: '1. 獲得済みポイントを遡及的に取り消すことはありません',
@@ -138,6 +160,10 @@ const content: Record<Locale, PolicyContent> = {
       {
         title: '5. App Store の Pro サブスクリプションとの関係',
         body: 'ポイント交換による Pro メンバーシップは、コミュニティ内の貢献報酬であり、App Store で販売される Pro サブスクリプションとは独立した別の経路です。ポイント制度は App 内課金の代替や回避手段ではなく、プラットフォームの裁量で付与される内部的なインセンティブです。都合に応じて App Store から通常どおりご購入いただくこともできます。',
+      },
+      {
+        title: '6. 今後の方向性：ポイントをダウンロード消費に',
+        body: 'ローンチプロモーションの終了後、ポイントは「Pro 交換」から、コミュニティ内の「ダウンロード消費」へと移行する計画です。アップロード者は引き続きアップロードと被ダウンロードでポイントを獲得し、ダウンロード利用者はコミュニティで共有された素材をダウンロードする際に少額のポイントを消費します。これにより貢献者への報酬と、貢献と消費のバランスが取れ、ポイント経済が持続可能になります。具体的な消費レートは切り替え前に告知し、上記第 2 条の「14 日前告知」ルールに従います。',
       },
     ],
     contactTitle: 'ご質問・フィードバック',
@@ -169,7 +195,15 @@ export default function PointsPolicyPage({ params: { lang } }: { params: { lang:
         <h1 className="text-3xl font-bold">{t.title}</h1>
       </div>
       <p className="text-xs text-[var(--muted-foreground)] mb-6">{t.lastUpdated}</p>
-      <p className="text-[var(--muted-foreground)] leading-relaxed mb-8">{t.intro}</p>
+      <p className="text-[var(--muted-foreground)] leading-relaxed mb-6">{t.intro}</p>
+
+      <div className="mb-8 p-5 rounded-2xl border border-amber-500/30 bg-amber-500/5">
+        <h2 className="font-bold text-base mb-2 flex items-start gap-2 text-amber-600">
+          <Megaphone size={18} className="shrink-0 mt-0.5" />
+          <span>{t.promoTitle}</span>
+        </h2>
+        <p className="text-sm text-[var(--muted-foreground)] leading-relaxed pl-6">{t.promoBody}</p>
+      </div>
 
       <div className="space-y-6 mb-10">
         {t.sections.map((section) => (
