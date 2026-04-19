@@ -164,11 +164,14 @@ export default async function ProductDetailPage({ params }: { params: { lang: Lo
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="p-6 rounded-2xl border border-[var(--border)] bg-[var(--card)] text-center space-y-3">
-                  <div className="w-12 h-12 rounded-xl bg-[rgb(var(--accent))]/10 flex items-center justify-center text-[rgb(var(--accent))] mx-auto">
+                <Link
+                  href={`/${params.lang}/yomiplay/community`}
+                  className="group p-6 rounded-2xl border border-[var(--border)] bg-[var(--card)] text-center space-y-3 hover:border-[rgb(var(--accent))]/50 hover:bg-[rgb(var(--accent))]/5 transition-colors"
+                >
+                  <div className="w-12 h-12 rounded-xl bg-[rgb(var(--accent))]/10 flex items-center justify-center text-[rgb(var(--accent))] mx-auto group-hover:bg-[rgb(var(--accent))]/20 transition-colors">
                     <Download size={24} />
                   </div>
-                  <h4 className="font-bold">
+                  <h4 className="font-bold group-hover:text-[rgb(var(--accent))] transition-colors">
                     {params.lang === 'en' ? 'Download Subtitles' : params.lang === 'zh' ? '下载字幕' : params.lang === 'zh-tw' ? '下載字幕' : '字幕をダウンロード'}
                   </h4>
                   <p className="text-sm text-[var(--muted-foreground)]">
@@ -180,12 +183,15 @@ export default async function ProductDetailPage({ params }: { params: { lang: Lo
                           ? '取得播客、新聞等內容的高品質 .yomi 字幕檔案。'
                           : 'ポッドキャスト、ニュースなどの高品質な .yomi ファイルを取得。'}
                   </p>
-                </div>
-                <div className="p-6 rounded-2xl border border-[var(--border)] bg-[var(--card)] text-center space-y-3">
-                  <div className="w-12 h-12 rounded-xl bg-[rgb(var(--accent))]/10 flex items-center justify-center text-[rgb(var(--accent))] mx-auto">
+                </Link>
+                <Link
+                  href={`/${params.lang}/yomiplay/community/upload`}
+                  className="group p-6 rounded-2xl border border-[var(--border)] bg-[var(--card)] text-center space-y-3 hover:border-[rgb(var(--accent))]/50 hover:bg-[rgb(var(--accent))]/5 transition-colors"
+                >
+                  <div className="w-12 h-12 rounded-xl bg-[rgb(var(--accent))]/10 flex items-center justify-center text-[rgb(var(--accent))] mx-auto group-hover:bg-[rgb(var(--accent))]/20 transition-colors">
                     <Upload size={24} />
                   </div>
-                  <h4 className="font-bold">
+                  <h4 className="font-bold group-hover:text-[rgb(var(--accent))] transition-colors">
                     {params.lang === 'en' ? 'Share Your Work' : params.lang === 'zh' ? '分享你的成果' : params.lang === 'zh-tw' ? '分享你的成果' : 'あなたの成果を共有'}
                   </h4>
                   <p className="text-sm text-[var(--muted-foreground)]">
@@ -197,12 +203,15 @@ export default async function ProductDetailPage({ params }: { params: { lang: Lo
                           ? '上傳精修字幕，幫助裝置效能較低的學習者。'
                           : '精修した字幕をアップロードし、低スペックデバイスの学習者を支援。'}
                   </p>
-                </div>
-                <div className="p-6 rounded-2xl border border-[var(--border)] bg-[var(--card)] text-center space-y-3">
-                  <div className="w-12 h-12 rounded-xl bg-[rgb(var(--accent))]/10 flex items-center justify-center text-[rgb(var(--accent))] mx-auto">
+                </Link>
+                <Link
+                  href={`/${params.lang}/yomiplay/community`}
+                  className="group p-6 rounded-2xl border border-[var(--border)] bg-[var(--card)] text-center space-y-3 hover:border-[rgb(var(--accent))]/50 hover:bg-[rgb(var(--accent))]/5 transition-colors"
+                >
+                  <div className="w-12 h-12 rounded-xl bg-[rgb(var(--accent))]/10 flex items-center justify-center text-[rgb(var(--accent))] mx-auto group-hover:bg-[rgb(var(--accent))]/20 transition-colors">
                     <Users size={24} />
                   </div>
-                  <h4 className="font-bold">
+                  <h4 className="font-bold group-hover:text-[rgb(var(--accent))] transition-colors">
                     {params.lang === 'en' ? 'Community Driven' : params.lang === 'zh' ? '社区驱动' : params.lang === 'zh-tw' ? '社區驅動' : 'コミュニティ主導'}
                   </h4>
                   <p className="text-sm text-[var(--muted-foreground)]">
@@ -214,7 +223,7 @@ export default async function ProductDetailPage({ params }: { params: { lang: Lo
                           ? '學習者為學習者打造，來自真實用戶的高品質字幕。'
                           : '学習者が学習者のために。実際のユーザーによる高品質字幕。'}
                   </p>
-                </div>
+                </Link>
               </div>
 
               <div className="text-center">
