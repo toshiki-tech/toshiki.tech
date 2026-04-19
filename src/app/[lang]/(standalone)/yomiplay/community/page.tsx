@@ -3,11 +3,14 @@ import { Metadata } from 'next';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
-import { Download, Upload, Search, FileText, Music, Crown, FolderOpen } from 'lucide-react';
+import { Download, Upload, Search, FileText, Music, Crown, FolderOpen, Apple } from 'lucide-react';
 import { SOURCE_PLATFORMS, CONTENT_LANGUAGES, SHOW_POINTS_FEATURE } from '@/lib/yomi-constants';
+import { localizeAppStoreUrl } from '@/data/products';
 import Filters from './Filters';
 import CommunityIntro from './CommunityIntro';
 import PointsRules from './PointsRules';
+
+const APP_STORE_URL = 'https://apps.apple.com/jp/app/yomiplay/id6760715932';
 
 interface YomiUpload {
   id: string;
@@ -70,6 +73,9 @@ const content = {
     proCtaTitle: 'Earn points, unlock Pro',
     proCtaBody: 'Share .yomi files with the community, collect points from uploads and downloads, and redeem them for a Pro membership.',
     proCtaButton: 'View points & apply for Pro',
+    appCtaTitle: 'Need the YomiPlay app to use these materials',
+    appCtaBody: 'The .yomi subtitle files shared here are designed to be imported into the YomiPlay iOS app for study. If you don\'t have the app yet, download it from the App Store before downloading community materials.',
+    appCtaButton: 'Download on the App Store',
   },
   zh: {
     title: 'YomiPlay 社区',
@@ -113,6 +119,9 @@ const content = {
     proCtaTitle: '赚取积分，解锁 Pro',
     proCtaBody: '向社区分享你的 .yomi 字幕文件，通过上传和他人下载累积积分，达到门槛后可兑换 Pro 会员。',
     proCtaButton: '查看积分 & 申请 Pro',
+    appCtaTitle: '使用这些资料需要先下载 YomiPlay App',
+    appCtaBody: '社区分享的 .yomi 字幕文件需要导入 YomiPlay iOS App 才能用于学习。如果你还没有安装 App，请先前往 App Store 下载后再下载社区资料。',
+    appCtaButton: '前往 App Store 下载',
   },
   'zh-tw': {
     title: 'YomiPlay 社區',
@@ -156,6 +165,9 @@ const content = {
     proCtaTitle: '賺取積分，解鎖 Pro',
     proCtaBody: '向社區分享你的 .yomi 字幕檔案，透過上傳和他人下載累積積分，達到門檻後可兌換 Pro 會員。',
     proCtaButton: '查看積分 & 申請 Pro',
+    appCtaTitle: '使用這些資料需要先下載 YomiPlay App',
+    appCtaBody: '社區分享的 .yomi 字幕檔案需要匯入 YomiPlay iOS App 才能用於學習。若你尚未安裝 App，請先前往 App Store 下載後再下載社區資料。',
+    appCtaButton: '前往 App Store 下載',
   },
   ja: {
     title: 'YomiPlay コミュニティ',
@@ -199,6 +211,9 @@ const content = {
     proCtaTitle: 'ポイントを貯めて Pro を解放',
     proCtaBody: 'コミュニティに .yomi 字幕ファイルを共有し、アップロードとダウンロードでポイントを貯めて、Pro メンバーシップと交換しましょう。',
     proCtaButton: 'ポイント確認 & Pro 申請',
+    appCtaTitle: 'これらの教材を使うには YomiPlay アプリが必要です',
+    appCtaBody: 'コミュニティで共有されている .yomi 字幕ファイルは、YomiPlay iOS アプリに読み込んで学習用に使います。まだアプリを入れていない方は、先に App Store からダウンロードしてから素材をご利用ください。',
+    appCtaButton: 'App Store でダウンロード',
   },
 };
 
@@ -303,6 +318,28 @@ export default async function CommunityPage({
           </Link>
         </div>
       </div>
+
+      {/* App Store CTA — reminder that the YomiPlay app is required to use these materials */}
+      <a
+        href={localizeAppStoreUrl(APP_STORE_URL, lang)}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="group relative mb-6 block p-5 rounded-2xl border border-[rgb(var(--accent))]/30 bg-gradient-to-br from-[rgb(var(--accent))]/10 via-[rgb(var(--accent))]/5 to-transparent hover:border-[rgb(var(--accent))]/60 transition-colors"
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-start gap-3 flex-1 min-w-0">
+            <Apple size={20} className="text-[rgb(var(--accent))] shrink-0 mt-0.5" />
+            <div className="flex-1 min-w-0">
+              <h2 className="font-bold text-sm mb-1">{t.appCtaTitle}</h2>
+              <p className="text-xs text-[var(--muted-foreground)] leading-relaxed">{t.appCtaBody}</p>
+            </div>
+          </div>
+          <span className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-black text-white text-sm font-bold hover:bg-neutral-800 transition-colors shrink-0">
+            <Apple size={14} />
+            {t.appCtaButton}
+          </span>
+        </div>
+      </a>
 
       {/* Community intro & terms */}
       <CommunityIntro
