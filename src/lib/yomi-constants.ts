@@ -45,7 +45,7 @@ export const MAX_ZIP_FILE_SIZE = 524_288_000; // 500MB
 
 // Feature flag: controls visibility of the community "How to earn points" rules
 // and the "Earn points, unlock Pro" CTA banner. Set to true to re-enable.
-export const SHOW_POINTS_FEATURE = false;
+export const SHOW_POINTS_FEATURE = true;
 
 export type SourcePlatformId = typeof SOURCE_PLATFORMS[number]['id'];
 export type ContentLanguageId = typeof CONTENT_LANGUAGES[number]['id'];
