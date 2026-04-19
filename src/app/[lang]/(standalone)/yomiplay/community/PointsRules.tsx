@@ -1,4 +1,5 @@
-import { Star, Crown, Upload, Download, Calendar } from 'lucide-react';
+import Link from 'next/link';
+import { Star, Crown, Upload, Download, Calendar, ShieldCheck } from 'lucide-react';
 
 interface Props {
   config: Record<string, number>;
@@ -12,9 +13,11 @@ interface Props {
     pro_threshold: string;
   };
   unit: string;
+  policyLabel: string;
+  policyHref: string;
 }
 
-export default function PointsRules({ config, title, subtitle, rules, unit }: Props) {
+export default function PointsRules({ config, title, subtitle, rules, unit, policyLabel, policyHref }: Props) {
   const items = [
     { key: 'upload_yomi', label: rules.upload_yomi, icon: Upload },
     { key: 'upload_zip', label: rules.upload_zip, icon: Upload },
@@ -58,6 +61,14 @@ export default function PointsRules({ config, title, subtitle, rules, unit }: Pr
           <span className="font-bold text-purple-500">{threshold} {unit}</span>
         </div>
       )}
+
+      <Link
+        href={policyHref}
+        className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-[var(--muted-foreground)] hover:text-[rgb(var(--accent))] transition-colors"
+      >
+        <ShieldCheck size={12} />
+        {policyLabel}
+      </Link>
     </div>
   );
 }

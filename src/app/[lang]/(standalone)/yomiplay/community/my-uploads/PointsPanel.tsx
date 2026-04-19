@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase-browser';
 import { useAuth } from '@/contexts/AuthContext';
-import { Crown, Star, ChevronDown, ChevronUp, ExternalLink, ImagePlus } from 'lucide-react';
+import Link from 'next/link';
+import { Crown, Star, ChevronDown, ChevronUp, ExternalLink, ImagePlus, ShieldCheck } from 'lucide-react';
 
 const labels = {
   en: {
@@ -17,6 +18,7 @@ const labels = {
     noHistory: 'No points history yet.',
     showHistory: 'Show History',
     hideHistory: 'Hide History',
+    viewPolicy: 'View points policy',
     redeemUrl: 'Open this link in Safari on your iPhone to activate Pro:',
     rejected: 'Your Pro application was not approved.',
     screenshotLabel: 'Please upload a screenshot showing:',
@@ -43,6 +45,7 @@ const labels = {
     noHistory: '暂无积分记录。',
     showHistory: '查看记录',
     hideHistory: '收起记录',
+    viewPolicy: '查看积分政策',
     redeemUrl: '请在 iPhone 的 Safari 中打开以下链接激活 Pro 会员：',
     rejected: '你的 Pro 申请未通过。',
     screenshotLabel: '请上传截图，需包含以下信息：',
@@ -69,6 +72,7 @@ const labels = {
     noHistory: '暫無積分記錄。',
     showHistory: '查看記錄',
     hideHistory: '收起記錄',
+    viewPolicy: '查看積分政策',
     redeemUrl: '請在 iPhone 的 Safari 中開啟以下連結以啟用 Pro 會員：',
     rejected: '你的 Pro 申請未通過。',
     screenshotLabel: '請上傳截圖，需包含以下資訊：',
@@ -95,6 +99,7 @@ const labels = {
     noHistory: 'ポイント履歴がありません。',
     showHistory: '履歴を表示',
     hideHistory: '履歴を隠す',
+    viewPolicy: 'ポイント規定を見る',
     redeemUrl: 'iPhone の Safari でこのリンクを開いて Pro を有効化してください：',
     rejected: 'Pro 申請は承認されませんでした。',
     screenshotLabel: 'スクリーンショットをアップロードしてください：',
@@ -319,14 +324,23 @@ export default function PointsPanel({ lang }: { lang: string }) {
         </div>
       )}
 
-      {/* History toggle */}
-      <button
-        onClick={() => showHistory ? setShowHistory(false) : loadHistory()}
-        className="text-xs font-bold text-[var(--muted-foreground)] hover:text-[rgb(var(--accent))] transition-colors flex items-center gap-1"
-      >
-        {showHistory ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-        {showHistory ? t.hideHistory : t.showHistory}
-      </button>
+      {/* History toggle + policy link */}
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <button
+          onClick={() => showHistory ? setShowHistory(false) : loadHistory()}
+          className="text-xs font-bold text-[var(--muted-foreground)] hover:text-[rgb(var(--accent))] transition-colors flex items-center gap-1"
+        >
+          {showHistory ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+          {showHistory ? t.hideHistory : t.showHistory}
+        </button>
+        <Link
+          href={`/${lang}/yomiplay/community/points-policy`}
+          className="text-xs font-bold text-[var(--muted-foreground)] hover:text-[rgb(var(--accent))] transition-colors flex items-center gap-1"
+        >
+          <ShieldCheck size={12} />
+          {t.viewPolicy}
+        </Link>
+      </div>
 
       {/* History list */}
       {showHistory && (

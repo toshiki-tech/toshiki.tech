@@ -75,6 +75,7 @@ const content = {
       pro_threshold: 'Points needed to apply for Pro membership',
     },
     pointsUnit: 'pts',
+    pointsPolicy: 'View points policy',
     myUploads: 'My Uploads',
     proCtaTitle: 'Earn points, unlock Pro',
     proCtaBody: 'Share .yomi files with the community, collect points from uploads and downloads, and redeem them for a Pro membership.',
@@ -125,6 +126,7 @@ const content = {
       pro_threshold: '申请 Pro 会员所需积分',
     },
     pointsUnit: '分',
+    pointsPolicy: '查看积分政策',
     myUploads: '我的上传',
     proCtaTitle: '赚取积分，解锁 Pro',
     proCtaBody: '向社区分享你的 .yomi 字幕文件，通过上传和他人下载累积积分，达到门槛后可兑换 Pro 会员。',
@@ -175,6 +177,7 @@ const content = {
       pro_threshold: '申請 Pro 會員所需積分',
     },
     pointsUnit: '分',
+    pointsPolicy: '查看積分政策',
     myUploads: '我的上傳',
     proCtaTitle: '賺取積分，解鎖 Pro',
     proCtaBody: '向社區分享你的 .yomi 字幕檔案，透過上傳和他人下載累積積分，達到門檻後可兌換 Pro 會員。',
@@ -225,6 +228,7 @@ const content = {
       pro_threshold: 'Pro メンバーシップ申請に必要なポイント',
     },
     pointsUnit: 'pt',
+    pointsPolicy: 'ポイント規定を見る',
     myUploads: 'マイ投稿',
     proCtaTitle: 'ポイントを貯めて Pro を解放',
     proCtaBody: 'コミュニティに .yomi 字幕ファイルを共有し、アップロードとダウンロードでポイントを貯めて、Pro メンバーシップと交換しましょう。',
@@ -398,6 +402,8 @@ export default async function CommunityPage({
             subtitle={t.pointsSubtitle}
             rules={t.pointsRules}
             unit={t.pointsUnit}
+            policyLabel={t.pointsPolicy}
+            policyHref={`/${lang}/yomiplay/community/points-policy`}
           />
 
           {/* Pro CTA banner */}
