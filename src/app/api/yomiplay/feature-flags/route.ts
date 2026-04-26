@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { SHOW_POINTS_FEATURE } from '@/lib/yomi-constants';
+import { SHOW_POINTS_FEATURE, SHOW_COMMUNITY_DOWNLOAD } from '@/lib/yomi-constants';
 
 export const runtime = 'edge';
 
@@ -17,6 +17,7 @@ export async function GET() {
   return NextResponse.json(
     {
       points_feature_enabled: SHOW_POINTS_FEATURE,
+      community_download_enabled: SHOW_COMMUNITY_DOWNLOAD,
       updated_at: new Date().toISOString(),
     },
     { headers: { ...CORS_HEADERS, ...CACHE_HEADERS } }

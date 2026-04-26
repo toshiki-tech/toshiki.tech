@@ -47,5 +47,9 @@ export const MAX_ZIP_FILE_SIZE = 524_288_000; // 500MB
 // and the "Earn points, unlock Pro" CTA banner. Set to true to re-enable.
 export const SHOW_POINTS_FEATURE = true;
 
+// Feature flag exposed via /api/yomiplay/feature-flags. Controls whether the
+// YomiPlay iOS app surfaces the "download from community" entry point.
+export const SHOW_COMMUNITY_DOWNLOAD = true;
+
 export type SourcePlatformId = typeof SOURCE_PLATFORMS[number]['id'];
 export type ContentLanguageId = typeof CONTENT_LANGUAGES[number]['id'];
