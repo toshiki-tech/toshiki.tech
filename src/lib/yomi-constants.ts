@@ -43,13 +43,25 @@ export const MAX_YOMI_FILE_SIZE = 10_485_760; // 10MB
 export const MAX_AUDIO_FILE_SIZE = 157_286_400; // 150MB
 export const MAX_ZIP_FILE_SIZE = 524_288_000; // 500MB
 
-// Feature flag: controls visibility of the community "How to earn points" rules
-// and the "Earn points, unlock Pro" CTA banner. Set to true to re-enable.
+// Feature flag: controls visibility of the points feature overall — the
+// community "How to earn points" rules card, the header points badge, the
+// my-uploads PointsPanel, and the daily-login bonus. Set to false to remove
+// the entire points UI; turn off ALLOW_PRO_REDEMPTION instead if you only
+// want to close the Pro redemption channel while keeping points accumulation.
+// Also exposed to the iOS app via /api/yomiplay/feature-flags.
 export const SHOW_POINTS_FEATURE = true;
+
+// Feature flag: controls whether users can redeem accumulated points for Pro
+// membership. When false, the "Apply for Pro" form, the "Earn points, unlock
+// Pro" CTA banner, and the launch-promotion notice are hidden, and the
+// /api/yomi/pro/apply endpoint rejects new applications. Points are still
+// earned/displayed (subject to SHOW_POINTS_FEATURE).
+// Also exposed to the iOS app via /api/yomiplay/feature-flags.
+export const ALLOW_PRO_REDEMPTION = false;
 
 // Feature flag exposed via /api/yomiplay/feature-flags. Controls whether the
 // YomiPlay iOS app surfaces the "download from community" entry point.
-export const SHOW_COMMUNITY_DOWNLOAD = true;
+export const SHOW_COMMUNITY_DOWNLOAD = false;
 
 export type SourcePlatformId = typeof SOURCE_PLATFORMS[number]['id'];
 export type ContentLanguageId = typeof CONTENT_LANGUAGES[number]['id'];

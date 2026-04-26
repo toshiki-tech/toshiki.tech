@@ -4,7 +4,7 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { Download, Upload, Search, FileText, Music, Crown, FolderOpen, Apple, Megaphone } from 'lucide-react';
-import { SOURCE_PLATFORMS, CONTENT_LANGUAGES, CONTENT_CATEGORIES, SHOW_POINTS_FEATURE } from '@/lib/yomi-constants';
+import { SOURCE_PLATFORMS, CONTENT_LANGUAGES, CONTENT_CATEGORIES, SHOW_POINTS_FEATURE, ALLOW_PRO_REDEMPTION } from '@/lib/yomi-constants';
 import { localizeAppStoreUrl } from '@/data/products';
 import Filters from './Filters';
 import CommunityIntro from './CommunityIntro';
@@ -407,22 +407,24 @@ export default async function CommunityPage({
 
       {SHOW_POINTS_FEATURE && (
         <>
-          {/* Promotional-phase notice */}
-          <div className="mb-6 p-5 rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent">
-            <div className="flex items-start gap-3">
-              <Megaphone size={20} className="text-amber-600 shrink-0 mt-0.5" />
-              <div className="flex-1 min-w-0">
-                <h2 className="font-bold text-sm text-amber-600 mb-1">{t.promoNoticeTitle}</h2>
-                <p className="text-xs text-[var(--muted-foreground)] leading-relaxed">{t.promoNoticeBody}</p>
-                <Link
-                  href={`/${lang}/yomiplay/community/points-policy`}
-                  className="mt-2 inline-block text-xs font-bold text-amber-600 hover:underline"
-                >
-                  {t.promoNoticeLink} →
-                </Link>
+          {/* Promotional-phase notice — only while Pro redemption is open */}
+          {ALLOW_PRO_REDEMPTION && (
+            <div className="mb-6 p-5 rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent">
+              <div className="flex items-start gap-3">
+                <Megaphone size={20} className="text-amber-600 shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <h2 className="font-bold text-sm text-amber-600 mb-1">{t.promoNoticeTitle}</h2>
+                  <p className="text-xs text-[var(--muted-foreground)] leading-relaxed">{t.promoNoticeBody}</p>
+                  <Link
+                    href={`/${lang}/yomiplay/community/points-policy`}
+                    className="mt-2 inline-block text-xs font-bold text-amber-600 hover:underline"
+                  >
+                    {t.promoNoticeLink} →
+                  </Link>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Points rules */}
           <PointsRules
@@ -435,30 +437,32 @@ export default async function CommunityPage({
             policyHref={`/${lang}/yomiplay/community/points-policy`}
           />
 
-          {/* Pro CTA banner */}
-          <Link
-            href={`/${lang}/yomiplay/community/my-uploads`}
-            className="group relative mb-8 block p-6 rounded-2xl border border-purple-500/30 bg-gradient-to-br from-purple-500/10 via-purple-500/5 to-transparent hover:border-purple-500/60 transition-colors overflow-hidden"
-          >
-            <div className="absolute -right-8 -top-8 opacity-10 group-hover:opacity-20 transition-opacity">
-              <Crown size={160} className="text-purple-500" />
-            </div>
-            <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-2">
-                  <Crown size={20} className="text-purple-500" />
-                  <h3 className="text-lg font-bold">{t.proCtaTitle}</h3>
-                </div>
-                <p className="text-sm text-[var(--muted-foreground)] leading-relaxed">
-                  {t.proCtaBody}
-                </p>
+          {/* Pro CTA banner — only while Pro redemption is open */}
+          {ALLOW_PRO_REDEMPTION && (
+            <Link
+              href={`/${lang}/yomiplay/community/my-uploads`}
+              className="group relative mb-8 block p-6 rounded-2xl border border-purple-500/30 bg-gradient-to-br from-purple-500/10 via-purple-500/5 to-transparent hover:border-purple-500/60 transition-colors overflow-hidden"
+            >
+              <div className="absolute -right-8 -top-8 opacity-10 group-hover:opacity-20 transition-opacity">
+                <Crown size={160} className="text-purple-500" />
               </div>
-              <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-purple-500 text-white text-sm font-bold hover:bg-purple-600 transition-colors shrink-0">
-                <Crown size={14} />
-                {t.proCtaButton}
-              </span>
-            </div>
-          </Link>
+              <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Crown size={20} className="text-purple-500" />
+                    <h3 className="text-lg font-bold">{t.proCtaTitle}</h3>
+                  </div>
+                  <p className="text-sm text-[var(--muted-foreground)] leading-relaxed">
+                    {t.proCtaBody}
+                  </p>
+                </div>
+                <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-purple-500 text-white text-sm font-bold hover:bg-purple-600 transition-colors shrink-0">
+                  <Crown size={14} />
+                  {t.proCtaButton}
+                </span>
+              </div>
+            </Link>
+          )}
         </>
       )}
 

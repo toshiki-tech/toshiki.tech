@@ -1,7 +1,12 @@
 import { NextResponse } from 'next/server';
 import { getSupabase, getAuthUser } from '@/lib/supabase-server-api';
+import { ALLOW_PRO_REDEMPTION } from '@/lib/yomi-constants';
 
 export async function POST(request: Request) {
+  if (!ALLOW_PRO_REDEMPTION) {
+    return NextResponse.json({ error: 'Pro redemption is currently closed' }, { status: 403 });
+  }
+
   const supabase = getSupabase();
   const user = await getAuthUser(supabase);
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

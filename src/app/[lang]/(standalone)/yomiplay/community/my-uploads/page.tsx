@@ -5,7 +5,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { Upload, FileText, Music, Clock, CheckCircle2, XCircle, ArrowLeft } from 'lucide-react';
-import { SOURCE_PLATFORMS, CONTENT_LANGUAGES } from '@/lib/yomi-constants';
+import { SOURCE_PLATFORMS, CONTENT_LANGUAGES, SHOW_POINTS_FEATURE } from '@/lib/yomi-constants';
 import DeleteButton from './DeleteButton';
 import ShareButton from './ShareButton';
 import PointsPanel from './PointsPanel';
@@ -205,7 +205,7 @@ export default async function MyUploadsPage({ params: { lang } }: { params: { la
       )}
 
       {/* Points & Pro */}
-      <PointsPanel lang={lang} />
+      {SHOW_POINTS_FEATURE && <PointsPanel lang={lang} />}
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase-browser';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 import { Crown, Star, ChevronDown, ChevronUp, ExternalLink, ImagePlus, ShieldCheck } from 'lucide-react';
+import { ALLOW_PRO_REDEMPTION } from '@/lib/yomi-constants';
 
 const labels = {
   en: {
@@ -19,6 +20,7 @@ const labels = {
     showHistory: 'Show History',
     hideHistory: 'Hide History',
     viewPolicy: 'View points policy',
+    redemptionPaused: 'Pro redemption is currently closed. You can keep earning points — they will remain valid for future use.',
     redeemUrl: 'Open this link in Safari on your iPhone to activate Pro:',
     rejected: 'Your Pro application was not approved.',
     screenshotLabel: 'Please upload a screenshot showing:',
@@ -46,6 +48,7 @@ const labels = {
     showHistory: '查看记录',
     hideHistory: '收起记录',
     viewPolicy: '查看积分政策',
+    redemptionPaused: 'Pro 兑换通道当前已关闭。你仍可以继续累积积分，已有积分依然有效，可用于后续。',
     redeemUrl: '请在 iPhone 的 Safari 中打开以下链接激活 Pro 会员：',
     rejected: '你的 Pro 申请未通过。',
     screenshotLabel: '请上传截图，需包含以下信息：',
@@ -73,6 +76,7 @@ const labels = {
     showHistory: '查看記錄',
     hideHistory: '收起記錄',
     viewPolicy: '查看積分政策',
+    redemptionPaused: 'Pro 兌換通道目前已關閉。你仍可繼續累積積分，已有積分依然有效，可用於後續。',
     redeemUrl: '請在 iPhone 的 Safari 中開啟以下連結以啟用 Pro 會員：',
     rejected: '你的 Pro 申請未通過。',
     screenshotLabel: '請上傳截圖，需包含以下資訊：',
@@ -100,6 +104,7 @@ const labels = {
     showHistory: '履歴を表示',
     hideHistory: '履歴を隠す',
     viewPolicy: 'ポイント規定を見る',
+    redemptionPaused: 'Pro 交換窓口は現在閉じています。引き続きポイントは貯められ、保有中のポイントは今後の用途のために有効です。',
     redeemUrl: 'iPhone の Safari でこのリンクを開いて Pro を有効化してください：',
     rejected: 'Pro 申請は承認されませんでした。',
     screenshotLabel: 'スクリーンショットをアップロードしてください：',
@@ -235,8 +240,8 @@ export default function PointsPanel({ lang }: { lang: string }) {
       {/* Points display */}
       <div className="text-4xl font-bold mb-2">{points}</div>
 
-      {/* Progress to Pro */}
-      {!isPro && (
+      {/* Progress to Pro — only when redemption is open */}
+      {!isPro && ALLOW_PRO_REDEMPTION && (
         <div className="mb-4">
           <div className="flex justify-between text-xs text-[var(--muted-foreground)] mb-1">
             <span>0</span>
@@ -256,6 +261,13 @@ export default function PointsPanel({ lang }: { lang: string }) {
         </div>
       )}
 
+      {/* Paused notice — shown when Pro redemption is closed and user is not already Pro */}
+      {!isPro && !ALLOW_PRO_REDEMPTION && (
+        <div className="mb-4 p-3 rounded-xl bg-[var(--muted)] text-xs text-[var(--muted-foreground)] leading-relaxed">
+          {t.redemptionPaused}
+        </div>
+      )}
+
       {/* Show redeem URL if approved (visible even for Pro users) */}
       {proRequest?.status === 'approved' && proRequest.admin_note && (
         <div className="mb-4 p-4 rounded-xl bg-green-500/10 border border-green-500/20">
@@ -272,8 +284,8 @@ export default function PointsPanel({ lang }: { lang: string }) {
         </div>
       )}
 
-      {/* Pro apply form (only for non-Pro users) */}
-      {!isPro && (
+      {/* Pro apply form (only for non-Pro users, and only when redemption is open) */}
+      {!isPro && ALLOW_PRO_REDEMPTION && (
         <div className="mb-4">
           {/* Show rejected message */}
           {proRequest?.status === 'rejected' && (

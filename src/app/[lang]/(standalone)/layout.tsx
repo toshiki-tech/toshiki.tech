@@ -8,6 +8,7 @@ import { ChevronDown, FolderOpen, LogOut, Star, Shield } from 'lucide-react';
 import Logo from '@/components/Logo';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { createClient } from '@/lib/supabase-browser';
+import { SHOW_POINTS_FEATURE } from '@/lib/yomi-constants';
 import LangSwitcher from '@/components/LangSwitcher';
 
 function AuthNav({ lang }: { lang: Locale }) {
@@ -36,11 +37,13 @@ function AuthNav({ lang }: { lang: Locale }) {
           setIsAdmin(data.role === 'admin');
         }
       });
-    // Trigger daily login (once per session)
-    const key = `daily_login_${user.id}_${new Date().toISOString().split('T')[0]}`;
-    if (!sessionStorage.getItem(key)) {
-      sessionStorage.setItem(key, '1');
-      fetch('/api/yomi/points/daily-login', { method: 'POST' });
+    // Trigger daily login (once per session) — only when points feature is on
+    if (SHOW_POINTS_FEATURE) {
+      const key = `daily_login_${user.id}_${new Date().toISOString().split('T')[0]}`;
+      if (!sessionStorage.getItem(key)) {
+        sessionStorage.setItem(key, '1');
+        fetch('/api/yomi/points/daily-login', { method: 'POST' });
+      }
     }
   }, [user]);
 
@@ -78,7 +81,7 @@ function AuthNav({ lang }: { lang: Locale }) {
               PRO
             </span>
           )}
-          {points !== null && (
+          {SHOW_POINTS_FEATURE && points !== null && (
             <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-600">
               <Star size={10} />
               {points}
