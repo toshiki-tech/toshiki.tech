@@ -10,7 +10,7 @@ const content = {
   en: {
     contentTypeLabel: 'Content Type',
     original: 'Original / Self-recorded',
-    originalDesc: 'Audio recorded by yourself. Can include audio + .yomi in a zip.',
+    originalDesc: 'Audio or video recorded by yourself. Upload the media and .yomi as separate files, or together as a .zip.',
     thirdParty: 'Third-party platform content',
     thirdPartyDesc: 'Subtitles for content from podcasts, YouTube, etc. Upload .yomi only.',
     titleLabel: 'Title',
@@ -58,7 +58,7 @@ const content = {
   zh: {
     contentTypeLabel: '内容类型',
     original: '原创 / 自录内容',
-    originalDesc: '自己录制的音频。可上传包含音频和 .yomi 的 zip 包。',
+    originalDesc: '自己录制的音视频。可分别上传媒体和 .yomi 文件，也可打包成 zip 上传。',
     thirdParty: '第三方平台内容',
     thirdPartyDesc: '播客、YouTube 等内容的字幕。仅上传 .yomi 文件。',
     titleLabel: '标题',
@@ -106,7 +106,7 @@ const content = {
   'zh-tw': {
     contentTypeLabel: '內容類型',
     original: '原創 / 自錄內容',
-    originalDesc: '自己錄製的音訊。可上傳包含音訊和 .yomi 的 zip 包。',
+    originalDesc: '自己錄製的影音。可分別上傳媒體和 .yomi 檔案，也可打包成 zip 上傳。',
     thirdParty: '第三方平台內容',
     thirdPartyDesc: '播客、YouTube 等內容的字幕。僅上傳 .yomi 檔案。',
     titleLabel: '標題',
@@ -154,7 +154,7 @@ const content = {
   ja: {
     contentTypeLabel: 'コンテンツタイプ',
     original: 'オリジナル / 自分で録音',
-    originalDesc: '自分で録音した音声。音声 + .yomi を zip にまとめてアップロードできます。',
+    originalDesc: '自分で録音・撮影した音声・動画。メディアと .yomi を別ファイルでアップロード、または .zip にまとめてアップロードできます。',
     thirdParty: '外部プラットフォームのコンテンツ',
     thirdPartyDesc: 'ポッドキャスト、YouTube などの字幕。.yomi ファイルのみアップロード。',
     titleLabel: 'タイトル',
