@@ -59,6 +59,8 @@ export async function POST(request: Request) {
     storagePath,
     fileName,
     isZip,
+    audioStoragePath,
+    audioFileName,
     title,
     description,
     contentType,
@@ -79,8 +81,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Source info required for third-party content' }, { status: 400 });
   }
 
-  // Determine status: third_party auto-approved; original zip goes to pending review
-  const status = contentType === 'third_party' || !isZip ? 'approved' : 'pending';
+  // Bundled media is only allowed for original content (avoids redistributing
+  // copyrighted third-party audio/video).
+  if (audioStoragePath && contentType !== 'original') {
+    return NextResponse.json(
+      { error: 'Bundled media is only allowed for original content' },
+      { status: 400 }
+    );
+  }
+
+  // Determine status: third_party auto-approved; anything bundling media
+  // (zip or .yomi + separate media file) goes to pending review.
+  const hasBundledMedia = isZip || !!audioStoragePath;
+  const status = contentType === 'third_party' || !hasBundledMedia ? 'approved' : 'pending';
 
   // Insert database record
   const { data: upload, error: dbError } = await supabase
@@ -98,9 +111,9 @@ export async function POST(request: Request) {
       source_episode: sourceEpisode || null,
       category: category || null,
       yomi_storage_path: storagePath,
-      audio_storage_path: null,
+      audio_storage_path: audioStoragePath || null,
       yomi_file_name: fileName,
-      audio_file_name: null,
+      audio_file_name: audioFileName || null,
       language,
       translation_language: translationLanguage || null,
     })
@@ -109,8 +122,10 @@ export async function POST(request: Request) {
 
   if (dbError) {
     console.error('DB insert error:', dbError);
-    // Clean up storage
-    await supabase.storage.from('toshiki-tech-yomi-files').remove([storagePath]);
+    // Clean up any uploaded files
+    const cleanup = [storagePath];
+    if (audioStoragePath) cleanup.push(audioStoragePath);
+    await supabase.storage.from('toshiki-tech-yomi-files').remove(cleanup);
     return NextResponse.json({ error: 'Failed to create upload record' }, { status: 500 });
   }
 

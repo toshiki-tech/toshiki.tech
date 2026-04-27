@@ -3,10 +3,12 @@ import { getSupabase } from '@/lib/supabase-server-api';
 import { getDownloadPresignedUrl } from '@/lib/r2';
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: { id: string } }
 ) {
   const supabase = getSupabase();
+  const url = new URL(request.url);
+  const downloadType = url.searchParams.get('type'); // 'media' or null
 
   // Fetch upload record
   const { data: upload, error } = await supabase
@@ -32,12 +34,23 @@ export async function GET(
     console.error('record_yomi_download error:', rpcError);
   }
 
-  // Generate presigned download URL from R2
-  const isZip = upload.yomi_storage_path.startsWith('zip/');
-  const originalName = upload.yomi_file_name || (isZip ? 'download.zip' : 'download.yomi');
+  // Resolve which file to serve. Default = subtitle/zip; ?type=media = media file.
+  let storagePath: string;
+  let originalName: string;
+  if (downloadType === 'media') {
+    if (!upload.audio_storage_path) {
+      return NextResponse.json({ error: 'No media file for this upload' }, { status: 404 });
+    }
+    storagePath = upload.audio_storage_path;
+    originalName = upload.audio_file_name || 'media';
+  } else {
+    storagePath = upload.yomi_storage_path;
+    const isZip = upload.yomi_storage_path.startsWith('zip/');
+    originalName = upload.yomi_file_name || (isZip ? 'download.zip' : 'download.yomi');
+  }
 
   try {
-    const presignedUrl = await getDownloadPresignedUrl(upload.yomi_storage_path, originalName);
+    const presignedUrl = await getDownloadPresignedUrl(storagePath, originalName);
     return NextResponse.redirect(presignedUrl);
   } catch (err) {
     console.error('R2 presign error:', err);
