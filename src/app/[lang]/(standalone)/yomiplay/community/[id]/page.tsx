@@ -12,6 +12,7 @@ const content = {
     back: 'Back to Community',
     download: 'Download .yomi',
     downloadBundle: 'Download Bundle',
+    downloadMedia: 'Download Media',
     source: 'Source',
     language: 'Language',
     uploadedBy: 'Uploaded by',
@@ -27,6 +28,7 @@ const content = {
     back: '返回社区',
     download: '下载 .yomi',
     downloadBundle: '下载完整包',
+    downloadMedia: '下载媒体',
     source: '来源',
     language: '语言',
     uploadedBy: '上传者',
@@ -42,6 +44,7 @@ const content = {
     back: '返回社區',
     download: '下載 .yomi',
     downloadBundle: '下載完整包',
+    downloadMedia: '下載媒體',
     source: '來源',
     language: '語言',
     uploadedBy: '上傳者',
@@ -57,6 +60,7 @@ const content = {
     back: 'コミュニティに戻る',
     download: '.yomi をダウンロード',
     downloadBundle: 'バンドルをダウンロード',
+    downloadMedia: 'メディアをダウンロード',
     source: 'ソース',
     language: '言語',
     uploadedBy: '投稿者',
@@ -222,18 +226,32 @@ export default async function SubtitleDetailPage({
         </div>
       )}
 
-      {/* Download button */}
-      {upload.status === 'approved' && (
-        <div className="mb-8">
-          <a
-            href={`/api/yomi/download/${upload.id}`}
-            className="btn-primary px-6 py-3 rounded-xl font-bold inline-flex items-center gap-2"
-          >
-            <Download size={18} />
-            {(upload.audio_storage_path || upload.yomi_storage_path?.startsWith('zip/')) ? t.downloadBundle : t.download}
-          </a>
-        </div>
-      )}
+      {/* Download buttons */}
+      {upload.status === 'approved' && (() => {
+        const isZip = upload.yomi_storage_path?.startsWith('zip/');
+        const hasSeparateMedia = !isZip && !!upload.audio_storage_path;
+        const primaryLabel = isZip ? t.downloadBundle : t.download;
+        return (
+          <div className="mb-8 flex flex-wrap gap-3">
+            <a
+              href={`/api/yomi/download/${upload.id}`}
+              className="btn-primary px-6 py-3 rounded-xl font-bold inline-flex items-center gap-2"
+            >
+              <Download size={18} />
+              {primaryLabel}
+            </a>
+            {hasSeparateMedia && (
+              <a
+                href={`/api/yomi/download/${upload.id}?type=media`}
+                className="px-6 py-3 rounded-xl font-bold inline-flex items-center gap-2 border border-[var(--border)] hover:border-[rgb(var(--accent))]/50 transition-colors"
+              >
+                <Music size={18} />
+                {t.downloadMedia}
+              </a>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Report */}
       <ReportForm uploadId={upload.id} lang={lang} />

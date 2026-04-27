@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Locale } from '@/lib/get-dictionary';
-import { SOURCE_PLATFORMS, CONTENT_LANGUAGES, CONTENT_CATEGORIES, MAX_YOMI_FILE_SIZE, MAX_ZIP_FILE_SIZE } from '@/lib/yomi-constants';
+import { SOURCE_PLATFORMS, CONTENT_LANGUAGES, CONTENT_CATEGORIES, MAX_YOMI_FILE_SIZE, MAX_ZIP_FILE_SIZE, MAX_AUDIO_FILE_SIZE, ALLOWED_MEDIA_EXTENSIONS } from '@/lib/yomi-constants';
 import { Upload, FileText, Music, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 const content = {
@@ -37,6 +37,16 @@ const content = {
     fileLabel: 'File',
     fileHintZip: 'Upload a .zip (containing .yomi + audio) or a standalone .yomi file',
     fileHintYomi: 'Upload a .yomi file',
+    originalModeLabel: 'Upload mode',
+    bundleMode: 'ZIP bundle',
+    bundleModeDesc: 'A single .zip containing both the .yomi and audio/video',
+    separateMode: 'Subtitle + media (separate files)',
+    separateModeDesc: 'Upload your .yomi and the media file as two separate files',
+    yomiFileLabel: 'Subtitle file (.yomi)',
+    yomiFileHint: 'Upload a .yomi file (max 10MB)',
+    mediaFileLabel: 'Media file',
+    mediaFileHint: `Upload ${ALLOWED_MEDIA_EXTENSIONS.join(' / ')} (max ${MAX_AUDIO_FILE_SIZE / 1024 / 1024}MB)`,
+    mediaRequired: 'Please select a media file',
     submit: 'Upload',
     submitting: 'Uploading...',
     successPending: 'Upload successful! Your content is pending review.',
@@ -75,6 +85,16 @@ const content = {
     fileLabel: '文件',
     fileHintZip: '上传 .zip（包含 .yomi + 音频）或单独的 .yomi 文件',
     fileHintYomi: '上传 .yomi 文件',
+    originalModeLabel: '上传方式',
+    bundleMode: 'ZIP 压缩包',
+    bundleModeDesc: '一个 .zip，里面同时包含 .yomi 和音视频文件',
+    separateMode: '字幕 + 媒体（分文件上传）',
+    separateModeDesc: '将 .yomi 字幕和媒体文件作为两个文件分别上传',
+    yomiFileLabel: '字幕文件（.yomi）',
+    yomiFileHint: '上传 .yomi 文件（最大 10MB）',
+    mediaFileLabel: '媒体文件',
+    mediaFileHint: `上传 ${ALLOWED_MEDIA_EXTENSIONS.join(' / ')}（最大 ${MAX_AUDIO_FILE_SIZE / 1024 / 1024}MB）`,
+    mediaRequired: '请选择媒体文件',
     submit: '上传',
     submitting: '上传中...',
     successPending: '上传成功！内容正在等待审核。',
@@ -113,6 +133,16 @@ const content = {
     fileLabel: '檔案',
     fileHintZip: '上傳 .zip（包含 .yomi + 音訊）或單獨的 .yomi 檔案',
     fileHintYomi: '上傳 .yomi 檔案',
+    originalModeLabel: '上傳方式',
+    bundleMode: 'ZIP 壓縮包',
+    bundleModeDesc: '一個 .zip，內含 .yomi 與影音檔案',
+    separateMode: '字幕 + 媒體（分檔案上傳）',
+    separateModeDesc: '將 .yomi 字幕和媒體檔案作為兩個檔案分別上傳',
+    yomiFileLabel: '字幕檔案（.yomi）',
+    yomiFileHint: '上傳 .yomi 檔案（最大 10MB）',
+    mediaFileLabel: '媒體檔案',
+    mediaFileHint: `上傳 ${ALLOWED_MEDIA_EXTENSIONS.join(' / ')}（最大 ${MAX_AUDIO_FILE_SIZE / 1024 / 1024}MB）`,
+    mediaRequired: '請選擇媒體檔案',
     submit: '上傳',
     submitting: '上傳中...',
     successPending: '上傳成功！內容正在等待審核。',
@@ -151,6 +181,16 @@ const content = {
     fileLabel: 'ファイル',
     fileHintZip: '.zip（.yomi + 音声を含む）または .yomi ファイルをアップロード',
     fileHintYomi: '.yomi ファイルをアップロード',
+    originalModeLabel: 'アップロード方法',
+    bundleMode: 'ZIP バンドル',
+    bundleModeDesc: '.yomi と音声・動画をまとめた 1 つの .zip',
+    separateMode: '字幕 + メディア（別ファイル）',
+    separateModeDesc: '.yomi 字幕とメディアファイルを別々にアップロード',
+    yomiFileLabel: '字幕ファイル（.yomi）',
+    yomiFileHint: '.yomi ファイルをアップロード（最大 10MB）',
+    mediaFileLabel: 'メディアファイル',
+    mediaFileHint: `${ALLOWED_MEDIA_EXTENSIONS.join(' / ')} をアップロード（最大 ${MAX_AUDIO_FILE_SIZE / 1024 / 1024}MB）`,
+    mediaRequired: 'メディアファイルを選択してください',
     submit: 'アップロード',
     submitting: 'アップロード中...',
     successPending: 'アップロード成功！コンテンツは審査待ちです。',
@@ -166,6 +206,8 @@ export default function UploadForm({ lang }: { lang: Locale }) {
   const { user, isLoading } = useAuth();
 
   const [contentTypeChoice, setContentTypeChoice] = useState<'original' | 'third_party'>('third_party');
+  const [originalMode, setOriginalMode] = useState<'bundle' | 'separate'>('bundle');
+  const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
@@ -196,27 +238,92 @@ export default function UploadForm({ lang }: { lang: Locale }) {
     );
   }
 
+  const useSeparate = contentTypeChoice === 'original' && originalMode === 'separate';
+
+  async function uploadOne(
+    f: File,
+    kind: 'yomi' | 'zip' | 'media'
+  ): Promise<{ uploadId: string; storagePath: string }> {
+    const urlRes = await fetch('/api/yomi/upload-url', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fileName: f.name, fileSize: f.size, kind, isZip: kind === 'zip' }),
+    });
+    const urlData = await urlRes.json();
+    if (!urlRes.ok) {
+      throw new Error(urlData.error || 'Failed to prepare upload');
+    }
+    const { uploadId, storagePath, presignedUrl, contentType: uploadContentType } = urlData;
+    await new Promise<void>((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('PUT', presignedUrl);
+      xhr.setRequestHeader('Content-Type', uploadContentType);
+      xhr.upload.addEventListener('progress', (event) => {
+        if (event.lengthComputable) {
+          setProgress(Math.round((event.loaded / event.total) * 100));
+        }
+      });
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) resolve();
+        else reject(new Error(`Upload failed: ${xhr.status} ${xhr.responseText}`));
+      };
+      xhr.onerror = () => reject(new Error('Network error during upload'));
+      xhr.send(f);
+    });
+    return { uploadId, storagePath };
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) return;
 
     // Client-side validation
     const fileName = file.name.toLowerCase();
-    const isZip = fileName.endsWith('.zip');
-    if (!isZip && !fileName.endsWith('.yomi')) {
-      setErrorMessage('Only .zip or .yomi files are accepted');
-      setStatus('error');
-      return;
-    }
-    if (isZip && file.size > MAX_ZIP_FILE_SIZE) {
-      setErrorMessage(`ZIP file too large (max ${MAX_ZIP_FILE_SIZE / 1024 / 1024}MB)`);
-      setStatus('error');
-      return;
-    }
-    if (!isZip && file.size > MAX_YOMI_FILE_SIZE) {
-      setErrorMessage(`.yomi file too large (max ${MAX_YOMI_FILE_SIZE / 1024 / 1024}MB)`);
-      setStatus('error');
-      return;
+    const isZip = !useSeparate && fileName.endsWith('.zip');
+
+    if (useSeparate) {
+      if (!fileName.endsWith('.yomi')) {
+        setErrorMessage('Subtitle file must be a .yomi');
+        setStatus('error');
+        return;
+      }
+      if (file.size > MAX_YOMI_FILE_SIZE) {
+        setErrorMessage(`.yomi file too large (max ${MAX_YOMI_FILE_SIZE / 1024 / 1024}MB)`);
+        setStatus('error');
+        return;
+      }
+      if (!mediaFile) {
+        setErrorMessage(t.mediaRequired);
+        setStatus('error');
+        return;
+      }
+      const mediaExt = `.${mediaFile.name.split('.').pop()?.toLowerCase()}` as typeof ALLOWED_MEDIA_EXTENSIONS[number];
+      if (!ALLOWED_MEDIA_EXTENSIONS.includes(mediaExt)) {
+        setErrorMessage(`Unsupported media type. Allowed: ${ALLOWED_MEDIA_EXTENSIONS.join(', ')}`);
+        setStatus('error');
+        return;
+      }
+      if (mediaFile.size > MAX_AUDIO_FILE_SIZE) {
+        setErrorMessage(`Media file too large (max ${MAX_AUDIO_FILE_SIZE / 1024 / 1024}MB)`);
+        setStatus('error');
+        return;
+      }
+    } else {
+      if (!isZip && !fileName.endsWith('.yomi')) {
+        setErrorMessage('Only .zip or .yomi files are accepted');
+        setStatus('error');
+        return;
+      }
+      if (isZip && file.size > MAX_ZIP_FILE_SIZE) {
+        setErrorMessage(`ZIP file too large (max ${MAX_ZIP_FILE_SIZE / 1024 / 1024}MB)`);
+        setStatus('error');
+        return;
+      }
+      if (!isZip && file.size > MAX_YOMI_FILE_SIZE) {
+        setErrorMessage(`.yomi file too large (max ${MAX_YOMI_FILE_SIZE / 1024 / 1024}MB)`);
+        setStatus('error');
+        return;
+      }
     }
 
     setStatus('uploading');
@@ -224,41 +331,20 @@ export default function UploadForm({ lang }: { lang: Locale }) {
     setErrorMessage('');
 
     try {
-      // 1. Get presigned upload URL from our API
-      const urlRes = await fetch('/api/yomi/upload-url', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fileName: file.name, fileSize: file.size, isZip }),
-      });
-      const urlData = await urlRes.json();
-      if (!urlRes.ok) {
-        setErrorMessage(urlData.error || 'Failed to prepare upload');
-        setStatus('error');
-        return;
+      // 1. Upload primary file (.yomi or .zip). Its uploadId becomes the DB record id.
+      const { uploadId, storagePath } = await uploadOne(file, isZip ? 'zip' : 'yomi');
+
+      // 2. If separate mode, upload the media file too
+      let audioStoragePath: string | undefined;
+      let audioFileName: string | undefined;
+      if (useSeparate && mediaFile) {
+        setProgress(0);
+        const mediaResult = await uploadOne(mediaFile, 'media');
+        audioStoragePath = mediaResult.storagePath;
+        audioFileName = mediaFile.name;
       }
-      const { uploadId, storagePath, presignedUrl, contentType: uploadContentType } = urlData;
 
-      // 2. PUT file directly to R2 via presigned URL, tracking progress
-      await new Promise<void>((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open('PUT', presignedUrl);
-        xhr.setRequestHeader('Content-Type', uploadContentType);
-
-        xhr.upload.addEventListener('progress', (event) => {
-          if (event.lengthComputable) {
-            setProgress(Math.round((event.loaded / event.total) * 100));
-          }
-        });
-
-        xhr.onload = () => {
-          if (xhr.status >= 200 && xhr.status < 300) resolve();
-          else reject(new Error(`Upload failed: ${xhr.status} ${xhr.responseText}`));
-        };
-        xhr.onerror = () => reject(new Error('Network error during upload'));
-        xhr.send(file);
-      });
-
-      // Now create DB record
+      // 3. Create DB record
       setStatus('creating');
       const res = await fetch('/api/yomi/upload', {
         method: 'POST',
@@ -268,6 +354,8 @@ export default function UploadForm({ lang }: { lang: Locale }) {
           storagePath,
           fileName: file.name,
           isZip,
+          audioStoragePath,
+          audioFileName,
           title,
           description: description || undefined,
           contentType: contentTypeChoice,
@@ -497,7 +585,92 @@ export default function UploadForm({ lang }: { lang: Locale }) {
         </div>
       </div>
 
-      {/* File Upload */}
+      {/* Original upload mode sub-toggle */}
+      {contentTypeChoice === 'original' && (
+        <div>
+          <label className={labelClass}>{t.originalModeLabel}</label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => { setOriginalMode('bundle'); setMediaFile(null); }}
+              className={`p-4 rounded-xl border text-left transition-all ${
+                originalMode === 'bundle'
+                  ? 'border-[rgb(var(--accent))] bg-[rgb(var(--accent))]/5'
+                  : 'border-[var(--border)] hover:border-[var(--muted-foreground)]'
+              }`}
+            >
+              <div className="flex items-center gap-2 mb-1">
+                <FileText size={16} className={originalMode === 'bundle' ? 'text-[rgb(var(--accent))]' : ''} />
+                <span className="font-bold text-sm">{t.bundleMode}</span>
+              </div>
+              <p className="text-xs text-[var(--muted-foreground)]">{t.bundleModeDesc}</p>
+            </button>
+            <button
+              type="button"
+              onClick={() => { setOriginalMode('separate'); setFile(null); }}
+              className={`p-4 rounded-xl border text-left transition-all ${
+                originalMode === 'separate'
+                  ? 'border-[rgb(var(--accent))] bg-[rgb(var(--accent))]/5'
+                  : 'border-[var(--border)] hover:border-[var(--muted-foreground)]'
+              }`}
+            >
+              <div className="flex items-center gap-2 mb-1">
+                <Music size={16} className={originalMode === 'separate' ? 'text-[rgb(var(--accent))]' : ''} />
+                <span className="font-bold text-sm">{t.separateMode}</span>
+              </div>
+              <p className="text-xs text-[var(--muted-foreground)]">{t.separateModeDesc}</p>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* File Upload — single input for bundle/third_party, two inputs for separate mode */}
+      {useSeparate ? (
+        <>
+          <div>
+            <label className={labelClass}>{t.yomiFileLabel}</label>
+            <div className="relative">
+              <input
+                type="file"
+                required
+                accept=".yomi"
+                onChange={(e) => setFile(e.target.files?.[0] || null)}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              />
+              <div className="flex items-center gap-3 p-6 rounded-xl border-2 border-dashed border-[var(--border)] hover:border-[rgb(var(--accent))] transition-colors text-center">
+                <FileText size={24} className="text-[var(--muted-foreground)] mx-auto" />
+                <div className="text-left">
+                  <p className="text-sm font-medium">{file ? file.name : t.yomiFileHint}</p>
+                  {file && (
+                    <p className="text-xs text-[var(--muted-foreground)]">{(file.size / 1024).toFixed(1)} KB</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <label className={labelClass}>{t.mediaFileLabel}</label>
+            <div className="relative">
+              <input
+                type="file"
+                required
+                accept={ALLOWED_MEDIA_EXTENSIONS.join(',')}
+                onChange={(e) => setMediaFile(e.target.files?.[0] || null)}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              />
+              <div className="flex items-center gap-3 p-6 rounded-xl border-2 border-dashed border-[var(--border)] hover:border-[rgb(var(--accent))] transition-colors text-center">
+                <Music size={24} className="text-[var(--muted-foreground)] mx-auto" />
+                <div className="text-left">
+                  <p className="text-sm font-medium">{mediaFile ? mediaFile.name : t.mediaFileHint}</p>
+                  {mediaFile && (
+                    <p className="text-xs text-[var(--muted-foreground)]">{(mediaFile.size / 1024 / 1024).toFixed(1)} MB</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      ) : (
       <div>
         <label className={labelClass}>{t.fileLabel}</label>
         <div className="relative">
@@ -523,6 +696,7 @@ export default function UploadForm({ lang }: { lang: Locale }) {
           </div>
         </div>
       </div>
+      )}
 
       {/* Progress bar */}
       {(status === 'uploading' || status === 'creating') && (
