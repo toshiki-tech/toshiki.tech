@@ -57,11 +57,11 @@ export const SHOW_POINTS_FEATURE = true;
 // /api/yomi/pro/apply endpoint rejects new applications. Points are still
 // earned/displayed (subject to SHOW_POINTS_FEATURE).
 // Also exposed to the iOS app via /api/yomiplay/feature-flags.
-export const ALLOW_PRO_REDEMPTION = false;
+export const ALLOW_PRO_REDEMPTION = true;
 
 // Feature flag exposed via /api/yomiplay/feature-flags. Controls whether the
 // YomiPlay iOS app surfaces the "download from community" entry point.
-export const SHOW_COMMUNITY_DOWNLOAD = false;
+export const SHOW_COMMUNITY_DOWNLOAD = true;
 
 export type SourcePlatformId = typeof SOURCE_PLATFORMS[number]['id'];
 export type ContentLanguageId = typeof CONTENT_LANGUAGES[number]['id'];
