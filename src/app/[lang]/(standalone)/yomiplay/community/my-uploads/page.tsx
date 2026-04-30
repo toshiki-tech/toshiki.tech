@@ -22,6 +22,7 @@ const content = {
     shareLink: 'Copy Share Link',
     delete: 'Delete',
     community: 'Back to Community',
+    hiddenByAdmin: 'Hidden by admin',
   },
   zh: {
     title: '我的上传',
@@ -34,6 +35,7 @@ const content = {
     shareLink: '复制分享链接',
     delete: '删除',
     community: '返回社区',
+    hiddenByAdmin: '管理员已隐藏',
   },
   'zh-tw': {
     title: '我的上傳',
@@ -46,6 +48,7 @@ const content = {
     shareLink: '複製分享連結',
     delete: '刪除',
     community: '返回社區',
+    hiddenByAdmin: '管理員已隱藏',
   },
   ja: {
     title: 'マイアップロード',
@@ -58,6 +61,7 @@ const content = {
     shareLink: '共有リンクをコピー',
     delete: '削除',
     community: 'コミュニティに戻る',
+    hiddenByAdmin: '管理者により非表示',
   },
 };
 
@@ -74,6 +78,7 @@ interface MyUpload {
   download_count: number;
   share_token: string;
   created_at: string;
+  is_hidden: boolean;
 }
 
 export async function generateMetadata({ params: { lang } }: { params: { lang: Locale } }): Promise<Metadata> {
@@ -193,6 +198,11 @@ export default async function MyUploadsPage({ params: { lang } }: { params: { la
                   <span className="text-[10px] font-bold uppercase px-2.5 py-1 rounded-full bg-[var(--muted)] text-[var(--muted-foreground)]">
                     {t.visibility[upload.visibility as keyof typeof t.visibility] || upload.visibility}
                   </span>
+                  {upload.is_hidden && (
+                    <span className="text-[10px] font-bold uppercase px-2.5 py-1 rounded-full bg-orange-500/10 text-orange-600">
+                      {t.hiddenByAdmin}
+                    </span>
+                  )}
                   {upload.visibility === 'unlisted' && (
                     <ShareButton lang={lang} uploadId={upload.id} />
                   )}

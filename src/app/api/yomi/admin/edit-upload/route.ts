@@ -13,6 +13,8 @@ const ALLOWED_FIELDS = [
   'content_type',
   'category',
   'tags',
+  'is_hidden',
+  'sort_order',
 ] as const;
 
 export async function PATCH(request: Request) {

@@ -11,6 +11,7 @@ import ReportActions from './ReportActions';
 import PointsConfig from './PointsConfig';
 import ProRequests from './ProRequests';
 import EditUpload from './EditUpload';
+import HidePinControls from './HidePinControls';
 
 interface AdminUpload {
   id: string;
@@ -27,6 +28,8 @@ interface AdminUpload {
   translation_language: string | null;
   category: string | null;
   tags: string[] | null;
+  is_hidden: boolean;
+  sort_order: number;
   created_at: string;
   toshiki_tech_yomi_profiles: { display_name: string } | null;
 }
@@ -197,12 +200,18 @@ export default async function AdminPage({ params: { lang } }: { params: { lang: 
                           {upload.content_type}
                         </span>
                       </div>
-                      <div className="text-xs text-[var(--muted-foreground)] flex flex-wrap gap-2">
+                      <div className="text-xs text-[var(--muted-foreground)] flex flex-wrap gap-2 items-center">
                         <span>by {upload.toshiki_tech_yomi_profiles?.display_name || 'Unknown'}</span>
                         {langLabel && <span>· {langLabel.label}</span>}
                         {platform && <span>· {platform.name}</span>}
                         {upload.category && <span>· {upload.category}</span>}
                         <span>· {date}</span>
+                        {upload.is_hidden && (
+                          <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-600">Hidden</span>
+                        )}
+                        {upload.sort_order > 0 && (
+                          <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-[rgb(var(--accent))]/10 text-[rgb(var(--accent))]">Pin {upload.sort_order}</span>
+                        )}
                       </div>
                       {upload.tags && upload.tags.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-2">
@@ -215,6 +224,7 @@ export default async function AdminPage({ params: { lang } }: { params: { lang: 
                       )}
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
+                      <HidePinControls uploadId={upload.id} isHidden={upload.is_hidden} sortOrder={upload.sort_order} />
                       <EditUpload upload={upload} />
                       <AdminActions uploadId={upload.id} />
                     </div>
@@ -266,12 +276,18 @@ export default async function AdminPage({ params: { lang } }: { params: { lang: 
                           {upload.status}
                         </span>
                       </div>
-                      <div className="text-xs text-[var(--muted-foreground)] flex flex-wrap gap-2">
+                      <div className="text-xs text-[var(--muted-foreground)] flex flex-wrap gap-2 items-center">
                         <span>by {upload.toshiki_tech_yomi_profiles?.display_name || 'Unknown'}</span>
                         {langLabel && <span>· {langLabel.label}</span>}
                         {platform && <span>· {platform.name}</span>}
                         {upload.category && <span>· {upload.category}</span>}
                         <span>· {date}</span>
+                        {upload.is_hidden && (
+                          <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-600">Hidden</span>
+                        )}
+                        {upload.sort_order > 0 && (
+                          <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-[rgb(var(--accent))]/10 text-[rgb(var(--accent))]">Pin {upload.sort_order}</span>
+                        )}
                       </div>
                       {upload.tags && upload.tags.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-2">
@@ -284,6 +300,7 @@ export default async function AdminPage({ params: { lang } }: { params: { lang: 
                       )}
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
+                      <HidePinControls uploadId={upload.id} isHidden={upload.is_hidden} sortOrder={upload.sort_order} />
                       <EditUpload upload={upload} />
                       <AdminActions uploadId={upload.id} />
                     </div>

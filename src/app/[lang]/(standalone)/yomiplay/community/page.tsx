@@ -290,8 +290,12 @@ export default async function CommunityPage({
     .select('*, toshiki_tech_yomi_profiles!inner(display_name)', { count: 'exact' })
     .eq('status', 'approved')
     .eq('visibility', 'public')
-    .eq('is_removed', false);
+    .eq('is_removed', false)
+    .eq('is_hidden', false);
 
+  // Pinned items (sort_order > 0) always come first; remainder honours the
+  // user-chosen sort.
+  query = query.order('sort_order', { ascending: false });
   if (sort === 'downloads') {
     query = query.order('download_count', { ascending: false });
   } else if (sort === 'updated') {

@@ -23,9 +23,29 @@ export async function GET(
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
 
+  // Hidden uploads can only be downloaded by the uploader or an admin.
+  const { data: { user: currentUser } } = await supabase.auth.getUser();
+  if (upload.is_hidden) {
+    let allowed = false;
+    if (currentUser) {
+      if (currentUser.id === upload.user_id) {
+        allowed = true;
+      } else {
+        const { data: viewerProfile } = await supabase
+          .from('toshiki_tech_yomi_profiles')
+          .select('role')
+          .eq('id', currentUser.id)
+          .single();
+        if (viewerProfile?.role === 'admin') allowed = true;
+      }
+    }
+    if (!allowed) {
+      return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    }
+  }
+
   // Record download + award points atomically via SECURITY DEFINER function
   // (Works for both anonymous and authenticated users, bypassing RLS safely)
-  const { data: { user: currentUser } } = await supabase.auth.getUser();
   const { error: rpcError } = await supabase.rpc('record_yomi_download', {
     upload_id: params.id,
     downloader_id: currentUser?.id || null,

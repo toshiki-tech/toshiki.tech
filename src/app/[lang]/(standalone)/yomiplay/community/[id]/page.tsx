@@ -23,6 +23,7 @@ const content = {
     hasAudio: 'Includes Audio',
     listenAt: 'Listen at',
     pending: 'This content is pending review.',
+    hiddenNotice: 'This content is currently hidden by an administrator. Only you and admins can see this page.',
   },
   zh: {
     back: '返回社区',
@@ -39,6 +40,7 @@ const content = {
     hasAudio: '包含音频',
     listenAt: '收听来源',
     pending: '此内容正在等待审核。',
+    hiddenNotice: '此内容当前被管理员隐藏，仅你本人和管理员可见。',
   },
   'zh-tw': {
     back: '返回社區',
@@ -55,6 +57,7 @@ const content = {
     hasAudio: '包含音訊',
     listenAt: '收聽來源',
     pending: '此內容正在等待審核。',
+    hiddenNotice: '此內容目前被管理員隱藏，僅你本人和管理員可見。',
   },
   ja: {
     back: 'コミュニティに戻る',
@@ -71,6 +74,7 @@ const content = {
     hasAudio: '音声あり',
     listenAt: '配信元',
     pending: 'このコンテンツは審査待ちです。',
+    hiddenNotice: 'このコンテンツは現在管理者により非表示にされています。投稿者本人と管理者のみが閲覧できます。',
   },
 };
 
@@ -107,6 +111,25 @@ export default async function SubtitleDetailPage({
     notFound();
   }
 
+  // Hidden uploads are visible only to the uploader and admins.
+  if (upload.is_hidden) {
+    const { data: { user: viewer } } = await supabase.auth.getUser();
+    let allowed = false;
+    if (viewer) {
+      if (viewer.id === upload.user_id) {
+        allowed = true;
+      } else {
+        const { data: viewerProfile } = await supabase
+          .from('toshiki_tech_yomi_profiles')
+          .select('role')
+          .eq('id', viewer.id)
+          .single();
+        if (viewerProfile?.role === 'admin') allowed = true;
+      }
+    }
+    if (!allowed) notFound();
+  }
+
   const profile = upload.toshiki_tech_yomi_profiles as Record<string, string> | null;
   const platform = SOURCE_PLATFORMS.find(p => p.id === upload.source_platform);
   const langLabel = CONTENT_LANGUAGES.find(l => l.id === upload.language);
@@ -132,6 +155,11 @@ export default async function SubtitleDetailPage({
       {upload.status === 'pending' && (
         <div className="mb-6 p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/20 text-yellow-600 text-sm font-medium">
           {t.pending}
+        </div>
+      )}
+      {upload.is_hidden && (
+        <div className="mb-6 p-4 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-600 text-sm font-medium">
+          {t.hiddenNotice}
         </div>
       )}
 
