@@ -166,5 +166,67 @@ export const products: Product[] = [
       { label: "Install from Chrome Store", url: "https://chromewebstore.google.com/detail/yomimark-%E2%80%94-instant-furiga/ldfcjpnjokhdoihapfcnimchieaofhin" }
     ],
     imageUrl: "/images/products/yomimark-promo.png"
+  },
+  {
+    id: "yominote",
+    slug: "yominote",
+    translations: {
+      en: {
+        title: "YomiNote",
+        subtitle: "Modern Markdown desktop editor with built-in Japanese reading aids",
+        description: "YomiNote is a desktop Markdown editor purpose-built for Japanese reading and writing. It automatically adds furigana to kanji and surfaces English glosses for katakana loanwords, with a clean side-by-side live preview that keeps focus on the text. Powered by kuroshiro/kuromoji morphological analysis and a JMdict-backed dictionary, it runs fully offline.",
+        features: [
+          "Automatic furigana on kanji (kuroshiro + kuromoji)",
+          "English glosses for katakana loanwords via JMdict",
+          "Live side-by-side Markdown preview",
+          "Custom {base|reading} ruby syntax",
+          "Native desktop app for Windows, macOS, and Linux",
+          "Fully offline — no cloud or account required"
+        ]
+      },
+      zh: {
+        title: "YomiNote",
+        subtitle: "内置日语阅读辅助的现代 Markdown 桌面编辑器",
+        description: "YomiNote 是一款专为日语阅读与写作而生的桌面 Markdown 编辑器。它能自动为汉字标注振假名（Furigana），并为片假名外来词附上英语原词解释，配合左右分栏的实时预览，让您专注于文本本身。基于 kuroshiro / kuromoji 形态分析与 JMdict 词典构建，全程离线运行。",
+        features: [
+          "汉字自动振假名 (Furigana) 标注（kuroshiro + kuromoji）",
+          "基于 JMdict 词典的片假名外来词英语原词标注",
+          "左右分栏的实时 Markdown 预览",
+          "自定义 {原文|读音} ruby 注音语法",
+          "原生桌面应用，支持 Windows / macOS / Linux",
+          "完全离线运行，无需账号与联网"
+        ]
+      },
+      ja: {
+        title: "YomiNote",
+        subtitle: "日本語の読みを助ける、モダン Markdown デスクトップエディタ",
+        description: "YomiNote は、日本語の読み書きのために設計されたデスクトップ Markdown エディタです。漢字に自動でふりがなを振り、カタカナ外来語には英語の原義注釈を添え、左右分割のライブプレビューで本文への集中を保ちます。kuroshiro / kuromoji の形態素解析と JMdict 辞書を基盤に、完全オフラインで動作します。",
+        features: [
+          "漢字への自動ふりがな付与（kuroshiro + kuromoji）",
+          "JMdict ベースのカタカナ外来語 → 英語注釈",
+          "Markdown のライブプレビュー（左右分割）",
+          "独自の {本文|読み} ルビ記法",
+          "Windows / macOS / Linux 対応のネイティブデスクトップアプリ",
+          "完全オフライン動作、アカウント不要"
+        ]
+      },
+      'zh-tw': {
+        title: "YomiNote",
+        subtitle: "內建日語閱讀輔助的現代 Markdown 桌面編輯器",
+        description: "YomiNote 是一款專為日語閱讀與寫作而生的桌面 Markdown 編輯器。它能自動為漢字標註振假名（Furigana），並為片假名外來詞附上英語原詞解釋，配合左右分欄的即時預覽，讓您專注於文本本身。基於 kuroshiro / kuromoji 形態分析與 JMdict 詞典建構，全程離線運行。",
+        features: [
+          "漢字自動振假名 (Furigana) 標註（kuroshiro + kuromoji）",
+          "基於 JMdict 詞典的片假名外來詞英語原詞標註",
+          "左右分欄的即時 Markdown 預覽",
+          "自訂 {原文|讀音} ruby 注音語法",
+          "原生桌面應用程式，支援 Windows / macOS / Linux",
+          "完全離線運行，無需帳號與聯網"
+        ]
+      }
+    },
+    techStack: ["Tauri 2", "Rust", "React", "TypeScript", "CodeMirror 6", "kuroshiro", "JMdict"],
+    externalLinks: [],
+    imageUrl: "/images/products/yominote-ad1.png",
+    portraitImageUrl: "/images/products/yominote-ad2.png"
   }
 ];

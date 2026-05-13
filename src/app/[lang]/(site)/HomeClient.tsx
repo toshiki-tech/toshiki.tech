@@ -3,10 +3,16 @@
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { products } from '@/data/products';
-import { works } from '@/data/works';
-import { experiments } from '@/data/experiments';
 import { ArrowUpRight } from 'lucide-react';
 import { Locale } from '@/lib/get-dictionary';
+import type { WritingPostMeta } from '@/lib/writing';
+
+const LOCALE_FORMAT: Record<Locale, string> = {
+  en: 'en-US',
+  zh: 'zh-CN',
+  ja: 'ja-JP',
+  'zh-tw': 'zh-TW',
+};
 
 const SectionHeader = ({ title, subtitle, href, cta, lang }: { title: string; subtitle: string; href?: string; cta?: string; lang: Locale }) => (
   <div className="flex flex-col md:flex-row md:items-end justify-between mb-12">
@@ -48,8 +54,13 @@ const item = {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default function HomeClient({ lang, dict }: { lang: Locale; dict: any }) {
+export default function HomeClient({ lang, dict, posts }: { lang: Locale; dict: any; posts: WritingPostMeta[] }) {
   const hDict = dict.home;
+  const dateFormatter = new Intl.DateTimeFormat(LOCALE_FORMAT[lang], {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
 
   return (
     <>
@@ -97,8 +108,8 @@ export default function HomeClient({ lang, dict }: { lang: Locale; dict: any }) 
               {hDict.hero.cta.viewProducts}
               <ArrowUpRight size={18} strokeWidth={3} className="transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
             </Link>
-            <Link href={`/${lang}/works`} className="group px-9 py-3.5 rounded-2xl font-bold bg-white/5 border border-white/10 backdrop-blur-xl text-white transition-all hover:bg-white/10">
-              {hDict.hero.cta.exploreWork}
+            <Link href={`/${lang}/writing`} className="group px-9 py-3.5 rounded-2xl font-bold bg-white/5 border border-white/10 backdrop-blur-xl text-white transition-all hover:bg-white/10">
+              {hDict.hero.cta.readNotes}
             </Link>
           </div>
         </motion.div>
@@ -119,9 +130,9 @@ export default function HomeClient({ lang, dict }: { lang: Locale; dict: any }) 
             initial="hidden"
             whileInView="show"
             viewport={{ once: true, margin: "-100px" }}
-            className="grid grid-cols-1 md:grid-cols-2 gap-10"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10"
           >
-            {products.slice(0, 2).map((product) => (
+            {products.slice(0, 3).map((product) => (
               <motion.div key={product.id} variants={item}>
                 <Link href={`/${lang}/p/${product.slug}`} className="group block h-full">
                   <article className="card p-0 flex flex-col h-full bg-gradient-to-b from-[var(--card)] to-[var(--muted)]/20 hover:-translate-y-1 transition-transform duration-300">
@@ -164,101 +175,56 @@ export default function HomeClient({ lang, dict }: { lang: Locale; dict: any }) 
           </motion.div>
         </section>
 
-        {/* Selected Works */}
-        <section id="works">
+        {/* Writing */}
+        <section id="writing">
           <SectionHeader
-            title={hDict.works.title}
-            subtitle={hDict.works.subtitle}
-            href="/works"
-            cta={hDict.works.all}
+            title={hDict.writing.title}
+            subtitle={hDict.writing.subtitle}
+            href={posts.length > 0 ? '/writing' : undefined}
+            cta={posts.length > 0 ? hDict.writing.all : undefined}
             lang={lang}
           />
-          <motion.div
-            variants={container}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: "-100px" }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-6"
-          >
-            {works.map((work) => (
-              <motion.div key={work.id} variants={item} className="group relative">
-                {work.url ? (
-                  <a href={work.url} target="_blank" rel="noopener noreferrer" className="block p-8 card h-full bg-[var(--card)] flex flex-col justify-between hover:border-[rgb(var(--accent))] transition-all hover:-translate-y-1">
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-start">
-                        <h3 className="text-xl font-bold group-hover:text-[rgb(var(--accent))] transition-colors">{work.translations[lang].title}</h3>
-                        <ArrowUpRight size={18} className="text-[rgb(var(--accent))] opacity-0 group-hover:opacity-100 transition-opacity" />
-                      </div>
-                      <p className="text-sm text-[var(--muted-foreground)] leading-relaxed mb-6">
-                        {work.translations[lang].description}
+          {posts.length === 0 ? (
+            <div className="py-20 text-center border-2 border-dashed border-[var(--border)] rounded-3xl bg-[var(--muted)]/20">
+              <p className="text-[var(--muted-foreground)] font-mono tracking-widest text-xs uppercase opacity-60">
+                {hDict.writing.empty}
+              </p>
+            </div>
+          ) : (
+            <div className="divide-y divide-[var(--border)]">
+              {posts.map((post, idx) => (
+                <motion.div
+                  key={post.slug}
+                  initial={{ opacity: 0, x: -10 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: idx * 0.08 }}
+                >
+                  <Link
+                    href={`/${lang}/writing/${post.slug}`}
+                    className="group grid grid-cols-1 md:grid-cols-[140px_1fr_auto] gap-4 md:gap-8 py-6 items-start hover:bg-[var(--muted)]/30 -mx-4 px-4 rounded-xl transition-colors"
+                  >
+                    <time className="text-xs font-mono uppercase tracking-widest text-[var(--muted-foreground)] pt-1">
+                      {dateFormatter.format(new Date(post.date))}
+                    </time>
+                    <div className="space-y-1.5">
+                      <h3 className="text-lg md:text-xl font-bold tracking-tight group-hover:text-[rgb(var(--accent))] transition-colors">
+                        {post.title}
+                      </h3>
+                      <p className="text-sm text-[var(--muted-foreground)] leading-relaxed line-clamp-2">
+                        {post.excerpt}
                       </p>
                     </div>
-                    <div className="mt-8 pt-6 border-t border-[var(--border)] flex justify-between items-center text-[10px] font-bold text-[var(--muted-foreground)] tracking-widest uppercase">
-                      <span>{work.url.replace('https://', '')}</span>
-                      <div className="flex gap-2">
-                        <div className="w-2 h-2 rounded-full border border-[var(--border)]" />
-                        <div className="w-2 h-2 rounded-full border border-[rgb(var(--accent))] bg-[rgb(var(--accent))]" />
-                      </div>
-                    </div>
-                  </a>
-                ) : (
-                  <div className="p-8 card h-full bg-[var(--card)] flex flex-col justify-between hover:border-[rgb(var(--accent))] transition-colors">
-                    <div className="space-y-4">
-                      <h3 className="text-xl font-bold">{work.translations[lang].title}</h3>
-                      <p className="text-sm text-[var(--muted-foreground)] leading-relaxed mb-6">
-                        {work.translations[lang].description}
-                      </p>
-                    </div>
-                    <div className="mt-8 pt-6 border-t border-[var(--border)] flex justify-between items-center text-[10px] font-bold text-[var(--muted-foreground)] tracking-widest uppercase">
-                      <span>READY.SYS</span>
-                      <div className="flex gap-2">
-                        <div className="w-2 h-2 rounded-full border border-[var(--border)]" />
-                        <div className="w-2 h-2 rounded-full border border-[rgb(var(--accent))] bg-[rgb(var(--accent))]" />
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </motion.div>
-            ))}
-          </motion.div>
+                    <ArrowUpRight
+                      size={16}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity text-[rgb(var(--accent))] mt-1"
+                    />
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </section>
-
-        {/* Experiments */}
-        <section id="experiments">
-          <div className="mb-12">
-            <SectionHeader
-              title={dict.common.nav.experiments}
-              subtitle={lang === 'en' ? "Deep tech exploration, research prototypes, and system designs." : (lang === 'zh' || lang === 'zh-tw') ? (lang === 'zh' ? "深度技术探索、研究原型与系统设计。" : "深度技術探索、研究原型與系統設計。") : "深層技術の探求、リサーチプロトタイプ、そしてシステム設計。"}
-              href="/ai-lab"
-              cta={lang === 'en' ? "all experiments" : (lang === 'zh' || lang === 'zh-tw') ? (lang === 'zh' ? "所有实验" : "所有實驗") : "全ラボ実績"}
-              lang={lang}
-            />
-          </div>
-          <div className="space-y-2">
-            {experiments.map((exp, idx) => (
-              <motion.div
-                key={exp.id}
-                initial={{ opacity: 0, x: -10 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.1 }}
-                className="group p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[var(--border)] hover:bg-[var(--muted)]/40 transition-colors"
-              >
-                <div className="flex gap-6 items-center">
-                  <span className="text-[10px] font-mono text-[var(--muted-foreground)]">0{idx + 1}</span>
-                  <h3 className="text-lg font-bold group-hover:text-[rgb(var(--accent))] transition-colors">{exp.translations[lang].title}</h3>
-                </div>
-                <p className="text-sm text-[var(--muted-foreground)] md:max-w-md lg:max-w-xl">
-                  {exp.translations[lang].description}
-                </p>
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                  <ArrowUpRight size={16} />
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </section>
-
 
         {/* CTA Section */}
         <section className="text-center space-y-10 py-20 pb-40">

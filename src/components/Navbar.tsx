@@ -59,8 +59,7 @@ const Navbar = ({ lang, dict }: { lang: Locale; dict: any }) => {
 
   const links = [
     { href: `/${lang}/products`, label: navDict.products, match: (p: string) => p.includes('/products') || p.includes('/p/') },
-    { href: `/${lang}/works`, label: navDict.works, match: (p: string) => p.includes('/works') },
-    { href: `/${lang}/ai-lab`, label: navDict.experiments, match: (p: string) => p.includes('/ai-lab') },
+    { href: `/${lang}/writing`, label: navDict.writing, match: (p: string) => p.includes('/writing') },
     { href: `/${lang}/about`, label: navDict.about, match: (p: string) => p.includes('/about') },
     { href: `/${lang}/work-with-me`, label: navDict.workWithMe, match: (p: string) => p.includes('/work-with-me') },
   ];

@@ -2,8 +2,7 @@
   "common": {
     "nav": {
       "products": "产品",
-      "works": "案例",
-      "experiments": "AI 实验室",
+      "writing": "技术札记",
       "about": "关于",
       "workWithMe": "商务合作"
     },
@@ -21,7 +20,7 @@
       "intro": "我致力于开发软件产品、浏览器工具及应用级 AI 系统。",
       "cta": {
         "viewProducts": "查看产品",
-        "exploreWork": "探索案例"
+        "readNotes": "阅读札记"
       }
     },
     "products": {
@@ -29,10 +28,11 @@
       "subtitle": "软件开发者亲历打造，旨在解决日语沉浸学习中的核心痛点。",
       "all": "所有产品"
     },
-    "works": {
-      "title": "精选案例",
-      "subtitle": "我与企业合作，构建稳健、现代的数字系统和定制化 Web 解决方案。",
-      "all": "合作详情"
+    "writing": {
+      "title": "技术札记",
+      "subtitle": "产品构建过程中的技术笔记与一线实践记录。",
+      "all": "全部文章",
+      "empty": "首批文章正在准备中。"
     },
     "beyondCode": {
       "title": "代码之外",

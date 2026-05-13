@@ -1,10 +1,11 @@
 import { MetadataRoute } from 'next'
 import { products } from '@/data/products'
+import { getAllWritingSlugs } from '@/lib/writing'
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://toshiki.tech'
 
-  const routes = ['', '/products', '/works', '/ai-lab', '/work-with-me', '/about'].map(
+  const routes = ['', '/products', '/writing', '/work-with-me', '/about'].map(
     (route) => ({
       url: `${baseUrl}${route}`,
       lastModified: new Date(),
@@ -20,5 +21,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }))
 
-  return [...routes, ...productRoutes]
+  const writingEntries = await getAllWritingSlugs()
+  const writingRoutes = writingEntries.map(({ slug, locale }) => ({
+    url: `${baseUrl}/${locale}/writing/${slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'monthly' as const,
+    priority: 0.6,
+  }))
+
+  return [...routes, ...productRoutes, ...writingRoutes]
 }

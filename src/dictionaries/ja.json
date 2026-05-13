@@ -2,8 +2,7 @@
   "common": {
     "nav": {
       "products": "プロダクト",
-      "works": "実績",
-      "experiments": "AIラボ",
+      "writing": "技術ノート",
       "about": "プロフィール",
       "workWithMe": "お仕事のご依頼"
     },
@@ -21,18 +20,19 @@
       "intro": "ソフトウェアプロダクト、ブラウザツール、応用AIシステムの構築に注力しています。",
       "cta": {
         "viewProducts": "プロダクトを見る",
-        "exploreWork": "実績を見る"
+        "readNotes": "ノートを読む"
       }
     },
     "products": {
       "title": "プロダクト",
-      "subtitle": "開発者自らが日本語学習で直面した課題を解決するために设计された学習ツール。",
+      "subtitle": "開発者自らが日本語学習で直面した課題を解決するために設計された学習ツール。",
       "all": "全プロダクト"
     },
-    "works": {
-      "title": "選定実績",
-      "subtitle": "ビジネスの課題に対し、堅牢かつモダンなデジタルシステムを構築します。",
-      "all": "実績の詳細"
+    "writing": {
+      "title": "技術ノート",
+      "subtitle": "プロダクト構築の現場から、技術ノートと実践記録。",
+      "all": "全記事",
+      "empty": "最初の記事を準備中です。"
     },
     "beyondCode": {
       "title": "Beyond Code",

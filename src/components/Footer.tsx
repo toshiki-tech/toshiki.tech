@@ -19,8 +19,7 @@ const Footer = ({ lang, dict }: { lang: Locale; dict: any }) => {
             <h4 className="text-sm font-semibold mb-4 tracking-wider uppercase">{footerDict.pages}</h4>
             <div className="flex flex-col gap-2">
               <Link href={`/${lang}/products`} className="text-sm text-[var(--muted-foreground)] hover:text-[rgb(var(--accent))] transition-colors">{dict.common.nav.products}</Link>
-              <Link href={`/${lang}/works`} className="text-sm text-[var(--muted-foreground)] hover:text-[rgb(var(--accent))] transition-colors">{dict.common.nav.works}</Link>
-              <Link href={`/${lang}/ai-lab`} className="text-sm text-[var(--muted-foreground)] hover:text-[rgb(var(--accent))] transition-colors">{dict.common.nav.experiments}</Link>
+              <Link href={`/${lang}/writing`} className="text-sm text-[var(--muted-foreground)] hover:text-[rgb(var(--accent))] transition-colors">{dict.common.nav.writing}</Link>
               <Link href={`/${lang}/about`} className="text-sm text-[var(--muted-foreground)] hover:text-[rgb(var(--accent))] transition-colors">{dict.common.nav.about}</Link>
             </div>
           </div>

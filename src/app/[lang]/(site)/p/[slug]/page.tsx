@@ -86,14 +86,14 @@ export default async function ProductDetailPage({ params }: { params: { lang: Lo
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 gap-4">
+              <div className="grid grid-cols-1 gap-2.5">
                 {t.features.map((feature, i) => (
-                  <div key={i} className="flex gap-4 p-6 rounded-2xl border border-[var(--border)] bg-[var(--card)] shadow-sm hover:shadow-md transition-shadow">
-                    <div className="w-10 h-10 rounded-xl bg-[rgb(var(--accent))]/10 flex items-center justify-center text-[rgb(var(--accent))] shrink-0">
-                      <CheckCircle2 size={20} />
+                  <div key={i} className="flex gap-3 p-4 rounded-2xl border border-[var(--border)] bg-[var(--card)] shadow-sm hover:shadow-md transition-shadow">
+                    <div className="w-9 h-9 rounded-xl bg-[rgb(var(--accent))]/10 flex items-center justify-center text-[rgb(var(--accent))] shrink-0">
+                      <CheckCircle2 size={18} />
                     </div>
-                    <div className="space-y-1">
-                      <p className="font-bold text-lg">{feature}</p>
+                    <div className="flex items-center">
+                      <p className="font-bold text-base leading-snug">{feature}</p>
                     </div>
                   </div>
                 ))}

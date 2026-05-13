@@ -2,8 +2,7 @@
   "common": {
     "nav": {
       "products": "Products",
-      "works": "Works",
-      "experiments": "AI Lab",
+      "writing": "Writing",
       "about": "About",
       "workWithMe": "Work with me"
     },
@@ -21,7 +20,7 @@
       "intro": "I build software products, browser tools, and applied AI systems.",
       "cta": {
         "viewProducts": "View Products",
-        "exploreWork": "Explore Work"
+        "readNotes": "Read Notes"
       }
     },
     "products": {
@@ -29,10 +28,11 @@
       "subtitle": "Learning tools built by a developer to solve real-world immersion pain points.",
       "all": "all products"
     },
-    "works": {
-      "title": "Selected Work",
-      "subtitle": "I collaborate with businesses to build robust, modern digital systems and custom web solutions.",
-      "all": "collaboration details"
+    "writing": {
+      "title": "Writing",
+      "subtitle": "Tech notes and field-tested insights from building products.",
+      "all": "all posts",
+      "empty": "First notes are coming soon."
     },
     "beyondCode": {
       "title": "Beyond Code",
