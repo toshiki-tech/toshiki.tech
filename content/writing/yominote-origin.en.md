@@ -63,9 +63,9 @@ Three characters of syntax. Zero learning curve.
 
 YomiNote has no cloud, no account, no network connection.
 
-The technical reason is simple: the tokenizer dictionary and the katakana JSON aren't large; there's no reason to keep them on a remote server and make the user wait on an HTTP request every time they open a note. Which leads to a disclaimer I should make explicit:
+The technical reason is simple: the tokenizer dictionary and the katakana JSON aren't large; there's no reason to keep them on a remote server and make the user wait on an HTTP request every time they open a note. And because a fixed tokenizer sometimes can't tell on-yomi from kun-yomi, a disclaimer I should make explicit:
 
-**This tool only assists with reading annotations. It cannot guarantee perfect accuracy. Always verify and edit manually.**
+**This tool mainly provides furigana typesetting assistance — it cannot guarantee the readings are always correct. Always verify and edit manually.**
 
 Your Markdown files just live on your local machine. You can choose to sync them to cloud storage yourself if you want.
 
