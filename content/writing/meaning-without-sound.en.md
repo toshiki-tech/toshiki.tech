@@ -1,7 +1,7 @@
 ---
 title: Meaning without sound — the "translucent" state of Chinese-background kids learning Japanese
 date: 2026-05-10
-excerpt: She understands that 「祖母」 means "grandmother," but can't quite tell whether to pronounce it `sobo` or `obaasan` — a common, fascinating in-between that Chinese-speaking children land in when learning Japanese.
+excerpt: "Reading the meaning but not the sound" is a narrow gap. This is a note on why it deserves a tool of its own.
 tags: [Japanese, Kanji, Learning]
 ---
 
