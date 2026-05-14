@@ -76,7 +76,7 @@ export default async function WritingPostPage({ params }: { params: { lang: Loca
         </header>
 
         <div
-          className="prose prose-zinc dark:prose-invert max-w-none prose-headings:tracking-tight prose-headings:font-bold prose-a:text-[rgb(var(--accent))] prose-a:no-underline hover:prose-a:underline prose-pre:bg-[var(--muted)] prose-pre:border prose-pre:border-[var(--border)]"
+          className="prose prose-zinc dark:prose-invert max-w-none prose-headings:tracking-tight prose-headings:font-bold prose-a:text-[rgb(var(--accent))] prose-a:no-underline hover:prose-a:underline prose-pre:bg-[var(--muted)] prose-pre:border prose-pre:border-[var(--border)] prose-img:mx-auto prose-img:max-w-[280px] prose-img:rounded-xl prose-img:border prose-img:border-[var(--border)] prose-img:shadow-sm [&_td]:align-middle [&_td_img]:my-0 [&_table]:my-8"
           dangerouslySetInnerHTML={{ __html: post.html }}
         />
       </article>
