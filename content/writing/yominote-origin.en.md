@@ -1,5 +1,5 @@
 ---
-title: A notebook that adds furigana, made for my daughter
+title: A Markdown editor that adds furigana to Japanese, made for my daughter — YomiNote
 date: 2026-05-13
 excerpt: A Chinese-speaking fifth-grader living in Japan can read the kanji but can't always pronounce them. YomiNote was built for exactly that.
 tags: [YomiNote, Tools, Japanese]

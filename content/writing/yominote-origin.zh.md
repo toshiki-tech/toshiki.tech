@@ -1,5 +1,5 @@
 ---
-title: 为女儿做一个会注音的笔记本
+title: 为女儿做了一个可以给日语注音的 Markdown 编辑器——YomiNote
 date: 2026-05-13
 excerpt: 一个在日本读小学五年级的中文背景孩子，读得懂汉字、却念不准日语 —— YomiNote 就是为这件事写的。
 tags: [YomiNote, 工具, 日语]
