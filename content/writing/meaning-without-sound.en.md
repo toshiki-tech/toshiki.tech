@@ -1,7 +1,7 @@
 ---
 title: Meaning without sound — the "translucent" state of Chinese-background kids learning Japanese
 date: 2026-05-10
-excerpt: "Reading the meaning but not the sound" is a narrow gap. This is a note on why it deserves a tool of its own.
+excerpt: Chinese-background kids learning Japanese often fall into a "translucent" state — meanings come through at a glance, but the readings stay hazy. A narrow gap worth building a tool for.
 tags: [Japanese, Kanji, Learning]
 ---
 
@@ -37,7 +37,7 @@ This "I understand it but I can't pronounce it" state is a very common, very cur
 
 For a native Chinese speaker, kanji in Japanese is like a **translucent window**.
 
-The meaning side, you can see — 「祖母」 reads as *grandmother* at a glance; 「環境問題」 is clearly *environmental issues* without looking it up; 「議事録」 sits there as *meeting minutes*, almost zero effort to parse.
+The meaning side, you can see — 「環境問題」 is clearly *environmental issues* without looking it up.
 
 But the sound side? Not so much.
 
@@ -89,7 +89,7 @@ For a kid who uses Japanese as a daily language, this is a constant, low-volume 
 
 English-natives learning Japanese don't run into this — they learn "sound, shape, meaning" together from day one. No shortcut, but no hidden trap either.
 
-Chinese-background kids walk a different path: meaning moves fast, sound fills in slowly.
+Chinese-background kids walk a different path: meaning is grasped quickly, sound slowly catches up.
 
 ## A "quiet sheet of paper with the readings already marked"
 

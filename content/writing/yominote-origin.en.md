@@ -45,7 +45,7 @@ Print it and you have a furigana-annotated reading sheet; don't print and just p
 
 Japanese has piles of loanwords like 「コンピュータ」, 「オフィス」, 「インターフェース」 that are warped phonetic transcriptions of English. But recognizing the katakana doesn't mean instantly recognizing which English word it is — my daughter has to sound out 「マネージャー」 three times before realizing it's "manager."
 
-YomiNote quietly tags the original English word next to the katakana in the preview. Recognition speed jumps immediately, and that little *"oh, that's what it is"* moment happens several times per passage.
+YomiNote quietly tags the original English word above the katakana in the preview. Recognition speed jumps immediately, and that little *"oh, that's what it is"* moment happens several times per passage.
 
 This part relies on JMdict — an open-source Japanese dictionary maintained by the community for thirty years. That alone is something worth respecting.
 
@@ -65,7 +65,7 @@ YomiNote has no cloud, no account, no network connection.
 
 The technical reason is simple: the tokenizer dictionary and the katakana JSON aren't large; there's no reason to keep them on a remote server and make the user wait on an HTTP request every time they open a note. Which leads to a disclaimer I should make explicit:
 
-**Important disclaimer: This tool only assists with reading annotations. It cannot guarantee perfect accuracy. Always verify and edit manually.**
+**This tool only assists with reading annotations. It cannot guarantee perfect accuracy. Always verify and edit manually.**
 
 Your Markdown files just live on your local machine. You can choose to sync them to cloud storage yourself if you want.
 
@@ -75,7 +75,7 @@ The tools I make are small tools — not meant for everyone.
 
 But behind each one is a specific, concrete little problem. The problem YomiNote stands behind is a fifth-grader living in Japan, who understands the kanji but can't quite pronounce the Japanese — she doesn't need a smarter AI. She needs **a quiet sheet of paper with the readings already marked**.
 
-I spent a weekend coding it with AI's help. And that's how YomiNote came to be.
+I spent a weekend coding. And that's how YomiNote came to be.
 
 If there's someone like her near you — a kid, a student, yourself — this tool is for them.
 

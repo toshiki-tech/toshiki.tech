@@ -42,6 +42,11 @@ function parseFilename(name: string): { slug: string; locale: Locale } | null {
   return { slug: match[1], locale: match[2] as Locale };
 }
 
+function normalizeDate(value: unknown): string {
+  if (value instanceof Date) return value.toISOString().slice(0, 10);
+  return String(value);
+}
+
 async function loadFrontmatter(file: string): Promise<WritingPostMeta | null> {
   const parsed = parseFilename(file);
   if (!parsed) return null;
@@ -52,7 +57,7 @@ async function loadFrontmatter(file: string): Promise<WritingPostMeta | null> {
     slug: parsed.slug,
     locale: parsed.locale,
     title: String(data.title),
-    date: String(data.date),
+    date: normalizeDate(data.date),
     excerpt: String(data.excerpt),
     tags: Array.isArray(data.tags) ? data.tags.map(String) : undefined,
   };
@@ -94,7 +99,7 @@ export async function getWritingPost(slug: string, locale: Locale): Promise<Writ
     slug,
     locale,
     title: String(data.title),
-    date: String(data.date),
+    date: normalizeDate(data.date),
     excerpt: String(data.excerpt),
     tags: Array.isArray(data.tags) ? data.tags.map(String) : undefined,
     html: String(processed),
