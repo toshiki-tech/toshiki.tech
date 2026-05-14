@@ -1,6 +1,6 @@
 ---
 title: I built a Chrome extension to make Japanese katakana loanwords easier to read — meet YomiMark
-date: 2026-05-15
+date: 2026-03-29
 excerpt: For Chinese-speaking developers reading Japanese tech pages, the real pain isn't kanji — it's katakana loanwords. You can read every character but can't tell the English word in disguise. YomiMark quietly maps them back, fully offline, triggered by text selection.
 tags: [YomiMark, Chrome Extension, Japanese]
 ---
