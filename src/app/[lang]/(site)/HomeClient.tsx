@@ -2,9 +2,10 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { products } from '@/data/products';
-import { ArrowUpRight } from 'lucide-react';
+import { products, localizeAppStoreUrl } from '@/data/products';
+import { ArrowUpRight, Download, Apple, Puzzle, ExternalLink } from 'lucide-react';
 import { Locale } from '@/lib/get-dictionary';
+import { detectStore, STORE_LABELS } from '@/lib/external-store';
 import type { WritingPostMeta } from '@/lib/writing';
 
 const LOCALE_FORMAT: Record<Locale, string> = {
@@ -134,42 +135,77 @@ export default function HomeClient({ lang, dict, posts }: { lang: Locale; dict: 
           >
             {products.slice(0, 3).map((product) => (
               <motion.div key={product.id} variants={item}>
-                <Link href={`/${lang}/p/${product.slug}`} className="group block h-full">
-                  <article className="card p-0 flex flex-col h-full bg-gradient-to-b from-[var(--card)] to-[var(--muted)]/20 hover:-translate-y-1 transition-transform duration-300">
-                    <div className="aspect-[16/10] overflow-hidden rounded-t-xl bg-[var(--muted)] relative">
-                      <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[var(--muted)]/50 to-transparent z-10" />
-                      {product.imageUrl ? (
-                        <img 
-                          src={product.imageUrl} 
-                          alt={product.translations[lang].title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                      ) : (
-                        <div className="absolute inset-0 flex items-center justify-center p-8">
-                          <div className="w-full h-full border border-dashed border-[var(--border)] rounded-lg flex items-center justify-center text-xs font-mono text-[var(--muted-foreground)] opacity-50">
-                            {product.translations[lang].title.toUpperCase()} VIEWPORT
-                          </div>
+                <article className="group relative card p-0 flex flex-col h-full bg-gradient-to-b from-[var(--card)] to-[var(--muted)]/20 hover:-translate-y-1 transition-transform duration-300 overflow-hidden">
+                  <Link
+                    href={`/${lang}/p/${product.slug}`}
+                    className="absolute inset-0 z-10"
+                    aria-label={product.translations[lang].title}
+                  >
+                    <span className="sr-only">{product.translations[lang].title}</span>
+                  </Link>
+                  <div className="aspect-[16/10] overflow-hidden rounded-t-xl bg-[var(--muted)] relative">
+                    <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[var(--muted)]/50 to-transparent z-[1]" />
+                    {product.imageUrl ? (
+                      <img
+                        src={product.imageUrl}
+                        alt={product.translations[lang].title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center p-8">
+                        <div className="w-full h-full border border-dashed border-[var(--border)] rounded-lg flex items-center justify-center text-xs font-mono text-[var(--muted-foreground)] opacity-50">
+                          {product.translations[lang].title.toUpperCase()} VIEWPORT
                         </div>
-                      )}
-                    </div>
-                    <div className="p-8 space-y-4">
-                      <div className="flex justify-between items-start">
-                        <h3 className="text-2xl font-bold tracking-tight">{product.translations[lang].title}</h3>
-                        <ArrowUpRight className="opacity-0 group-hover:opacity-100 transition-opacity text-[rgb(var(--accent))]" />
                       </div>
-                      <p className="text-[var(--muted-foreground)] leading-relaxed text-sm h-12 line-clamp-2">
-                        {product.translations[lang].subtitle}
-                      </p>
-                      <div className="flex flex-wrap gap-2 pt-2">
-                        {product.techStack.slice(0, 3).map(tech => (
-                          <span key={tech} className="text-[10px] uppercase font-bold tracking-wider px-2 py-1 rounded bg-[var(--border)]/50 border border-[var(--border)] text-[var(--muted-foreground)]">
-                            {tech}
-                          </span>
-                        ))}
-                      </div>
+                    )}
+                  </div>
+                  <div className="p-8 space-y-4 flex-1 flex flex-col">
+                    <div className="flex justify-between items-start">
+                      <h3 className="text-2xl font-bold tracking-tight">{product.translations[lang].title}</h3>
+                      <ArrowUpRight className="opacity-0 group-hover:opacity-100 transition-opacity text-[rgb(var(--accent))]" />
                     </div>
-                  </article>
-                </Link>
+                    <p className="text-[var(--muted-foreground)] leading-relaxed text-sm h-12 line-clamp-2">
+                      {product.translations[lang].subtitle}
+                    </p>
+                    <div className="flex flex-wrap gap-2 pt-2">
+                      {product.techStack.slice(0, 3).map(tech => (
+                        <span key={tech} className="text-[10px] uppercase font-bold tracking-wider px-2 py-1 rounded bg-[var(--border)]/50 border border-[var(--border)] text-[var(--muted-foreground)]">
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                    {product.downloads && (
+                      <div className="pt-4 mt-auto">
+                        <Link
+                          href={`/${lang}/p/${product.slug}#download`}
+                          className="relative z-20 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider px-3 py-2 rounded-lg bg-[rgb(var(--accent))]/10 text-[rgb(var(--accent))] border border-[rgb(var(--accent))]/20 hover:bg-[rgb(var(--accent))]/20 transition-colors"
+                        >
+                          <Download size={14} />
+                          {lang === 'en' ? 'Free download · Mac & Windows' : lang === 'zh' ? '免费下载 · Mac & Windows' : lang === 'zh-tw' ? '免費下載 · Mac & Windows' : '無料ダウンロード · Mac & Windows'}
+                        </Link>
+                      </div>
+                    )}
+                    {!product.downloads && product.externalLinks.length > 0 && (() => {
+                      const link = product.externalLinks[0];
+                      const kind = detectStore(link.url);
+                      const labels = STORE_LABELS[lang][kind];
+                      const Icon = kind === 'app-store' ? Apple : kind === 'chrome-store' ? Puzzle : ExternalLink;
+                      return (
+                        <div className="pt-4 mt-auto">
+                          <a
+                            href={localizeAppStoreUrl(link.url, lang)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="relative z-20 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider px-3 py-2 rounded-lg bg-[rgb(var(--accent))]/10 text-[rgb(var(--accent))] border border-[rgb(var(--accent))]/20 hover:bg-[rgb(var(--accent))]/20 transition-colors"
+                          >
+                            <Icon size={14} />
+                            {labels.long}
+                          </a>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                </article>
               </motion.div>
             ))}
           </motion.div>

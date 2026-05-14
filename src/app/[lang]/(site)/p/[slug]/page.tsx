@@ -1,8 +1,11 @@
-import { products } from '@/data/products';
+import { products, localizeAppStoreUrl } from '@/data/products';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, CheckCircle2, Cpu, ArrowRight, Users, Upload, Download } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Cpu, ArrowRight, Users, Upload, Download, Apple, Puzzle, ExternalLink } from 'lucide-react';
 import { Locale, getDictionary } from '@/lib/get-dictionary';
+import ZoomableImage from '@/components/ZoomableImage';
+import { ZOOM_LABELS } from '@/lib/zoom-labels';
+import { detectStore, STORE_LABELS } from '@/lib/external-store';
 
 export async function generateStaticParams() {
   const locales: Locale[] = ['en', 'zh', 'ja', 'zh-tw'];
@@ -103,12 +106,14 @@ export default async function ProductDetailPage({ params }: { params: { lang: Lo
             <div className="order-1 lg:order-2 space-y-12">
               {/* Primary Image */}
               <div className={`${product.portraitImageUrl ? 'aspect-[3/4.5] md:aspect-[3/4.5] lg:aspect-[2/3]' : 'aspect-[4/5] md:aspect-square'} bg-[var(--card)] rounded-3xl border border-[var(--border)] shadow-2xl overflow-hidden relative group`}>
-                <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black/20 to-transparent z-10" />
+                <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black/20 to-transparent z-10 pointer-events-none" />
                 {product.imageUrl ? (
-                  <img 
-                    src={product.portraitImageUrl || product.imageUrl} 
+                  <ZoomableImage
+                    src={product.portraitImageUrl || product.imageUrl}
                     alt={t.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    zoomLabel={ZOOM_LABELS[params.lang].zoom}
+                    closeLabel={ZOOM_LABELS[params.lang].close}
                   />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center">
@@ -123,8 +128,14 @@ export default async function ProductDetailPage({ params }: { params: { lang: Lo
               {product.gallery && product.gallery.length > 0 && (
                 <div className="grid grid-cols-3 gap-4">
                   {product.gallery.map((img, i) => (
-                    <div key={i} className="aspect-[3/4] rounded-xl overflow-hidden border border-[var(--border)] shadow-sm hover:shadow-lg transition-all hover:-translate-y-1 cursor-zoom-in">
-                      <img src={img} alt={`Gallery ${i}`} className="w-full h-full object-cover" />
+                    <div key={i} className="aspect-[3/4] rounded-xl overflow-hidden border border-[var(--border)] shadow-sm hover:shadow-lg transition-all hover:-translate-y-1">
+                      <ZoomableImage
+                        src={img}
+                        alt={`${t.title} — ${i + 1}`}
+                        className="w-full h-full object-cover"
+                        zoomLabel={ZOOM_LABELS[params.lang].zoom}
+                        closeLabel={ZOOM_LABELS[params.lang].close}
+                      />
                     </div>
                   ))}
                 </div>
@@ -133,6 +144,230 @@ export default async function ProductDetailPage({ params }: { params: { lang: Lo
           </div>
         </div>
       </section>
+
+      {/* Downloads Section */}
+      {product.downloads && (() => {
+        const d = product.downloads!;
+        const labels = {
+          en: {
+            eyebrow: 'Download',
+            title: `Get ${t.title} for your desktop`,
+            subtitle: 'Free, offline, no account required.',
+            version: 'Version',
+            recommended: 'Recommended',
+            mac: 'macOS',
+            macArm: 'Apple Silicon (M1 / M2 / M3 / M4)',
+            macIntel: 'Intel',
+            windows: 'Windows',
+            winExe: 'Installer (.exe)',
+            winMsi: 'MSI installer',
+            viewRelease: 'View all releases on GitHub',
+            download: 'Download',
+          },
+          zh: {
+            eyebrow: '下载',
+            title: `下载 ${t.title} 桌面版`,
+            subtitle: '免费、离线，无需注册账号。',
+            version: '版本',
+            recommended: '推荐',
+            mac: 'macOS',
+            macArm: 'Apple 芯片 (M1 / M2 / M3 / M4)',
+            macIntel: 'Intel 芯片',
+            windows: 'Windows',
+            winExe: '安装程序 (.exe)',
+            winMsi: 'MSI 安装包',
+            viewRelease: '在 GitHub 查看全部版本',
+            download: '下载',
+          },
+          ja: {
+            eyebrow: 'ダウンロード',
+            title: `${t.title} デスクトップ版をダウンロード`,
+            subtitle: '無料・オフライン・アカウント不要。',
+            version: 'バージョン',
+            recommended: '推奨',
+            mac: 'macOS',
+            macArm: 'Apple Silicon (M1 / M2 / M3 / M4)',
+            macIntel: 'Intel',
+            windows: 'Windows',
+            winExe: 'インストーラ (.exe)',
+            winMsi: 'MSI インストーラ',
+            viewRelease: 'GitHub ですべてのリリースを見る',
+            download: 'ダウンロード',
+          },
+          'zh-tw': {
+            eyebrow: '下載',
+            title: `下載 ${t.title} 桌面版`,
+            subtitle: '免費、離線，無需註冊帳號。',
+            version: '版本',
+            recommended: '推薦',
+            mac: 'macOS',
+            macArm: 'Apple 晶片 (M1 / M2 / M3 / M4)',
+            macIntel: 'Intel 晶片',
+            windows: 'Windows',
+            winExe: '安裝程式 (.exe)',
+            winMsi: 'MSI 安裝包',
+            viewRelease: '在 GitHub 查看所有版本',
+            download: '下載',
+          },
+        }[params.lang];
+
+        const mac = d.platforms.filter((p) => p.os.startsWith('macos'));
+        const win = d.platforms.filter((p) => p.os.startsWith('windows'));
+
+        const osLabel = (os: typeof d.platforms[number]['os']) => {
+          switch (os) {
+            case 'macos-arm': return labels.macArm;
+            case 'macos-intel': return labels.macIntel;
+            case 'windows-exe': return labels.winExe;
+            case 'windows-msi': return labels.winMsi;
+          }
+        };
+
+        const renderPlatformList = (items: typeof d.platforms) => (
+          <div className="space-y-3">
+            {items.map((p) => (
+              <a
+                key={p.os}
+                href={p.url}
+                className={`group flex items-center justify-between gap-4 p-4 rounded-xl border transition-colors ${
+                  p.recommended
+                    ? 'border-[rgb(var(--accent))]/40 bg-[rgb(var(--accent))]/5 hover:bg-[rgb(var(--accent))]/10'
+                    : 'border-[var(--border)] bg-[var(--card)] hover:border-[rgb(var(--accent))]/40'
+                }`}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="font-bold text-sm truncate">{osLabel(p.os)}</span>
+                  {p.recommended && (
+                    <span className="shrink-0 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-[rgb(var(--accent))]/15 text-[rgb(var(--accent))]">
+                      {labels.recommended}
+                    </span>
+                  )}
+                </div>
+                <Download size={18} className="shrink-0 text-[var(--muted-foreground)] group-hover:text-[rgb(var(--accent))] transition-colors" />
+              </a>
+            ))}
+          </div>
+        );
+
+        return (
+          <section id="download" className="py-24 border-t border-[var(--border)] scroll-mt-20">
+            <div className="container-custom">
+              <div className="max-w-4xl mx-auto space-y-12">
+                <div className="text-center space-y-4">
+                  <h2 className="text-xs font-black uppercase tracking-[0.4em] text-[rgb(var(--accent))]">
+                    {labels.eyebrow}
+                  </h2>
+                  <h3 className="text-4xl font-black tracking-tight">{labels.title}</h3>
+                  <p className="text-lg text-[var(--muted-foreground)]">
+                    {labels.subtitle} <span className="font-mono text-sm ml-2">{labels.version} {d.version}</span>
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {mac.length > 0 && (
+                    <div className="p-6 rounded-2xl border border-[var(--border)] bg-[var(--card)] space-y-5">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-xl font-bold tracking-tight">{labels.mac}</h4>
+                        <span className="text-xs font-mono uppercase tracking-wider text-[var(--muted-foreground)]">.dmg</span>
+                      </div>
+                      {renderPlatformList(mac)}
+                    </div>
+                  )}
+                  {win.length > 0 && (
+                    <div className="p-6 rounded-2xl border border-[var(--border)] bg-[var(--card)] space-y-5">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-xl font-bold tracking-tight">{labels.windows}</h4>
+                        <span className="text-xs font-mono uppercase tracking-wider text-[var(--muted-foreground)]">.exe / .msi</span>
+                      </div>
+                      {renderPlatformList(win)}
+                    </div>
+                  )}
+                </div>
+
+                {d.releaseUrl && (
+                  <div className="text-center">
+                    <a
+                      href={d.releaseUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 text-sm font-bold text-[var(--muted-foreground)] hover:text-[rgb(var(--accent))] transition-colors"
+                    >
+                      {labels.viewRelease}
+                      <ArrowRight size={14} />
+                    </a>
+                  </div>
+                )}
+              </div>
+            </div>
+          </section>
+        );
+      })()}
+
+      {/* Get the App Section (for products without direct downloads but with store links) */}
+      {!product.downloads && product.externalLinks.length > 0 && (() => {
+        const link = product.externalLinks[0];
+        const kind = detectStore(link.url);
+        const labels = STORE_LABELS[params.lang][kind];
+        const Icon = kind === 'app-store' ? Apple : kind === 'chrome-store' ? Puzzle : ExternalLink;
+        const sectionTitle = {
+          en: `Get ${t.title}`,
+          zh: `获取 ${t.title}`,
+          'zh-tw': `取得 ${t.title}`,
+          ja: `${t.title} を入手`,
+        }[params.lang];
+        const eyebrow = {
+          en: 'Available on',
+          zh: '获取渠道',
+          'zh-tw': '取得渠道',
+          ja: '入手先',
+        }[params.lang];
+        const subtitle = {
+          'app-store': {
+            en: 'Tap below to open the App Store on your iPhone or iPad.',
+            zh: '点击下方按钮在 iPhone 或 iPad 上打开 App Store。',
+            'zh-tw': '點擊下方按鈕在 iPhone 或 iPad 上開啟 App Store。',
+            ja: '下のボタンをタップして、iPhone または iPad で App Store を開きます。',
+          },
+          'chrome-store': {
+            en: 'Install the extension from the Chrome Web Store.',
+            zh: '从 Chrome 网上应用店安装扩展。',
+            'zh-tw': '從 Chrome 線上應用程式商店安裝擴充功能。',
+            ja: 'Chrome ウェブストアから拡張機能をインストールします。',
+          },
+          'other': { en: '', zh: '', 'zh-tw': '', ja: '' },
+        }[kind][params.lang];
+
+        return (
+          <section id="get-app" className="py-24 border-t border-[var(--border)] scroll-mt-20">
+            <div className="container-custom">
+              <div className="max-w-3xl mx-auto space-y-10">
+                <div className="text-center space-y-4">
+                  <h2 className="text-xs font-black uppercase tracking-[0.4em] text-[rgb(var(--accent))]">
+                    {eyebrow}
+                  </h2>
+                  <h3 className="text-4xl font-black tracking-tight">{sectionTitle}</h3>
+                  {subtitle && (
+                    <p className="text-lg text-[var(--muted-foreground)] max-w-xl mx-auto">{subtitle}</p>
+                  )}
+                </div>
+
+                <div className="flex justify-center">
+                  <a
+                    href={localizeAppStoreUrl(link.url, params.lang)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-black text-white font-bold text-lg hover:bg-black/85 transition-colors shadow-xl"
+                  >
+                    <Icon size={28} />
+                    <span>{labels.long}</span>
+                    <ArrowRight size={20} className="transition-transform group-hover:translate-x-1" />
+                  </a>
+                </div>
+              </div>
+            </div>
+          </section>
+        );
+      })()}
 
       {/* Community Section - YomiPlay only */}
       {product.slug === 'yomiplay' && (
