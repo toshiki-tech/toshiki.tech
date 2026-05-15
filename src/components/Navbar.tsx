@@ -69,7 +69,7 @@ const Navbar = ({ lang, dict }: { lang: Locale; dict: any }) => {
       <div className="container-custom flex items-center justify-between h-20">
         <Link href={`/${lang}`} className="group flex items-center gap-4">
           <Logo className="w-10 h-10 transition-transform group-hover:scale-110" />
-          <span className="text-xl font-black tracking-tighter uppercase group-hover:text-[rgb(var(--accent))] transition-colors">
+          <span className="text-xl font-black tracking-wide uppercase group-hover:text-[rgb(var(--accent))] transition-colors">
             Toshiki Tech
           </span>
         </Link>
