@@ -121,13 +121,13 @@ export const products: Product[] = [
     techStack: ["Tauri 2", "Rust", "React", "TypeScript", "CodeMirror 6", "kuroshiro", "JMdict"],
     externalLinks: [],
     downloads: {
-      version: "0.1.0",
+      version: "0.1.1",
       releaseUrl: "https://github.com/toshiki-tech/yomi-note/releases/latest",
       platforms: [
-        { os: "macos-arm", url: "https://github.com/toshiki-tech/yomi-note/releases/latest/download/YomiNote_0.1.0_aarch64.dmg" },
-        { os: "macos-intel", url: "https://github.com/toshiki-tech/yomi-note/releases/latest/download/YomiNote_0.1.0_x64.dmg" },
-        { os: "windows-exe", url: "https://github.com/toshiki-tech/yomi-note/releases/latest/download/YomiNote_0.1.0_x64-setup.exe", recommended: true },
-        { os: "windows-msi", url: "https://github.com/toshiki-tech/yomi-note/releases/latest/download/YomiNote_0.1.0_x64_en-US.msi" }
+        { os: "macos-arm", url: "https://github.com/toshiki-tech/yomi-note/releases/download/v0.1.1/YomiNote_0.1.1_aarch64.dmg" },
+        { os: "macos-intel", url: "https://github.com/toshiki-tech/yomi-note/releases/download/v0.1.1/YomiNote_0.1.1_x64.dmg" },
+        { os: "windows-exe", url: "https://github.com/toshiki-tech/yomi-note/releases/download/v0.1.1/YomiNote_0.1.1_x64-setup.exe", recommended: true },
+        { os: "windows-msi", url: "https://github.com/toshiki-tech/yomi-note/releases/download/v0.1.1/YomiNote_0.1.1_x64_en-US.msi" }
       ]
     },
     imageUrl: "/images/products/yominote-ad1.png",
