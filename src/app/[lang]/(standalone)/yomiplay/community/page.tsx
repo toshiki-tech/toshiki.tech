@@ -4,7 +4,8 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { Download, Upload, Search, FileText, Music, Crown, FolderOpen, Apple, Megaphone } from 'lucide-react';
-import { SOURCE_PLATFORMS, CONTENT_LANGUAGES, CONTENT_CATEGORIES, SHOW_POINTS_FEATURE, ALLOW_PRO_REDEMPTION } from '@/lib/yomi-constants';
+import { SOURCE_PLATFORMS, CONTENT_LANGUAGES, CONTENT_CATEGORIES } from '@/lib/yomi-constants';
+import { getFeatureFlags } from '@/lib/yomi-feature-flags';
 import { localizeAppStoreUrl } from '@/data/products';
 import Filters from './Filters';
 import CommunityIntro from './CommunityIntro';
@@ -281,6 +282,8 @@ export default async function CommunityPage({
     }
   );
 
+  const flags = await getFeatureFlags(supabase);
+
   const page = parseInt(searchParams.page || '1');
   const pageSize = 20;
   const offset = (page - 1) * pageSize;
@@ -555,10 +558,10 @@ export default async function CommunityPage({
           learnMoreHref={`/${lang}/p/yomiplay`}
         />
 
-        {SHOW_POINTS_FEATURE && (
+        {flags.points_feature && (
           <>
             {/* Promotional-phase notice — only while Pro redemption is open */}
-            {ALLOW_PRO_REDEMPTION && (
+            {flags.pro_redemption && (
               <div className="mb-6 p-5 rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent">
                 <div className="flex items-start gap-3">
                   <Megaphone size={20} className="text-amber-600 shrink-0 mt-0.5" />
@@ -588,7 +591,7 @@ export default async function CommunityPage({
             />
 
             {/* Pro CTA banner — only while Pro redemption is open */}
-            {ALLOW_PRO_REDEMPTION && (
+            {flags.pro_redemption && (
               <Link
                 href={`/${lang}/yomiplay/community/my-uploads`}
                 className="group relative mb-8 block p-6 rounded-2xl border border-purple-500/30 bg-gradient-to-br from-purple-500/10 via-purple-500/5 to-transparent hover:border-purple-500/60 transition-colors overflow-hidden"

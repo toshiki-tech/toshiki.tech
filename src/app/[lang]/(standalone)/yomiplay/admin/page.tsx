@@ -12,6 +12,8 @@ import PointsConfig from './PointsConfig';
 import ProRequests from './ProRequests';
 import EditUpload from './EditUpload';
 import HidePinControls from './HidePinControls';
+import FeatureFlagsPanel from './FeatureFlagsPanel';
+import { getFeatureFlags } from '@/lib/yomi-feature-flags';
 
 interface AdminUpload {
   id: string;
@@ -113,6 +115,8 @@ export default async function AdminPage({ params: { lang } }: { params: { lang: 
     .eq('status', 'pending')
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     .order('created_at', { ascending: true }) as { data: any[] | null };
+
+  const featureFlags = await getFeatureFlags(supabase);
 
   return (
     <div className="container-custom py-12">
@@ -311,6 +315,8 @@ export default async function AdminPage({ params: { lang } }: { params: { lang: 
           </div>
         )}
       </section>
+
+      <FeatureFlagsPanel initialFlags={featureFlags} />
 
       {/* Points Config */}
       <section className="mb-12">

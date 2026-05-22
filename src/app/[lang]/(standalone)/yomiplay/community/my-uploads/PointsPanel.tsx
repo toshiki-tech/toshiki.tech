@@ -5,7 +5,6 @@ import { createClient } from '@/lib/supabase-browser';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 import { Crown, Star, ChevronDown, ChevronUp, ExternalLink, ImagePlus, ShieldCheck } from 'lucide-react';
-import { ALLOW_PRO_REDEMPTION } from '@/lib/yomi-constants';
 
 const labels = {
   en: {
@@ -130,7 +129,7 @@ interface PointsLog {
   created_at: string;
 }
 
-export default function PointsPanel({ lang }: { lang: string }) {
+export default function PointsPanel({ lang, allowProRedemption }: { lang: string; allowProRedemption: boolean }) {
   const t = labels[lang as keyof typeof labels] || labels.en;
   const { user } = useAuth();
   const [points, setPoints] = useState(0);
@@ -241,7 +240,7 @@ export default function PointsPanel({ lang }: { lang: string }) {
       <div className="text-4xl font-bold mb-2">{points}</div>
 
       {/* Progress to Pro — only when redemption is open */}
-      {!isPro && ALLOW_PRO_REDEMPTION && (
+      {!isPro && allowProRedemption && (
         <div className="mb-4">
           <div className="flex justify-between text-xs text-[var(--muted-foreground)] mb-1">
             <span>0</span>
@@ -262,7 +261,7 @@ export default function PointsPanel({ lang }: { lang: string }) {
       )}
 
       {/* Paused notice — shown when Pro redemption is closed and user is not already Pro */}
-      {!isPro && !ALLOW_PRO_REDEMPTION && (
+      {!isPro && !allowProRedemption && (
         <div className="mb-4 p-3 rounded-xl bg-[var(--muted)] text-xs text-[var(--muted-foreground)] leading-relaxed">
           {t.redemptionPaused}
         </div>
@@ -285,7 +284,7 @@ export default function PointsPanel({ lang }: { lang: string }) {
       )}
 
       {/* Pro apply form (only for non-Pro users, and only when redemption is open) */}
-      {!isPro && ALLOW_PRO_REDEMPTION && (
+      {!isPro && allowProRedemption && (
         <div className="mb-4">
           {/* Show rejected message */}
           {proRequest?.status === 'rejected' && (

@@ -8,7 +8,6 @@ import { ChevronDown, FolderOpen, LogOut, Star, Shield } from 'lucide-react';
 import Logo from '@/components/Logo';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { createClient } from '@/lib/supabase-browser';
-import { SHOW_POINTS_FEATURE } from '@/lib/yomi-constants';
 import LangSwitcher from '@/components/LangSwitcher';
 
 function AuthNav({ lang }: { lang: Locale }) {
@@ -18,6 +17,7 @@ function AuthNav({ lang }: { lang: Locale }) {
   const [points, setPoints] = useState<number | null>(null);
   const [isPro, setIsPro] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [pointsFeatureEnabled, setPointsFeatureEnabled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -37,14 +37,23 @@ function AuthNav({ lang }: { lang: Locale }) {
           setIsAdmin(data.role === 'admin');
         }
       });
-    // Trigger daily login (once per session) — only when points feature is on
-    if (SHOW_POINTS_FEATURE) {
-      const key = `daily_login_${user.id}_${new Date().toISOString().split('T')[0]}`;
-      if (!sessionStorage.getItem(key)) {
-        sessionStorage.setItem(key, '1');
-        fetch('/api/yomi/points/daily-login', { method: 'POST' });
-      }
-    }
+    // Resolve feature flags from the public endpoint, then conditionally fire
+    // the daily-login bonus once per session.
+    fetch('/api/yomiplay/feature-flags')
+      .then((r) => r.json())
+      .then((data) => {
+        const enabled = !!data?.points_feature_enabled;
+        setPointsFeatureEnabled(enabled);
+        if (!enabled) return;
+        const key = `daily_login_${user.id}_${new Date().toISOString().split('T')[0]}`;
+        if (!sessionStorage.getItem(key)) {
+          sessionStorage.setItem(key, '1');
+          fetch('/api/yomi/points/daily-login', { method: 'POST' });
+        }
+      })
+      .catch(() => {
+        // ignore — leave pointsFeatureEnabled false
+      });
   }, [user]);
 
   useEffect(() => {
@@ -81,7 +90,7 @@ function AuthNav({ lang }: { lang: Locale }) {
               PRO
             </span>
           )}
-          {SHOW_POINTS_FEATURE && points !== null && (
+          {pointsFeatureEnabled && points !== null && (
             <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-600">
               <Star size={10} />
               {points}
