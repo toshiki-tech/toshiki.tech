@@ -22,6 +22,12 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
+  // Skip locale redirect for YomiPlay app self-update manifests
+  // (fixed-URL static files served from public/yomiplay/, e.g. android-version.json, ios-version.json)
+  if (/^\/yomiplay\/[\w-]+\.json$/.test(pathname)) {
+    return NextResponse.next()
+  }
+
   // Skip locale redirect for non-localized pages (e.g. site-wide admin)
   if (pathname === '/admin' || pathname.startsWith('/admin/')) {
     return NextResponse.next()

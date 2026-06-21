@@ -1,0 +1,9 @@
+{
+  "versionCode": 1,
+  "versionName": "0.1.0",
+  "apkUrl": "https://REPLACE-WITH-STORAGE-URL/yomiplay-0.1.0.apk",
+  "releaseNotes": "• YomiPlay Android 首个自主分发版本",
+  "minSupportedVersionCode": 1,
+  "forceUpdate": false,
+  "apkSha256": ""
+}
