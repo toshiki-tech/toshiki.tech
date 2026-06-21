@@ -167,13 +167,6 @@ export default function HomeClient({ lang, dict, posts }: { lang: Locale; dict: 
                     <p className="text-[var(--muted-foreground)] leading-relaxed text-sm h-12 line-clamp-2">
                       {product.translations[lang].subtitle}
                     </p>
-                    <div className="flex flex-wrap gap-2 pt-2">
-                      {product.techStack.slice(0, 3).map(tech => (
-                        <span key={tech} className="text-[10px] uppercase font-bold tracking-wider px-2 py-1 rounded bg-[var(--border)]/50 border border-[var(--border)] text-[var(--muted-foreground)]">
-                          {tech}
-                        </span>
-                      ))}
-                    </div>
                     {product.downloads && (
                       <div className="pt-4 mt-auto">
                         <Link

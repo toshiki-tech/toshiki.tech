@@ -6,8 +6,10 @@
 
 | 资源 | 地址 | 用途 |
 |---|---|---|
-| Android 清单 | `https://toshiki.tech/yomiplay/android-version.json` | 安卓自更新检查 |
-| iOS 清单 | `https://toshiki.tech/yomiplay/ios-version.json` | 苹果版本/更新说明 |
+| Android 清单 | `https://www.toshiki.tech/yomiplay/android-version.json` | 安卓自更新检查 |
+| iOS 清单 | `https://www.toshiki.tech/yomiplay/ios-version.json` | 苹果版本/更新说明 |
+
+> ⚠️ 规范域名是 `www.toshiki.tech`。apex `toshiki.tech` 会 307 跳转到 www，客户端请清单时**直接用 www 域名**，避免多一次重定向。
 
 > 这些路径在 `src/middleware.ts` 里被显式放行，不做 locale 重定向。
 > APK **不放在本仓库**，托管在对象存储（R2 / S3 等），清单里的 `apkUrl` 填存储给的 HTTPS 直链。

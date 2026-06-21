@@ -161,6 +161,17 @@ function StandaloneLayoutInner({
     return segments.join('/');
   };
 
+  const footerLinks: { href: string; label: Record<Locale, string> }[] = [
+    { href: 'pricing', label: { en: 'Pricing', zh: '价格', 'zh-tw': '價格', ja: '料金プラン' } },
+    { href: 'download', label: { en: 'Download', zh: '下载', 'zh-tw': '下載', ja: 'ダウンロード' } },
+    { href: 'help', label: { en: 'Help', zh: '帮助中心', 'zh-tw': '幫助中心', ja: 'ヘルプ' } },
+    { href: 'contact', label: { en: 'Contact', zh: '联系我们', 'zh-tw': '聯絡我們', ja: 'お問い合わせ' } },
+    { href: 'terms', label: { en: 'Terms of Use', zh: '使用条款', 'zh-tw': '使用條款', ja: '利用規約' } },
+    { href: 'privacy', label: { en: 'Privacy Policy', zh: '隐私政策', 'zh-tw': '隱私政策', ja: 'プライバシー' } },
+    { href: 'refund', label: { en: 'Refund Policy', zh: '退款政策', 'zh-tw': '退款政策', ja: '返金ポリシー' } },
+    { href: 'legal', label: { en: 'Legal Notice', zh: '特商法标示', 'zh-tw': '特商法標示', ja: '特定商取引法表記' } },
+  ];
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Semi-transparent Mini Header */}
@@ -196,17 +207,16 @@ function StandaloneLayoutInner({
           <p className="text-xs text-[var(--muted-foreground)]">
             © 2026 Toshiki Tech. All rights reserved.
           </p>
-          <div className="flex gap-6">
-            <Link href={`/${params.lang}/yomiplay/terms`} className="text-xs text-[var(--muted-foreground)] hover:text-[rgb(var(--accent))]">
-              {params.lang === 'zh' ? '使用条款' :
-               params.lang === 'zh-tw' ? '使用條款' :
-               params.lang === 'ja' ? '利用規約' : 'Terms of Use'}
-            </Link>
-            <Link href={`/${params.lang}/yomiplay/privacy`} className="text-xs text-[var(--muted-foreground)] hover:text-[rgb(var(--accent))]">
-              {params.lang === 'zh' ? '隐私政策' :
-               params.lang === 'zh-tw' ? '隱私政策' :
-               params.lang === 'ja' ? 'プライバシー' : 'Privacy Policy'}
-            </Link>
+          <div className="flex flex-wrap justify-center gap-x-5 gap-y-2">
+            {footerLinks.map((l) => (
+              <Link
+                key={l.href}
+                href={`/${params.lang}/yomiplay/${l.href}`}
+                className="text-xs text-[var(--muted-foreground)] hover:text-[rgb(var(--accent))]"
+              >
+                {l.label[params.lang] || l.label.en}
+              </Link>
+            ))}
           </div>
         </div>
       </footer>

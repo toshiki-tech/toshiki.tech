@@ -1,7 +1,7 @@
 import { products, localizeAppStoreUrl } from '@/data/products';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, CheckCircle2, Cpu, ArrowRight, Users, Upload, Download, Apple, Puzzle, ExternalLink } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Cpu, ArrowRight, Users, Upload, Download, Apple, Puzzle, ExternalLink, Smartphone } from 'lucide-react';
 import { Locale, getDictionary } from '@/lib/get-dictionary';
 import ZoomableImage from '@/components/ZoomableImage';
 import { ZOOM_LABELS } from '@/lib/zoom-labels';
@@ -304,7 +304,7 @@ export default async function ProductDetailPage({ params }: { params: { lang: Lo
       })()}
 
       {/* Get the App Section (for products without direct downloads but with store links) */}
-      {!product.downloads && product.externalLinks.length > 0 && (() => {
+      {!product.downloads && product.externalLinks.length > 0 && product.slug !== 'yomiplay' && (() => {
         const link = product.externalLinks[0];
         const kind = detectStore(link.url);
         const labels = STORE_LABELS[params.lang][kind];
@@ -362,6 +362,202 @@ export default async function ProductDetailPage({ params }: { params: { lang: Lo
                     <span>{labels.long}</span>
                     <ArrowRight size={20} className="transition-transform group-hover:translate-x-1" />
                   </a>
+                </div>
+              </div>
+            </div>
+          </section>
+        );
+      })()}
+
+      {/* YomiPlay — Dual-platform download */}
+      {product.slug === 'yomiplay' && (() => {
+        const dl = {
+          en: {
+            eyebrow: 'Available on',
+            heading: 'Get YomiPlay',
+            sub: 'Download on iOS or get the Android APK — start reading with audio in minutes.',
+            ios: 'Download on the App Store',
+            android: 'Android APK',
+            androidSub: 'Coming Soon',
+            allPlatforms: 'All platforms & versions',
+          },
+          zh: {
+            eyebrow: '下载渠道',
+            heading: '下载 YomiPlay',
+            sub: '在 iOS 上下载，或获取安卓 APK — 几分钟内开启带音频的沉浸阅读体验。',
+            ios: '在 App Store 下载',
+            android: '安卓 APK',
+            androidSub: '即将推出',
+            allPlatforms: '查看全部平台及版本',
+          },
+          'zh-tw': {
+            eyebrow: '下載渠道',
+            heading: '下載 YomiPlay',
+            sub: '在 iOS 上下載，或取得安卓 APK — 幾分鐘內開啟帶音訊的沉浸閱讀體驗。',
+            ios: '在 App Store 下載',
+            android: '安卓 APK',
+            androidSub: '即將推出',
+            allPlatforms: '查看全部平台及版本',
+          },
+          ja: {
+            eyebrow: '入手先',
+            heading: 'YomiPlay を入手',
+            sub: 'iOS は App Store から、Android は APK を直接ダウンロード。',
+            ios: 'App Store からダウンロード',
+            android: 'Android APK',
+            androidSub: '近日公開',
+            allPlatforms: 'すべてのプラットフォーム・バージョン',
+          },
+        }[params.lang];
+
+        return (
+          <section id="get-app" className="py-24 border-t border-[var(--border)] scroll-mt-20">
+            <div className="container-custom">
+              <div className="max-w-3xl mx-auto space-y-10">
+                <div className="text-center space-y-4">
+                  <h2 className="text-xs font-black uppercase tracking-[0.4em] text-[rgb(var(--accent))]">{dl.eyebrow}</h2>
+                  <h3 className="text-4xl font-black tracking-tight">{dl.heading}</h3>
+                  <p className="text-lg text-[var(--muted-foreground)] max-w-xl mx-auto">{dl.sub}</p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-md mx-auto">
+                  <a
+                    href="https://apps.apple.com/jp/app/yomiplay/id6760715932"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex flex-col items-center gap-3 p-6 rounded-2xl bg-black text-white font-bold hover:bg-black/85 transition-colors shadow-xl text-center"
+                  >
+                    <Apple size={32} />
+                    <span className="text-sm">{dl.ios}</span>
+                  </a>
+
+                  <div className="flex flex-col items-center gap-3 p-6 rounded-2xl border-2 border-dashed border-[var(--border)] text-center opacity-50 select-none">
+                    <Smartphone size={32} className="text-[var(--muted-foreground)]" />
+                    <span className="font-bold text-sm">{dl.android}</span>
+                    <span className="text-xs text-[var(--muted-foreground)]">{dl.androidSub}</span>
+                  </div>
+                </div>
+
+                <div className="text-center">
+                  <Link
+                    href={`/${params.lang}/yomiplay/download`}
+                    className="inline-flex items-center gap-1.5 text-sm font-bold text-[var(--muted-foreground)] hover:text-[rgb(var(--accent))] transition-colors"
+                  >
+                    {dl.allPlatforms}
+                    <ArrowRight size={14} />
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </section>
+        );
+      })()}
+
+      {/* YomiPlay — Pricing summary */}
+      {product.slug === 'yomiplay' && (() => {
+        const pr = {
+          en: {
+            eyebrow: 'Pricing',
+            heading: 'Simple, transparent pricing',
+            sub: 'Start for free. Upgrade when you\'re ready.',
+            plans: [
+              { name: 'Free', price: '¥0', period: '', badge: null, features: ['Core reading + TTS', 'Basic furigana', 'Community subtitles'] },
+              { name: 'Premium Monthly', price: '¥180', period: '/mo', badge: null, features: ['Everything in Free', 'Advanced AI TTS', 'Priority support'] },
+              { name: 'Premium Yearly', price: '¥1,480', period: '/yr', badge: 'Save 31%', features: ['Everything in Monthly', 'Best value', '~¥123/month'] },
+              { name: 'Lifetime', price: '¥2,980', period: '', badge: 'One-time', features: ['All Premium features', 'All future updates', 'Forever'] },
+            ],
+            cta: 'View full pricing',
+          },
+          zh: {
+            eyebrow: '价格',
+            heading: '简单透明的定价',
+            sub: '免费开始使用，准备好时再升级。',
+            plans: [
+              { name: '免费版', price: '¥0', period: '', badge: null, features: ['基础阅读 + TTS', '基本假名标注', '社区字幕'] },
+              { name: 'Premium 月付', price: '¥180', period: '/月', badge: null, features: ['包含免费版全部功能', '高级 AI TTS', '优先支持'] },
+              { name: 'Premium 年付', price: '¥1,480', period: '/年', badge: '省 31%', features: ['包含月付全部功能', '最优性价比', '约 ¥123/月'] },
+              { name: '买断版', price: '¥2,980', period: '', badge: '一次付清', features: ['全部 Premium 功能', '永久更新', '买断终身'] },
+            ],
+            cta: '查看完整价格方案',
+          },
+          'zh-tw': {
+            eyebrow: '價格',
+            heading: '簡單透明的定價',
+            sub: '免費開始使用，準備好時再升級。',
+            plans: [
+              { name: '免費版', price: '¥0', period: '', badge: null, features: ['基礎閱讀 + TTS', '基本假名標注', '社區字幕'] },
+              { name: 'Premium 月付', price: '¥180', period: '/月', badge: null, features: ['包含免費版全部功能', '進階 AI TTS', '優先支援'] },
+              { name: 'Premium 年付', price: '¥1,480', period: '/年', badge: '省 31%', features: ['包含月付全部功能', '最優性價比', '約 ¥123/月'] },
+              { name: '買斷版', price: '¥2,980', period: '', badge: '一次付清', features: ['全部 Premium 功能', '永久更新', '買斷終身'] },
+            ],
+            cta: '查看完整價格方案',
+          },
+          ja: {
+            eyebrow: '料金',
+            heading: 'シンプルで透明な料金体系',
+            sub: '無料で始めて、準備ができたらアップグレード。',
+            plans: [
+              { name: '無料版', price: '¥0', period: '', badge: null, features: ['基本読書 + TTS', 'ふりがな表示', 'コミュニティ字幕'] },
+              { name: 'Premium 月払い', price: '¥180', period: '/月', badge: null, features: ['無料版の全機能', '高度な AI TTS', '優先サポート'] },
+              { name: 'Premium 年払い', price: '¥1,480', period: '/年', badge: '31% お得', features: ['月払いの全機能', '最もお得', '月あたり約 ¥123'] },
+              { name: '買い切り', price: '¥2,980', period: '', badge: '一括払い', features: ['全 Premium 機能', '将来のアップデート', '永久に利用可能'] },
+            ],
+            cta: '詳細な料金プランを見る',
+          },
+        }[params.lang];
+
+        return (
+          <section className="py-24 border-t border-[var(--border)]">
+            <div className="container-custom">
+              <div className="max-w-5xl mx-auto space-y-12">
+                <div className="text-center space-y-4">
+                  <h2 className="text-xs font-black uppercase tracking-[0.4em] text-[rgb(var(--accent))]">{pr.eyebrow}</h2>
+                  <h3 className="text-4xl font-black tracking-tight">{pr.heading}</h3>
+                  <p className="text-lg text-[var(--muted-foreground)]">{pr.sub}</p>
+                </div>
+
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  {pr.plans.map((plan) => (
+                    <div
+                      key={plan.name}
+                      className={`relative pt-6 p-5 rounded-2xl border flex flex-col gap-4 ${
+                        plan.badge === (params.lang === 'en' ? 'Save 31%' : params.lang === 'ja' ? '31% お得' : '省 31%')
+                          ? 'border-[rgb(var(--accent))]/50 bg-[rgb(var(--accent))]/5'
+                          : 'border-[var(--border)] bg-[var(--card)]'
+                      }`}
+                    >
+                      {plan.badge && (
+                        <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] font-black uppercase tracking-wider px-3 py-0.5 rounded-full bg-[rgb(var(--accent))] text-white whitespace-nowrap">
+                          {plan.badge}
+                        </span>
+                      )}
+                      <div>
+                        <p className="text-xs font-bold text-[var(--muted-foreground)] uppercase tracking-wider leading-tight">{plan.name}</p>
+                        <p className="text-3xl font-black mt-1 tracking-tight">
+                          {plan.price}
+                          <span className="text-sm font-normal text-[var(--muted-foreground)]">{plan.period}</span>
+                        </p>
+                      </div>
+                      <ul className="space-y-1.5 flex-1">
+                        {plan.features.map((f) => (
+                          <li key={f} className="flex items-start gap-2 text-xs text-[var(--muted-foreground)]">
+                            <CheckCircle2 size={12} className="text-[rgb(var(--accent))] shrink-0 mt-0.5" />
+                            {f}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="text-center">
+                  <Link
+                    href={`/${params.lang}/yomiplay/pricing`}
+                    className="inline-flex items-center gap-1.5 text-sm font-bold text-[var(--muted-foreground)] hover:text-[rgb(var(--accent))] transition-colors"
+                  >
+                    {pr.cta}
+                    <ArrowRight size={14} />
+                  </Link>
                 </div>
               </div>
             </div>
@@ -474,6 +670,81 @@ export default async function ProductDetailPage({ params }: { params: { lang: Lo
           </div>
         </section>
       )}
+
+      {/* YomiPlay Resources Hub — YomiPlay only */}
+      {product.slug === 'yomiplay' && (() => {
+        const r = {
+          en: {
+            eyebrow: 'Resources',
+            heading: 'Explore More',
+            groups: [
+              { title: 'Product', links: [ { href: 'pricing', label: 'Pricing' }, { href: 'download', label: 'Download' }, { href: 'changelog', label: 'Changelog' }, { href: 'roadmap', label: 'Roadmap' } ] },
+              { title: 'Support', links: [ { href: 'help', label: 'Help Center' }, { href: 'contact', label: 'Contact' } ] },
+              { title: 'Legal', links: [ { href: 'terms', label: 'Terms of Use' }, { href: 'privacy', label: 'Privacy Policy' }, { href: 'refund', label: 'Refund Policy' }, { href: 'legal', label: 'Legal Notice' } ] },
+            ],
+          },
+          zh: {
+            eyebrow: '资源',
+            heading: '了解更多',
+            groups: [
+              { title: '产品', links: [ { href: 'pricing', label: '价格方案' }, { href: 'download', label: '下载' }, { href: 'changelog', label: '更新记录' }, { href: 'roadmap', label: '开发路线图' } ] },
+              { title: '支持', links: [ { href: 'help', label: '帮助中心' }, { href: 'contact', label: '联系我们' } ] },
+              { title: '法律条款', links: [ { href: 'terms', label: '使用条款' }, { href: 'privacy', label: '隐私政策' }, { href: 'refund', label: '退款政策' }, { href: 'legal', label: '特商法标示' } ] },
+            ],
+          },
+          'zh-tw': {
+            eyebrow: '資源',
+            heading: '了解更多',
+            groups: [
+              { title: '產品', links: [ { href: 'pricing', label: '價格方案' }, { href: 'download', label: '下載' }, { href: 'changelog', label: '更新記錄' }, { href: 'roadmap', label: '開發路線圖' } ] },
+              { title: '支援', links: [ { href: 'help', label: '幫助中心' }, { href: 'contact', label: '聯絡我們' } ] },
+              { title: '法律條款', links: [ { href: 'terms', label: '使用條款' }, { href: 'privacy', label: '隱私政策' }, { href: 'refund', label: '退款政策' }, { href: 'legal', label: '特商法標示' } ] },
+            ],
+          },
+          ja: {
+            eyebrow: 'リソース',
+            heading: 'もっと詳しく',
+            groups: [
+              { title: 'プロダクト', links: [ { href: 'pricing', label: '料金プラン' }, { href: 'download', label: 'ダウンロード' }, { href: 'changelog', label: '更新履歴' }, { href: 'roadmap', label: 'ロードマップ' } ] },
+              { title: 'サポート', links: [ { href: 'help', label: 'ヘルプセンター' }, { href: 'contact', label: 'お問い合わせ' } ] },
+              { title: '規約・法務', links: [ { href: 'terms', label: '利用規約' }, { href: 'privacy', label: 'プライバシーポリシー' }, { href: 'refund', label: '返金ポリシー' }, { href: 'legal', label: '特定商取引法表記' } ] },
+            ],
+          },
+        }[params.lang];
+
+        return (
+          <section className="py-24 border-t border-[var(--border)]">
+            <div className="container-custom">
+              <div className="max-w-4xl mx-auto space-y-12">
+                <div className="text-center space-y-4">
+                  <h2 className="text-xs font-black uppercase tracking-[0.4em] text-[rgb(var(--accent))]">{r.eyebrow}</h2>
+                  <h3 className="text-4xl font-black tracking-tight">{r.heading}</h3>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+                  {r.groups.map((g) => (
+                    <div key={g.title} className="space-y-4">
+                      <h4 className="text-xs font-black uppercase tracking-wider text-[var(--muted-foreground)]">{g.title}</h4>
+                      <ul className="space-y-2.5">
+                        {g.links.map((l) => (
+                          <li key={l.href}>
+                            <Link
+                              href={`/${params.lang}/yomiplay/${l.href}`}
+                              className="group inline-flex items-center gap-1.5 font-bold hover:text-[rgb(var(--accent))] transition-colors"
+                            >
+                              {l.label}
+                              <ArrowRight size={14} className="opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+        );
+      })()}
 
       {/* Tech Breakdown */}
       <section className="py-24 border-t border-[var(--border)]">
