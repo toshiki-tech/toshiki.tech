@@ -15,7 +15,7 @@ const content = {
         name: 'Free',
         price: '¥0',
         period: '',
-        tagline: 'Get started with the essentials and try core listening features at no cost.',
+        tagline: '1 hour/month of free speech-to-text — experience the core listening workflow at no cost.',
         highlight: false,
         badge: ''
       },
@@ -23,7 +23,7 @@ const content = {
         name: 'Premium Monthly',
         price: '¥180',
         period: '/month',
-        tagline: 'Unlock unlimited subtitle generation, shadowing, TTS, and Anki export.',
+        tagline: 'Unlock unlimited subtitle generation, shadowing, TTS, and audio/video subtitle import, export & sharing.',
         highlight: false,
         badge: ''
       },
@@ -47,16 +47,22 @@ const content = {
     compareTitle: 'Feature Comparison',
     compareHeaders: { feature: 'Feature', free: 'Free', premium: 'Premium' },
     features: [
-      { name: 'Subtitle generation', free: 'Daily quota', premium: 'Unlimited' },
+      { name: 'Recognition quota', isHeader: true, free: '', premium: '' },
+      { name: 'Podcast audio recognition', free: '1 hr / month', premium: 'Unlimited' },
+      { name: 'Online audio/video link recognition', free: '1 hr / month', premium: 'Unlimited' },
+      { name: 'Learning tools — all plans', isHeader: true, free: '', premium: '' },
       { name: 'Translation', free: true, premium: true },
       { name: 'Furigana display', free: true, premium: true },
       { name: 'Romaji', free: true, premium: true },
       { name: 'Sentence-by-sentence playback', free: true, premium: true },
-      { name: 'Shadowing', free: false, premium: true },
+      { name: 'Shadowing', free: true, premium: true },
+      { name: 'Premium exclusive', isHeader: true, free: '', premium: '' },
       { name: 'Text-to-Speech (TTS)', free: false, premium: true },
-      { name: 'Anki export', free: false, premium: true },
-      { name: 'Supported platforms', free: 'iOS', premium: 'iOS / Android' }
+      { name: 'Subtitle file import, export & sharing', free: false, premium: true },
+      { name: 'Platform', isHeader: true, free: '', premium: '' },
+      { name: 'Supported platforms', free: 'iOS / Android', premium: 'iOS / Android' },
     ],
+    androidNote: 'Prices listed above apply to the Android version only. iOS pricing is set by the App Store and may differ — please check the App Store listing for current iOS prices.',
     faqTitle: 'Frequently Asked Questions',
     faqs: [
       {
@@ -90,7 +96,7 @@ const content = {
         name: 'Free 免费版',
         price: '¥0',
         period: '',
-        tagline: '零成本上手，体验核心精听功能。',
+        tagline: '每月 1 小时语音转文字配额，免费体验核心精听功能。',
         highlight: false,
         badge: ''
       },
@@ -98,7 +104,7 @@ const content = {
         name: 'Premium 月付',
         price: '¥180',
         period: '/月',
-        tagline: '解锁无限字幕生成、跟读、文本朗读与 Anki 导出。',
+        tagline: '解锁无限字幕生成、跟读、文本朗读及音视频字幕资源导入导出分享功能。',
         highlight: false,
         badge: ''
       },
@@ -122,16 +128,22 @@ const content = {
     compareTitle: '功能对比',
     compareHeaders: { feature: '功能', free: '免费版', premium: 'Premium' },
     features: [
-      { name: '字幕生成', free: '每日额度', premium: '无限' },
+      { name: '识别额度', isHeader: true, free: '', premium: '' },
+      { name: '播客音频识别', free: '每月1小时', premium: '无限' },
+      { name: '网络音视频链接识别', free: '每月1小时内', premium: '无限' },
+      { name: '学习功能 — 所有版本', isHeader: true, free: '', premium: '' },
       { name: '翻译', free: true, premium: true },
       { name: '假名标注', free: true, premium: true },
       { name: '罗马字', free: true, premium: true },
-      { name: '逐句播放', free: true, premium: true },
-      { name: '跟读', free: false, premium: true },
+      { name: '逐句精听播放', free: true, premium: true },
+      { name: '跟读', free: true, premium: true },
+      { name: 'Premium 专属', isHeader: true, free: '', premium: '' },
       { name: '文本朗读（TTS）', free: false, premium: true },
-      { name: 'Anki 导出', free: false, premium: true },
-      { name: '对应平台', free: 'iOS', premium: 'iOS / Android' }
+      { name: '音视频字幕文件导入导出', free: false, premium: true },
+      { name: '平台', isHeader: true, free: '', premium: '' },
+      { name: '支持平台', free: 'iOS / Android', premium: 'iOS / Android' },
     ],
+    androidNote: '以上价格仅适用于 Android 版本。iOS 版本的实际价格由 App Store 决定，可能有所不同，请以 App Store 内显示为准。',
     faqTitle: '常见问题',
     faqs: [
       {
@@ -165,7 +177,7 @@ const content = {
         name: 'Free 免費版',
         price: '¥0',
         period: '',
-        tagline: '零成本上手，體驗核心精聽功能。',
+        tagline: '每月 1 小時語音轉文字配額，免費體驗核心精聽功能。',
         highlight: false,
         badge: ''
       },
@@ -173,7 +185,7 @@ const content = {
         name: 'Premium 月付',
         price: '¥180',
         period: '/月',
-        tagline: '解鎖無限字幕生成、跟讀、文字朗讀與 Anki 匯出。',
+        tagline: '解鎖無限字幕生成、跟讀、文字朗讀及音視頻字幕資源導入導出分享功能。',
         highlight: false,
         badge: ''
       },
@@ -197,16 +209,22 @@ const content = {
     compareTitle: '功能對比',
     compareHeaders: { feature: '功能', free: '免費版', premium: 'Premium' },
     features: [
-      { name: '字幕生成', free: '每日額度', premium: '無限' },
+      { name: '識別額度', isHeader: true, free: '', premium: '' },
+      { name: '播客音頻識別', free: '每月1小時', premium: '無限' },
+      { name: '網路音視頻連結識別', free: '每月1小時內', premium: '無限' },
+      { name: '學習功能 — 所有版本', isHeader: true, free: '', premium: '' },
       { name: '翻譯', free: true, premium: true },
-      { name: '假名標註', free: true, premium: true },
+      { name: '假名標注', free: true, premium: true },
       { name: '羅馬字', free: true, premium: true },
-      { name: '逐句播放', free: true, premium: true },
-      { name: '跟讀', free: false, premium: true },
+      { name: '逐句精聽播放', free: true, premium: true },
+      { name: '跟讀', free: true, premium: true },
+      { name: 'Premium 專屬', isHeader: true, free: '', premium: '' },
       { name: '文字朗讀（TTS）', free: false, premium: true },
-      { name: 'Anki 匯出', free: false, premium: true },
-      { name: '對應平台', free: 'iOS', premium: 'iOS / Android' }
+      { name: '音視頻字幕檔案導入導出', free: false, premium: true },
+      { name: '平台', isHeader: true, free: '', premium: '' },
+      { name: '支援平台', free: 'iOS / Android', premium: 'iOS / Android' },
     ],
+    androidNote: '以上價格僅適用於 Android 版本。iOS 版本的實際價格由 App Store 決定，可能有所不同，請以 App Store 內顯示為準。',
     faqTitle: '常見問題',
     faqs: [
       {
@@ -240,7 +258,7 @@ const content = {
         name: 'Free（無料）',
         price: '¥0',
         period: '',
-        tagline: 'コストゼロで始められ、コア機能を気軽にお試しいただけます。',
+        tagline: '毎月1時間の音声テキスト変換枠付き、無料でコア精聴機能をお試しいただけます。',
         highlight: false,
         badge: ''
       },
@@ -248,7 +266,7 @@ const content = {
         name: 'Premium 月額',
         price: '¥180',
         period: '/月',
-        tagline: '無制限の字幕生成、シャドーイング、読み上げ、Anki エクスポートを開放。',
+        tagline: '無制限の字幕生成・シャドーイング・読み上げ、音声／動画字幕リソースのインポート・エクスポート・共有を解放。',
         highlight: false,
         badge: ''
       },
@@ -272,16 +290,22 @@ const content = {
     compareTitle: '機能比較',
     compareHeaders: { feature: '機能', free: 'Free', premium: 'Premium' },
     features: [
-      { name: '字幕生成', free: '1日の上限あり', premium: '無制限' },
+      { name: '認識枠', isHeader: true, free: '', premium: '' },
+      { name: 'ポッドキャスト音声認識', free: '月1時間', premium: '無制限' },
+      { name: 'ネット音声・動画リンク認識', free: '月1時間内', premium: '無制限' },
+      { name: '学習機能 — 全プラン共通', isHeader: true, free: '', premium: '' },
       { name: '翻訳', free: true, premium: true },
       { name: 'ふりがな表示', free: true, premium: true },
       { name: 'ローマ字', free: true, premium: true },
-      { name: '一文ずつ再生', free: true, premium: true },
-      { name: 'シャドーイング', free: false, premium: true },
+      { name: '一文ずつ精聴再生', free: true, premium: true },
+      { name: 'シャドーイング', free: true, premium: true },
+      { name: 'Premium 限定', isHeader: true, free: '', premium: '' },
       { name: '読み上げ（TTS）', free: false, premium: true },
-      { name: 'Anki エクスポート', free: false, premium: true },
-      { name: '対応プラットフォーム', free: 'iOS', premium: 'iOS / Android' }
+      { name: '字幕ファイル 読み込み・書き出し・共有', free: false, premium: true },
+      { name: 'プラットフォーム', isHeader: true, free: '', premium: '' },
+      { name: '対応プラットフォーム', free: 'iOS / Android', premium: 'iOS / Android' },
     ],
+    androidNote: '上記の価格は Android 版の料金です。iOS 版の価格は App Store の設定に準じるため異なる場合があります。最新の iOS 価格は App Store の掲載ページをご確認ください。',
     faqTitle: 'よくあるご質問',
     faqs: [
       {
@@ -384,6 +408,12 @@ export default function YomiPlayPricingPage({ params: { lang } }: { params: { la
         ))}
       </div>
 
+      {/* Android-only pricing notice */}
+      <div className="mb-10 flex items-start gap-3 rounded-xl border border-[var(--border)] bg-[var(--muted)]/40 px-5 py-4 text-sm text-[var(--muted-foreground)]">
+        <span className="mt-0.5 shrink-0 text-base">ℹ️</span>
+        <p className="leading-relaxed">{t.androidNote}</p>
+      </div>
+
       {/* Feature comparison table */}
       <div className="mb-20">
         <h2 className="text-2xl font-bold text-[var(--foreground-rgb)] mb-6 text-center">
@@ -406,20 +436,28 @@ export default function YomiPlayPricingPage({ params: { lang } }: { params: { la
             </thead>
             <tbody>
               {t.features.map((feature, idx) => (
-                <tr
-                  key={idx}
-                  className="border-b border-[var(--border)] last:border-b-0"
-                >
-                  <td className="px-6 py-4 text-[var(--foreground-rgb)]">
-                    {feature.name}
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    {renderCell(feature.free)}
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    {renderCell(feature.premium)}
-                  </td>
-                </tr>
+                feature.isHeader ? (
+                  <tr key={idx} className="bg-[var(--muted)]/40">
+                    <td colSpan={3} className="px-6 pt-5 pb-2 text-[10px] font-black uppercase tracking-[0.18em] text-[var(--muted-foreground)]">
+                      {feature.name}
+                    </td>
+                  </tr>
+                ) : (
+                  <tr
+                    key={idx}
+                    className="border-b border-[var(--border)] last:border-b-0"
+                  >
+                    <td className="px-6 py-4 text-[var(--foreground-rgb)]">
+                      {feature.name}
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      {renderCell(feature.free as boolean | string)}
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      {renderCell(feature.premium as boolean | string)}
+                    </td>
+                  </tr>
+                )
               ))}
             </tbody>
           </table>
