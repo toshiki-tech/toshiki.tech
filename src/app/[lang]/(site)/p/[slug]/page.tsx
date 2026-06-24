@@ -461,10 +461,10 @@ export default async function ProductDetailPage({ params }: { params: { lang: Lo
             heading: 'Simple, transparent pricing',
             sub: 'Start for free. Upgrade when you\'re ready.',
             plans: [
-              { name: 'Free', price: '¥0', period: '', badge: null, features: ['Core reading + TTS', 'Basic furigana', 'Community subtitles'] },
-              { name: 'Premium Monthly', price: '¥180', period: '/mo', badge: null, features: ['Everything in Free', 'Advanced AI TTS', 'Priority support'] },
-              { name: 'Premium Yearly', price: '¥1,480', period: '/yr', badge: 'Save 31%', features: ['Everything in Monthly', 'Best value', '~¥123/month'] },
-              { name: 'Lifetime', price: '¥2,980', period: '', badge: 'One-time', features: ['All Premium features', 'All future updates', 'Forever'] },
+              { name: 'Free', price: '¥0', period: '', badge: null, tagline: '1 hour/month of free speech-to-text — experience the core listening workflow at no cost.' },
+              { name: 'Premium Monthly', price: '¥180', period: '/mo', badge: null, tagline: 'Unlock unlimited subtitle generation, shadowing, TTS, and audio/video subtitle import, export & sharing.' },
+              { name: 'Premium Yearly', price: '¥1,480', period: '/yr', badge: 'Save 31%', tagline: 'All Premium features at the best value — roughly 2 months free vs. monthly.' },
+              { name: 'Lifetime', price: '¥2,980', period: '', badge: 'One-time', tagline: 'Pay once, use forever. No recurring fees, all future Premium updates included.' },
             ],
             cta: 'View full pricing',
           },
@@ -473,10 +473,10 @@ export default async function ProductDetailPage({ params }: { params: { lang: Lo
             heading: '简单透明的定价',
             sub: '免费开始使用，准备好时再升级。',
             plans: [
-              { name: '免费版', price: '¥0', period: '', badge: null, features: ['基础阅读 + TTS', '基本假名标注', '社区字幕'] },
-              { name: 'Premium 月付', price: '¥180', period: '/月', badge: null, features: ['包含免费版全部功能', '高级 AI TTS', '优先支持'] },
-              { name: 'Premium 年付', price: '¥1,480', period: '/年', badge: '省 31%', features: ['包含月付全部功能', '最优性价比', '约 ¥123/月'] },
-              { name: '买断版', price: '¥2,980', period: '', badge: '一次付清', features: ['全部 Premium 功能', '永久更新', '买断终身'] },
+              { name: '免费版', price: '¥0', period: '', badge: null, tagline: '每月 1 小时语音转文字配额，免费体验核心精听功能。' },
+              { name: 'Premium 月付', price: '¥180', period: '/月', badge: null, tagline: '解锁无限字幕生成、跟读、文本朗读及音视频字幕资源导入导出分享功能。' },
+              { name: 'Premium 年付', price: '¥1,480', period: '/年', badge: '省 31%', tagline: '全部 Premium 功能，最划算之选 —— 相比月付约省 2 个月。' },
+              { name: 'Premium 买断', price: '¥2,980', period: '', badge: '一次付清', tagline: '一次付费，永久使用。无定期扣费，含未来全部 Premium 更新。' },
             ],
             cta: '查看完整价格方案',
           },
@@ -485,10 +485,10 @@ export default async function ProductDetailPage({ params }: { params: { lang: Lo
             heading: '簡單透明的定價',
             sub: '免費開始使用，準備好時再升級。',
             plans: [
-              { name: '免費版', price: '¥0', period: '', badge: null, features: ['基礎閱讀 + TTS', '基本假名標注', '社區字幕'] },
-              { name: 'Premium 月付', price: '¥180', period: '/月', badge: null, features: ['包含免費版全部功能', '進階 AI TTS', '優先支援'] },
-              { name: 'Premium 年付', price: '¥1,480', period: '/年', badge: '省 31%', features: ['包含月付全部功能', '最優性價比', '約 ¥123/月'] },
-              { name: '買斷版', price: '¥2,980', period: '', badge: '一次付清', features: ['全部 Premium 功能', '永久更新', '買斷終身'] },
+              { name: '免費版', price: '¥0', period: '', badge: null, tagline: '每月 1 小時語音轉文字配額，免費體驗核心精聽功能。' },
+              { name: 'Premium 月付', price: '¥180', period: '/月', badge: null, tagline: '解鎖無限字幕生成、跟讀、文字朗讀及音視頻字幕資源導入導出分享功能。' },
+              { name: 'Premium 年付', price: '¥1,480', period: '/年', badge: '省 31%', tagline: '全部 Premium 功能，最划算之選 —— 相比月付約省 2 個月。' },
+              { name: 'Premium 買斷', price: '¥2,980', period: '', badge: '一次付清', tagline: '一次付費，永久使用。無定期扣費，含未來全部 Premium 更新。' },
             ],
             cta: '查看完整價格方案',
           },
@@ -497,10 +497,10 @@ export default async function ProductDetailPage({ params }: { params: { lang: Lo
             heading: 'シンプルで透明な料金体系',
             sub: '無料で始めて、準備ができたらアップグレード。',
             plans: [
-              { name: '無料版', price: '¥0', period: '', badge: null, features: ['基本読書 + TTS', 'ふりがな表示', 'コミュニティ字幕'] },
-              { name: 'Premium 月払い', price: '¥180', period: '/月', badge: null, features: ['無料版の全機能', '高度な AI TTS', '優先サポート'] },
-              { name: 'Premium 年払い', price: '¥1,480', period: '/年', badge: '31% お得', features: ['月払いの全機能', '最もお得', '月あたり約 ¥123'] },
-              { name: '買い切り', price: '¥2,980', period: '', badge: '一括払い', features: ['全 Premium 機能', '将来のアップデート', '永久に利用可能'] },
+              { name: '無料版', price: '¥0', period: '', badge: null, tagline: '毎月1時間の音声テキスト変換枠付き、無料でコア精聴機能をお試しいただけます。' },
+              { name: 'Premium 月払い', price: '¥180', period: '/月', badge: null, tagline: '無制限の字幕生成・シャドーイング・読み上げ、音声／動画字幕リソースのインポート・エクスポート・共有を解放。' },
+              { name: 'Premium 年払い', price: '¥1,480', period: '/年', badge: '31% お得', tagline: 'すべての Premium 機能を最もお得に。月額換算で約2ヶ月分お得です。' },
+              { name: '買い切り', price: '¥2,980', period: '', badge: '一括払い', tagline: '一度の購入で永久に利用可能。継続課金なし、今後の Premium アップデートもすべて含まれます。' },
             ],
             cta: '詳細な料金プランを見る',
           },
@@ -538,14 +538,7 @@ export default async function ProductDetailPage({ params }: { params: { lang: Lo
                           <span className="text-sm font-normal text-[var(--muted-foreground)]">{plan.period}</span>
                         </p>
                       </div>
-                      <ul className="space-y-1.5 flex-1">
-                        {plan.features.map((f) => (
-                          <li key={f} className="flex items-start gap-2 text-xs text-[var(--muted-foreground)]">
-                            <CheckCircle2 size={12} className="text-[rgb(var(--accent))] shrink-0 mt-0.5" />
-                            {f}
-                          </li>
-                        ))}
-                      </ul>
+                      <p className="text-xs text-[var(--muted-foreground)] leading-relaxed flex-1">{plan.tagline}</p>
                     </div>
                   ))}
                 </div>
