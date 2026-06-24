@@ -29,6 +29,8 @@ const content = {
     sourceShowPlaceholder: 'e.g., ゆる言語学ラジオ',
     sourceEpisodeLabel: 'Episode (optional)',
     sourceEpisodePlaceholder: 'e.g., EP85',
+    sourceUrlLabel: 'Source URL (optional)',
+    sourceUrlPlaceholder: 'e.g., https://www.youtube.com/watch?v=...',
     visibilityLabel: 'Visibility',
     public: 'Public',
     publicDesc: 'Visible to everyone',
@@ -77,6 +79,8 @@ const content = {
     sourceShowPlaceholder: '如：ゆる言語学ラジオ',
     sourceEpisodeLabel: '集数（可选）',
     sourceEpisodePlaceholder: '如：EP85',
+    sourceUrlLabel: '来源链接（可选）',
+    sourceUrlPlaceholder: '如：https://www.youtube.com/watch?v=...',
     visibilityLabel: '可见性',
     public: '公开',
     publicDesc: '所有人可见',
@@ -125,6 +129,8 @@ const content = {
     sourceShowPlaceholder: '如：ゆる言語学ラジオ',
     sourceEpisodeLabel: '集數（可選）',
     sourceEpisodePlaceholder: '如：EP85',
+    sourceUrlLabel: '來源連結（可選）',
+    sourceUrlPlaceholder: '如：https://www.youtube.com/watch?v=...',
     visibilityLabel: '可見性',
     public: '公開',
     publicDesc: '所有人可見',
@@ -173,6 +179,8 @@ const content = {
     sourceShowPlaceholder: '例：ゆる言語学ラジオ',
     sourceEpisodeLabel: 'エピソード（任意）',
     sourceEpisodePlaceholder: '例：EP85',
+    sourceUrlLabel: 'ソース URL（任意）',
+    sourceUrlPlaceholder: '例：https://www.youtube.com/watch?v=...',
     visibilityLabel: '公開設定',
     public: '公開',
     publicDesc: '全員に表示',
@@ -216,6 +224,7 @@ export default function UploadForm({ lang }: { lang: Locale }) {
   const [sourcePlatform, setSourcePlatform] = useState('');
   const [sourceShow, setSourceShow] = useState('');
   const [sourceEpisode, setSourceEpisode] = useState('');
+  const [sourceUrl, setSourceUrl] = useState('');
   const [visibility, setVisibility] = useState<'public' | 'unlisted'>('public');
   const [file, setFile] = useState<File | null>(null);
   const [status, setStatus] = useState<'idle' | 'uploading' | 'creating' | 'success_pending' | 'success_approved' | 'error'>('idle');
@@ -366,6 +375,7 @@ export default function UploadForm({ lang }: { lang: Locale }) {
           sourcePlatform: sourcePlatform || undefined,
           sourceShow: sourceShow || undefined,
           sourceEpisode: sourceEpisode || undefined,
+          sourceUrl: sourceUrl || undefined,
         }),
       });
       const data = await res.json();
@@ -548,6 +558,16 @@ export default function UploadForm({ lang }: { lang: Locale }) {
               value={sourceEpisode}
               onChange={(e) => setSourceEpisode(e.target.value)}
               placeholder={t.sourceEpisodePlaceholder}
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label className={labelClass}>{t.sourceUrlLabel}</label>
+            <input
+              type="url"
+              value={sourceUrl}
+              onChange={(e) => setSourceUrl(e.target.value)}
+              placeholder={t.sourceUrlPlaceholder}
               className={inputClass}
             />
           </div>

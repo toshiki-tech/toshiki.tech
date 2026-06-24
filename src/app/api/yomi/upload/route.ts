@@ -71,6 +71,7 @@ export async function POST(request: Request) {
     sourcePlatform,
     sourceShow,
     sourceEpisode,
+    sourceUrl,
   } = body;
 
   if (!uploadId || !storagePath || !fileName || !title || !contentType || !language) {
@@ -109,6 +110,7 @@ export async function POST(request: Request) {
       source_platform: sourcePlatform || null,
       source_show: sourceShow || null,
       source_episode: sourceEpisode || null,
+      source_url: sourceUrl || null,
       category: category || null,
       yomi_storage_path: storagePath,
       audio_storage_path: audioStoragePath || null,

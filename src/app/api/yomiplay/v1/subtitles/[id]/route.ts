@@ -21,7 +21,7 @@ export async function GET(
     .from('toshiki_tech_yomi_uploads')
     .select(
       `id, title, description, language, category,
-       source_platform, source_show, source_episode,
+       source_platform, source_show, source_episode, source_url,
        content_type, yomi_file_name, audio_file_name,
        audio_storage_path, download_count, created_at, updated_at,
        toshiki_tech_yomi_profiles(display_name)`
@@ -51,6 +51,7 @@ export async function GET(
         source_platform: r.source_platform ?? null,
         source_show:     r.source_show ?? null,
         source_episode:  r.source_episode ?? null,
+        source_url:      r.source_url ?? null,
         content_type:    r.content_type,
         file_name:       r.yomi_file_name ?? null,
         media_file_name: r.audio_file_name ?? null,
