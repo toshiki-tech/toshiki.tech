@@ -68,6 +68,7 @@ GET /api/yomiplay/v1/subtitles?lang=ja&category=anime&page=1&per_page=20&sort=do
       "source_platform": "netflix",
       "source_show": "進撃の巨人",
       "source_episode": "S01E01",
+      "source_url": "https://www.youtube.com/watch?v=xxxxxx",
       "content_type": "subtitle",
       "has_media": false,
       "download_count": 128,
@@ -92,6 +93,7 @@ GET /api/yomiplay/v1/subtitles?lang=ja&category=anime&page=1&per_page=20&sort=do
 | `language` | 字幕语言（通常为 `ja`） |
 | `category` | 内容分类：`anime` / `podcast` / `drama` / `movie` 等 |
 | `content_type` | 内容类型：`subtitle` / `transcript` 等 |
+| `source_url` | 来源视频/音频链接（如 YouTube URL），可直接传入播放器实现一键导入，可能为 `null` |
 | `has_media` | 是否附带音频/视频媒体文件 |
 | `download_count` | 累计下载次数 |
 | `uploaded_by` | 上传者昵称 |
@@ -119,6 +121,7 @@ GET https://www.toshiki.tech/api/yomiplay/v1/subtitles/{id}
     "source_platform": "netflix",
     "source_show": "進撃の巨人",
     "source_episode": "S01E01",
+    "source_url": "https://www.youtube.com/watch?v=xxxxxx",
     "content_type": "subtitle",
     "file_name": "aot_s1e01.yomi",
     "media_file_name": "aot_s1e01.mp3",
@@ -137,6 +140,7 @@ GET https://www.toshiki.tech/api/yomiplay/v1/subtitles/{id}
 |------|------|
 | `file_name` | 字幕文件名（`.yomi`） |
 | `media_file_name` | 媒体文件名（`.mp3` / `.mp4` 等），`has_media` 为 `true` 时有效 |
+| `source_url` | 来源视频/音频链接（如 YouTube URL），可用于播放器直接导入，可能为 `null` |
 | `updated_at` | 最后更新时间 |
 
 ---
