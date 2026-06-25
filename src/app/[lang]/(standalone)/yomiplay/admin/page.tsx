@@ -13,7 +13,10 @@ import ProRequests from './ProRequests';
 import EditUpload from './EditUpload';
 import HidePinControls from './HidePinControls';
 import FeatureFlagsPanel from './FeatureFlagsPanel';
+import ApkReleasePanel from './ApkReleasePanel';
+import SubscriptionsPanel from './SubscriptionsPanel';
 import { getFeatureFlags } from '@/lib/yomi-feature-flags';
+import { createClient } from '@supabase/supabase-js';
 
 interface AdminUpload {
   id: string;
@@ -117,6 +120,72 @@ export default async function AdminPage({ params: { lang } }: { params: { lang: 
     .order('created_at', { ascending: true }) as { data: any[] | null };
 
   const featureFlags = await getFeatureFlags(supabase);
+
+  // Fetch APK releases (latest first)
+  const { data: apkReleases } = await supabase
+    .from('yomiplay_apk_releases')
+    .select('id, version_code, version_name, release_notes, force_update, is_active, file_size, created_at')
+    .order('version_code', { ascending: false })
+    .limit(10);
+
+  // Service-role client for privileged queries
+  const svc = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+
+  // Fetch all subscriptions with display_name
+  const { data: subscriptions } = await svc
+    .from('toshiki_tech_subscriptions')
+    .select(`
+      user_id, product, plan, status,
+      current_period_end, is_lifetime, updated_at,
+      toshiki_tech_yomi_profiles(display_name)
+    `)
+    .order('updated_at', { ascending: false })
+    .limit(100);
+
+  // Community download stats: total + top 10
+  const { data: topUploads } = await svc
+    .from('toshiki_tech_yomi_uploads')
+    .select('id, title, download_count, toshiki_tech_yomi_profiles(display_name)')
+    .eq('is_removed', false)
+    .order('download_count', { ascending: false })
+    .limit(10);
+
+  const { data: allDownloadCounts } = await svc
+    .from('toshiki_tech_yomi_uploads')
+    .select('download_count')
+    .eq('is_removed', false);
+
+  const communityTotalDownloads = (allDownloadCounts ?? [])
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .reduce((sum: number, r: any) => sum + (r.download_count ?? 0), 0);
+
+  // APK download stats: total + per version
+  const { data: apkStats } = await svc
+    .from('yomiplay_apk_downloads')
+    .select('version_name')
+    .order('downloaded_at', { ascending: false });
+
+  const apkTotal = apkStats?.length ?? 0;
+  const apkByVersion: Record<string, number> = {};
+  for (const row of apkStats ?? []) {
+    apkByVersion[row.version_name] = (apkByVersion[row.version_name] ?? 0) + 1;
+  }
+
+  // Flatten subscriptions with display_name
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const flatSubs = (subscriptions ?? []).map((s: any) => ({
+    user_id:            s.user_id,
+    display_name:       s.toshiki_tech_yomi_profiles?.display_name ?? null,
+    product:            s.product,
+    plan:               s.plan,
+    status:             s.status,
+    current_period_end: s.current_period_end,
+    is_lifetime:        s.is_lifetime,
+    updated_at:         s.updated_at,
+  }));
 
   return (
     <div className="container-custom py-12">
@@ -314,6 +383,79 @@ export default async function AdminPage({ params: { lang } }: { params: { lang: 
             })}
           </div>
         )}
+      </section>
+
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+      <ApkReleasePanel releases={(apkReleases || []) as any} />
+
+      <SubscriptionsPanel subscriptions={flatSubs} />
+
+      {/* Download Stats */}
+      <section className="mb-12">
+        <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+          <List size={18} />
+          Download Stats
+        </h2>
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--card)]">
+            <p className="text-xs font-black uppercase tracking-widest text-[var(--muted-foreground)] mb-1">Community Subtitles</p>
+            <p className="text-3xl font-black">{communityTotalDownloads.toLocaleString()}</p>
+            <p className="text-xs text-[var(--muted-foreground)] mt-1">total downloads</p>
+          </div>
+          <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--card)]">
+            <p className="text-xs font-black uppercase tracking-widest text-[var(--muted-foreground)] mb-1">Android APK</p>
+            <p className="text-3xl font-black">{apkTotal.toLocaleString()}</p>
+            <p className="text-xs text-[var(--muted-foreground)] mt-1">total downloads</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Top community uploads */}
+          <div>
+            <h3 className="text-sm font-bold mb-3 text-[var(--muted-foreground)] uppercase tracking-widest">Top Subtitle Resources</h3>
+            <div className="rounded-2xl border border-[var(--border)] overflow-hidden">
+              {(topUploads ?? []).length === 0 ? (
+                <p className="text-sm text-[var(--muted-foreground)] p-4 text-center">No data yet.</p>
+              ) : (
+                <table className="w-full text-sm">
+                  <tbody>
+                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                    {(topUploads ?? []).map((u: any, i: number) => (
+                      <tr key={u.id} className="border-b border-[var(--border)] last:border-0">
+                        <td className="px-4 py-2.5 text-[var(--muted-foreground)] text-xs w-6">{i + 1}</td>
+                        <td className="px-4 py-2.5 font-medium truncate max-w-[200px]">{u.title}</td>
+                        <td className="px-4 py-2.5 text-right text-[var(--muted-foreground)] text-xs whitespace-nowrap">{(u.download_count ?? 0).toLocaleString()} dl</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
+
+          {/* APK downloads by version */}
+          <div>
+            <h3 className="text-sm font-bold mb-3 text-[var(--muted-foreground)] uppercase tracking-widest">APK Downloads by Version</h3>
+            <div className="rounded-2xl border border-[var(--border)] overflow-hidden">
+              {Object.keys(apkByVersion).length === 0 ? (
+                <p className="text-sm text-[var(--muted-foreground)] p-4 text-center">No downloads yet.</p>
+              ) : (
+                <table className="w-full text-sm">
+                  <tbody>
+                    {Object.entries(apkByVersion)
+                      .sort(([, a], [, b]) => b - a)
+                      .map(([ver, count]) => (
+                        <tr key={ver} className="border-b border-[var(--border)] last:border-0">
+                          <td className="px-4 py-2.5 font-medium">v{ver}</td>
+                          <td className="px-4 py-2.5 text-right text-[var(--muted-foreground)] text-xs">{count.toLocaleString()} dl</td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
+        </div>
       </section>
 
       <FeatureFlagsPanel initialFlags={featureFlags} />
