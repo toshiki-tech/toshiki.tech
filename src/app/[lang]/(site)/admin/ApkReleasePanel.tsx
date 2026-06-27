@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { Smartphone, CheckCircle2, AlertCircle, ChevronDown, ChevronUp, Upload, X } from 'lucide-react';
+import { Smartphone, CheckCircle2, AlertCircle, ChevronDown, ChevronUp, Upload, X, RefreshCw } from 'lucide-react';
 
 interface Release {
   id: string;
@@ -30,6 +30,89 @@ export default function ApkReleasePanel({ releases }: { releases: Release[] }) {
 
   const [status, setStatus] = useState<'idle' | 'uploading' | 'submitting' | 'ok' | 'error'>('idle');
   const [errMsg, setErrMsg] = useState('');
+
+  // Replace-file state (for latest release)
+  const [replaceOpen, setReplaceOpen]           = useState(false);
+  const [replaceFile, setReplaceFile]           = useState<File | null>(null);
+  const [replaceProgress, setReplaceProgress]   = useState(0);
+  const [replaceStatus, setReplaceStatus]       = useState<'idle' | 'uploading' | 'ok' | 'error'>('idle');
+  const [replaceErr, setReplaceErr]             = useState('');
+  const replaceInputRef = useRef<HTMLInputElement>(null);
+
+  function clearReplace() {
+    setReplaceFile(null);
+    setReplaceProgress(0);
+    setReplaceStatus('idle');
+    setReplaceErr('');
+    if (replaceInputRef.current) replaceInputRef.current.value = '';
+  }
+
+  async function handleReplace(releaseId: string) {
+    if (!replaceFile) return;
+    setReplaceErr('');
+    setReplaceStatus('uploading');
+    setReplaceProgress(0);
+
+    let sha256: string;
+    let presignedUrl: string;
+
+    try {
+      const buffer = await replaceFile.arrayBuffer();
+      const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+      sha256 = Array.from(new Uint8Array(hashBuffer))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
+
+      const urlRes = await fetch('/api/admin/apk/upload-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ releaseId }),
+      });
+      if (!urlRes.ok) {
+        const d = await urlRes.json();
+        throw new Error(d.error || 'Failed to get upload URL');
+      }
+      ({ presignedUrl } = await urlRes.json());
+    } catch (err) {
+      setReplaceErr(err instanceof Error ? err.message : 'Init failed');
+      setReplaceStatus('error');
+      return;
+    }
+
+    try {
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.upload.onprogress = (ev) => {
+          if (ev.lengthComputable) setReplaceProgress(Math.round((ev.loaded / ev.total) * 100));
+        };
+        xhr.onload = () => (xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(`Upload failed (${xhr.status})`)));
+        xhr.onerror = () => reject(new Error('Network error'));
+        xhr.open('PUT', presignedUrl);
+        xhr.setRequestHeader('Content-Type', 'application/vnd.android.package-archive');
+        xhr.send(replaceFile);
+      });
+    } catch (err) {
+      setReplaceErr(err instanceof Error ? err.message : 'Upload failed');
+      setReplaceStatus('error');
+      return;
+    }
+
+    const patchRes = await fetch('/api/yomiplay/apk/release', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: releaseId, apkSha256: sha256, fileSize: replaceFile.size }),
+    });
+
+    if (!patchRes.ok) {
+      const d = await patchRes.json();
+      setReplaceErr(d.error || 'Failed to update record');
+      setReplaceStatus('error');
+      return;
+    }
+
+    setReplaceStatus('ok');
+    setTimeout(() => { setReplaceOpen(false); clearReplace(); window.location.reload(); }, 1000);
+  }
 
   const inputClass =
     'w-full px-3 py-2 rounded-lg bg-[var(--background)] border border-[var(--border)] text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(var(--accent))]/20 focus:border-[rgb(var(--accent))] transition-colors';
@@ -148,6 +231,7 @@ export default function ApkReleasePanel({ releases }: { releases: Release[] }) {
       </h2>
 
       {latest ? (
+        <>
         <div className="p-4 rounded-xl border border-green-500/30 bg-green-500/5 mb-4 flex items-center justify-between gap-4">
           <div>
             <p className="text-sm font-bold">
@@ -166,14 +250,87 @@ export default function ApkReleasePanel({ releases }: { releases: Release[] }) {
               {latest.file_size && ` · ${(latest.file_size / 1024 / 1024).toFixed(1)} MB`}
             </p>
           </div>
-          <a
-            href="/api/yomiplay/apk/latest"
-            target="_blank"
-            className="text-xs text-[rgb(var(--accent))] hover:underline shrink-0"
-          >
-            View JSON ↗
-          </a>
+          <div className="flex items-center gap-3 shrink-0">
+            <button
+              type="button"
+              onClick={() => { setReplaceOpen(!replaceOpen); clearReplace(); }}
+              className="flex items-center gap-1.5 text-xs text-[var(--muted-foreground)] hover:text-[var(--foreground-rgb)] transition-colors"
+            >
+              <RefreshCw size={12} />
+              Replace APK
+            </button>
+            <a
+              href="/api/yomiplay/apk/latest"
+              target="_blank"
+              className="text-xs text-[rgb(var(--accent))] hover:underline"
+            >
+              View JSON ↗
+            </a>
+          </div>
         </div>
+
+        {replaceOpen && (
+          <div className="mt-3 pt-3 border-t border-[var(--border)] space-y-3">
+            {replaceFile ? (
+              <div className="flex items-center gap-3 px-3 py-2 rounded-lg border border-[rgb(var(--accent))]/30 bg-[rgb(var(--accent))]/5">
+                <Smartphone size={13} className="text-[rgb(var(--accent))] shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium truncate">{replaceFile.name}</p>
+                  <p className="text-[10px] text-[var(--muted-foreground)]">{(replaceFile.size / 1024 / 1024).toFixed(1)} MB</p>
+                </div>
+                <button type="button" onClick={clearReplace} className="shrink-0 text-[var(--muted-foreground)] hover:text-red-400 transition-colors">
+                  <X size={13} />
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => replaceInputRef.current?.click()}
+                className="w-full flex items-center justify-center gap-2 px-3 py-3 rounded-lg border-2 border-dashed border-[var(--border)] text-xs text-[var(--muted-foreground)] hover:border-[rgb(var(--accent))]/50 hover:text-[rgb(var(--accent))] transition-colors"
+              >
+                <Upload size={13} />
+                Select replacement APK
+              </button>
+            )}
+            <input
+              ref={replaceInputRef}
+              type="file"
+              accept=".apk,application/vnd.android.package-archive"
+              className="hidden"
+              onChange={e => { setReplaceFile(e.target.files?.[0] ?? null); setReplaceProgress(0); }}
+            />
+
+            {replaceStatus === 'uploading' && (
+              <div className="space-y-1">
+                <div className="flex justify-between text-[10px] text-[var(--muted-foreground)]">
+                  <span>Uploading…</span><span>{replaceProgress}%</span>
+                </div>
+                <div className="w-full h-1 rounded-full bg-[var(--muted)] overflow-hidden">
+                  <div className="h-full bg-[rgb(var(--accent))] rounded-full transition-all" style={{ width: `${replaceProgress}%` }} />
+                </div>
+              </div>
+            )}
+
+            {replaceStatus === 'error' && (
+              <div className="flex items-center gap-1.5 text-red-500 text-xs"><AlertCircle size={12} />{replaceErr}</div>
+            )}
+            {replaceStatus === 'ok' && (
+              <div className="flex items-center gap-1.5 text-green-500 text-xs"><CheckCircle2 size={12} />File replaced successfully.</div>
+            )}
+
+            {replaceFile && replaceStatus !== 'ok' && (
+              <button
+                type="button"
+                disabled={replaceStatus === 'uploading'}
+                onClick={() => handleReplace(latest!.id)}
+                className="btn-primary px-4 py-1.5 rounded-lg text-xs font-bold disabled:opacity-50"
+              >
+                {replaceStatus === 'uploading' ? `Uploading… ${replaceProgress}%` : 'Confirm Replace'}
+              </button>
+            )}
+          </div>
+        )}
+        </>
       ) : (
         <p className="text-sm text-[var(--muted-foreground)] mb-4">No releases yet.</p>
       )}

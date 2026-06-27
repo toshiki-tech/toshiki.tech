@@ -27,6 +27,47 @@ function serviceClient() {
   );
 }
 
+export async function PATCH(request: Request) {
+  // Admin-only: update apk_sha256 and file_size for an existing release
+  const session = getSessionClient();
+  const { data: { user } } = await session.auth.getUser();
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const { data: profile } = await session
+    .from('toshiki_tech_yomi_profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+  if (!profile || profile.role !== 'admin') {
+    return NextResponse.json({ error: 'Admin only' }, { status: 403 });
+  }
+
+  let body: { id?: string; apkSha256?: string; fileSize?: number };
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+  }
+
+  const { id, apkSha256, fileSize } = body;
+  if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
+
+  const { error } = await serviceClient()
+    .from('yomiplay_apk_releases')
+    .update({
+      ...(apkSha256 !== undefined && { apk_sha256: apkSha256 }),
+      ...(fileSize !== undefined && { file_size: fileSize }),
+    })
+    .eq('id', id);
+
+  if (error) {
+    console.error('[apk/release PATCH]', error);
+    return NextResponse.json({ error: 'Update failed' }, { status: 500 });
+  }
+
+  return NextResponse.json({ ok: true });
+}
+
 export async function POST(request: Request) {
   // Auth: must be logged-in admin
   const session = getSessionClient();

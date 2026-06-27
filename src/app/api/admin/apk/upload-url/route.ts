@@ -39,18 +39,36 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Admin only' }, { status: 403 });
   }
 
-  let versionName: string;
+  let body: { versionName?: string; releaseId?: string };
   try {
-    ({ versionName } = await request.json());
+    body = await request.json();
   } catch {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  if (!versionName || typeof versionName !== 'string') {
-    return NextResponse.json({ error: 'Missing versionName' }, { status: 400 });
+  let key: string;
+
+  if (body.releaseId) {
+    // Replace mode: look up the existing r2_path
+    const { data: release } = await createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    )
+      .from('yomiplay_apk_releases')
+      .select('r2_path')
+      .eq('id', body.releaseId)
+      .single();
+
+    if (!release?.r2_path) {
+      return NextResponse.json({ error: 'Release not found' }, { status: 404 });
+    }
+    key = release.r2_path;
+  } else if (body.versionName && typeof body.versionName === 'string') {
+    key = `apk/yomiplay-${body.versionName}.apk`;
+  } else {
+    return NextResponse.json({ error: 'Provide either versionName or releaseId' }, { status: 400 });
   }
 
-  const key = `apk/yomiplay-${versionName}.apk`;
   const presignedUrl = await getUploadPresignedUrl(
     key,
     'application/vnd.android.package-archive',
