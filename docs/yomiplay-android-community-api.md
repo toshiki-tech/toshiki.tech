@@ -251,9 +251,63 @@ GET /api/yomiplay/v1/subtitles/{id}/download?type=media
 
 ---
 
-## 订阅管理
+## 用户与订阅状态
 
-### 4. POST /api/yomiplay/billing/portal — 打开订阅管理门户
+### 4. GET /api/yomiplay/v1/me — 获取当前用户订阅状态
+
+返回已登录用户的 Pro 状态及订阅详情，用于 App 决定功能权限和展示账户信息。
+
+**请求**
+
+```
+GET https://www.toshiki.tech/api/yomiplay/v1/me
+Authorization: Bearer <supabase_access_token>
+```
+
+**响应示例**
+
+```json
+{
+  "data": {
+    "user_id": "d66a42dd-...",
+    "is_pro": true,
+    "plan": "monthly",
+    "status": "active",
+    "cancel_at_period_end": true,
+    "current_period_end": "2026-07-20T00:00:00.000Z",
+    "is_lifetime": false,
+    "updated_at": "2026-06-20T10:00:00.000Z"
+  }
+}
+```
+
+**字段说明**
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `is_pro` | boolean | 当前是否有效的 Pro 权限（综合 status + 到期时间计算，直接用于功能鉴权） |
+| `plan` | string\|null | 订阅计划：`monthly` / `yearly` / `lifetime`，无订阅时为 null |
+| `status` | string\|null | Stripe 原始状态：`active` / `canceled` / `past_due` 等，无订阅时为 null |
+| `cancel_at_period_end` | boolean | **用户已申请取消但尚未到期**。`true` 时表示订阅在 `current_period_end` 到期后不再续订，期间 `is_pro` 仍为 true |
+| `current_period_end` | string\|null | 当前计费周期结束时间（ISO 8601），取消场景下即为服务终止时间 |
+| `is_lifetime` | boolean | 是否为买断用户，为 true 时永不过期 |
+| `updated_at` | string\|null | 订阅记录最后同步时间 |
+
+**典型状态组合**
+
+| 场景 | `is_pro` | `status` | `cancel_at_period_end` |
+|------|----------|----------|------------------------|
+| 正常订阅中 | true | active | false |
+| 已取消、待到期 | true | active | **true** |
+| 已到期或取消生效 | false | canceled | false |
+| 买断用户 | true | active | false（`is_lifetime: true`） |
+| 无订阅 | false | null | false |
+
+---
+
+## 订阅操作
+
+### 5. POST /api/yomiplay/billing/portal — 打开订阅管理门户
 
 为当前登录用户创建一个 Stripe Customer Portal 会话，返回一个有时效的 URL。App 用系统浏览器打开该 URL，用户可在 Stripe 托管的页面上自助取消订阅、查看账单、更新支付方式。
 
