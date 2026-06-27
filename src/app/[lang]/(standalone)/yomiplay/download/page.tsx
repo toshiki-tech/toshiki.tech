@@ -31,9 +31,14 @@ const content = {
     android: {
       label: 'Android',
       devices: 'Phone · Tablet',
-      req: 'Requires Android 8.0 or later',
       desc: 'Download the APK directly from this site — no app store needed. Sideload and install in seconds.',
       cta: 'Download Android APK',
+      specs: [
+        { label: 'OS', value: 'Android 9.0+ (API 28)' },
+        { label: 'CPU', value: 'ARM64 (64-bit)' },
+        { label: 'Storage', value: '1.2 GB free' },
+        { label: 'RAM', value: '4 GB recommended' },
+      ],
     },
     highlightsTitle: 'What you can do',
     highlights: [
@@ -76,9 +81,14 @@ const content = {
     android: {
       label: 'Android',
       devices: '手机 · 平板',
-      req: '需要 Android 8.0 或更高版本',
       desc: 'APK 直接通过本站（toshiki.tech）发布，下载安装即可使用，无需任何应用商店。',
       cta: '下载 Android APK',
+      specs: [
+        { label: '系统', value: 'Android 9.0+（API 28）' },
+        { label: '架构', value: 'ARM64（64位）' },
+        { label: '存储', value: '1.2GB 可用空间' },
+        { label: '内存', value: '建议 4GB 以上' },
+      ],
     },
     highlightsTitle: '你能做什么',
     highlights: [
@@ -121,9 +131,14 @@ const content = {
     android: {
       label: 'Android',
       devices: '手機 · 平板',
-      req: '需要 Android 8.0 或更高版本',
       desc: 'APK 直接透過本站（toshiki.tech）發佈，下載安裝即可使用，無需任何應用商店。',
       cta: '下載 Android APK',
+      specs: [
+        { label: '系統', value: 'Android 9.0+（API 28）' },
+        { label: '架構', value: 'ARM64（64位）' },
+        { label: '儲存', value: '1.2GB 可用空間' },
+        { label: '記憶體', value: '建議 4GB 以上' },
+      ],
     },
     highlightsTitle: '你能做什麼',
     highlights: [
@@ -166,9 +181,14 @@ const content = {
     android: {
       label: 'Android',
       devices: 'スマホ · タブレット',
-      req: 'Android 8.0 以降が必要',
       desc: '公式サイト（toshiki.tech）から APK を直接ダウンロード・インストール可能。アプリストア不要です。',
       cta: 'Android APK をダウンロード',
+      specs: [
+        { label: 'OS', value: 'Android 9.0+（API 28）' },
+        { label: 'CPU', value: 'ARM64（64ビット）' },
+        { label: 'ストレージ', value: '1.2GB 以上の空き容量' },
+        { label: 'RAM', value: '4GB 以上推奨' },
+      ],
     },
     highlightsTitle: 'できること',
     highlights: [
@@ -274,7 +294,7 @@ export default function YomiPlayDownloadPage({ params: { lang } }: { params: { l
               <p className="text-sm text-[var(--muted-foreground)] leading-relaxed flex-1">
                 {t.android.desc}
               </p>
-              <div className="space-y-2.5">
+              <div className="space-y-3">
                 <a
                   href="/api/yomiplay/apk/download"
                   className="flex items-center justify-center gap-2.5 w-full rounded-xl bg-[#3DDC84] text-black font-bold py-3.5 hover:opacity-90 transition-opacity"
@@ -282,7 +302,14 @@ export default function YomiPlayDownloadPage({ params: { lang } }: { params: { l
                   <AndroidIcon />
                   {t.android.cta}
                 </a>
-                <p className="text-xs text-center text-[var(--muted-foreground)]">{t.android.req}</p>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 pt-1">
+                  {t.android.specs.map((s) => (
+                    <div key={s.label} className="flex items-baseline gap-1.5">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--muted-foreground)] shrink-0">{s.label}</span>
+                      <span className="text-[11px] text-[var(--foreground-rgb)] truncate">{s.value}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
