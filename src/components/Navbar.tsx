@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
-import { Menu, X, User } from 'lucide-react';
+import { Menu, X, ChevronDown, FolderOpen, ShieldCheck, LogOut, UserCircle } from 'lucide-react';
 import Logo from '@/components/Logo';
 import LangSwitcher from '@/components/LangSwitcher';
 import { Locale } from '@/lib/get-dictionary';
@@ -30,17 +30,54 @@ const NavLink = ({ href, children, active }: { href: string; children: React.Rea
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function UserNav({ lang, dict }: { lang: Locale; dict: any }) {
   const [user, setUser] = useState<SupabaseUser | null | undefined>(undefined);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  const navDict = dict.common.nav;
+  const labels = {
+    account:  navDict.account,
+    uploads:  lang === 'zh' ? '我的上传' : lang === 'zh-tw' ? '我的上傳' : lang === 'ja' ? 'マイアップロード' : 'My Uploads',
+    admin:    lang === 'zh' ? '管理后台' : lang === 'zh-tw' ? '管理後台' : lang === 'ja' ? '管理画面' : 'Admin Panel',
+    signOut:  lang === 'zh' ? '退出' : lang === 'zh-tw' ? '退出' : lang === 'ja' ? 'ログアウト' : 'Sign Out',
+    signIn:   navDict.signIn,
+  };
 
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => setUser(data.user ?? null));
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      const u = session?.user ?? null;
+      setUser(u);
+      if (!u) return;
+      supabase
+        .from('toshiki_tech_yomi_profiles')
+        .select('role')
+        .eq('id', u.id)
+        .single()
+        .then(({ data }) => { if (data?.role === 'admin') setIsAdmin(true); });
+    });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
       setUser(session?.user ?? null);
+      if (!session?.user) setIsAdmin(false);
     });
     return () => subscription.unsubscribe();
   }, []);
 
-  // Still loading — render nothing to avoid flicker
+  // Close on outside click
+  useEffect(() => {
+    function onClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    if (open) document.addEventListener('mousedown', onClickOutside);
+    return () => document.removeEventListener('mousedown', onClickOutside);
+  }, [open]);
+
+  const signOut = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    window.location.href = `/${lang}`;
+  };
+
   if (user === undefined) return null;
 
   if (!user) {
@@ -49,19 +86,61 @@ function UserNav({ lang, dict }: { lang: Locale; dict: any }) {
         href={`/${lang}/yomiplay/auth`}
         className="text-sm font-bold text-[var(--muted-foreground)] hover:text-[var(--foreground-rgb)] transition-colors whitespace-nowrap"
       >
-        {dict.common.nav.signIn}
+        {labels.signIn}
       </Link>
     );
   }
 
+  const username = user.email?.split('@')[0] ?? '—';
+
   return (
-    <Link
-      href={`/${lang}/account`}
-      className="flex items-center justify-center w-8 h-8 rounded-full bg-[rgb(var(--accent))]/20 hover:bg-[rgb(var(--accent))]/30 transition-colors text-[rgb(var(--accent))] font-bold text-sm"
-      title={dict.common.nav.account}
-    >
-      {user.email?.[0].toUpperCase() ?? <User size={14} />}
-    </Link>
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[var(--border)] hover:bg-white/5 transition-colors text-sm font-bold"
+      >
+        <span className="max-w-[80px] truncate">{username}</span>
+        <ChevronDown size={13} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+
+      {open && (
+        <div className="absolute right-0 top-full mt-2 w-44 rounded-xl border border-[var(--border)] bg-[var(--background)]/95 backdrop-blur-md shadow-xl overflow-hidden z-50">
+          <Link
+            href={`/${lang}/account`}
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-2.5 px-4 py-3 text-sm hover:bg-white/5 transition-colors border-b border-[var(--border)]"
+          >
+            <UserCircle size={15} className="text-[var(--muted-foreground)]" />
+            {labels.account}
+          </Link>
+          <Link
+            href={`/${lang}/yomiplay/community/my-uploads`}
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-2.5 px-4 py-3 text-sm hover:bg-white/5 transition-colors border-b border-[var(--border)]"
+          >
+            <FolderOpen size={15} className="text-[var(--muted-foreground)]" />
+            {labels.uploads}
+          </Link>
+          {isAdmin && (
+            <Link
+              href={`/${lang}/admin`}
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2.5 px-4 py-3 text-sm hover:bg-white/5 transition-colors border-b border-[var(--border)] text-[rgb(var(--accent))]"
+            >
+              <ShieldCheck size={15} />
+              {labels.admin}
+            </Link>
+          )}
+          <button
+            onClick={signOut}
+            className="w-full flex items-center gap-2.5 px-4 py-3 text-sm hover:bg-white/5 transition-colors text-red-400"
+          >
+            <LogOut size={15} />
+            {labels.signOut}
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -72,12 +151,10 @@ const Navbar = ({ lang, dict }: { lang: Locale; dict: any }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const mobilePanelRef = useRef<HTMLDivElement>(null);
 
-  // Close mobile menu on route change
   useEffect(() => {
     setMobileOpen(false);
   }, [pathname]);
 
-  // Close on outside click
   useEffect(() => {
     function onClickOutside(e: MouseEvent) {
       if (mobilePanelRef.current && !mobilePanelRef.current.contains(e.target as Node)) {

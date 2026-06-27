@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase-browser';
 import { Locale } from '@/lib/get-dictionary';
 import type { User } from '@supabase/supabase-js';
-import { Smartphone, CreditCard, Shield, ExternalLink, Loader2 } from 'lucide-react';
+import { Smartphone, CreditCard, Shield, ExternalLink, Loader2, LogOut } from 'lucide-react';
 
 const t = {
   en: {
@@ -30,6 +30,7 @@ const t = {
     security: 'Account Security',
     resetPassword: 'Send Password Reset Email',
     resetSent: 'Reset email sent. Check your inbox.',
+    signOut: 'Sign Out',
     loading: 'Loading...',
     redirecting: 'Redirecting to sign in...',
   },
@@ -56,6 +57,7 @@ const t = {
     security: '账号安全',
     resetPassword: '发送密码重置邮件',
     resetSent: '重置邮件已发送，请查看邮箱。',
+    signOut: '退出登录',
     loading: '加载中...',
     redirecting: '正在跳转到登录页...',
   },
@@ -82,6 +84,7 @@ const t = {
     security: '帳號安全',
     resetPassword: '發送密碼重設郵件',
     resetSent: '重設郵件已發送，請查看電子郵件。',
+    signOut: '退出登入',
     loading: '載入中...',
     redirecting: '正在跳轉至登入頁...',
   },
@@ -108,6 +111,7 @@ const t = {
     security: 'アカウントセキュリティ',
     resetPassword: 'パスワードリセットメールを送信',
     resetSent: 'リセットメールを送信しました。',
+    signOut: 'ログアウト',
     loading: '読み込み中...',
     redirecting: 'ログインページへリダイレクト中...',
   },
@@ -176,6 +180,12 @@ export default function AccountPage({ params: { lang } }: { params: { lang: Loca
     } finally {
       setPortalLoading(false);
     }
+  };
+
+  const signOut = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    window.location.href = `/${lang}`;
   };
 
   const sendResetEmail = async () => {
@@ -358,6 +368,17 @@ export default function AccountPage({ params: { lang } }: { params: { lang: Loca
             {c.resetPassword}
           </button>
         )}
+      </div>
+
+      {/* Sign out */}
+      <div className="pt-2">
+        <button
+          onClick={signOut}
+          className="flex items-center gap-2 text-sm text-red-400 hover:text-red-300 transition-colors"
+        >
+          <LogOut size={15} />
+          {c.signOut}
+        </button>
       </div>
     </div>
   );
