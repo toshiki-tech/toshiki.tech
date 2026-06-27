@@ -24,7 +24,8 @@ const t = {
     manageSubscription: 'Manage Subscription',
     goToCommunity: 'Community',
     devices: 'Linked Devices',
-    manageDevices: 'Manage',
+    lastSeen: 'Last seen',
+    noDevices: 'No devices linked yet.',
     viewProduct: 'View Product',
     security: 'Account Security',
     resetPassword: 'Send Password Reset Email',
@@ -49,7 +50,8 @@ const t = {
     manageSubscription: '管理订阅',
     goToCommunity: '进入社区',
     devices: '已绑定设备',
-    manageDevices: '管理',
+    lastSeen: '最后活跃',
+    noDevices: '暂无已绑定设备。',
     viewProduct: '查看产品动态',
     security: '账号安全',
     resetPassword: '发送密码重置邮件',
@@ -74,7 +76,8 @@ const t = {
     manageSubscription: '管理訂閱',
     goToCommunity: '進入社區',
     devices: '已綁定裝置',
-    manageDevices: '管理',
+    lastSeen: '最後活躍',
+    noDevices: '暫無已綁定裝置。',
     viewProduct: '查看產品動態',
     security: '帳號安全',
     resetPassword: '發送密碼重設郵件',
@@ -99,7 +102,8 @@ const t = {
     manageSubscription: 'サブスク管理',
     goToCommunity: 'コミュニティ',
     devices: '登録デバイス',
-    manageDevices: '管理',
+    lastSeen: '最終確認',
+    noDevices: '登録済みデバイスはありません。',
     viewProduct: '製品ページを見る',
     security: 'アカウントセキュリティ',
     resetPassword: 'パスワードリセットメールを送信',
@@ -118,11 +122,21 @@ type Sub = {
   is_lifetime: boolean;
 };
 
+type Device = {
+  device_id: string;
+  device_name: string | null;
+  device_model: string | null;
+  device_brand: string | null;
+  os_version: string | null;
+  app_version: string | null;
+  last_seen_at: string;
+};
+
 export default function AccountPage({ params: { lang } }: { params: { lang: Locale } }) {
   const c = t[lang] || t.en;
   const [user, setUser] = useState<User | null | undefined>(undefined);
   const [sub, setSub] = useState<Sub | null>(null);
-  const [deviceCount, setDeviceCount] = useState<number | null>(null);
+  const [devices, setDevices] = useState<Device[] | null>(null);
   const [portalLoading, setPortalLoading] = useState(false);
   const [resetStatus, setResetStatus] = useState<'idle' | 'sent'>('idle');
 
@@ -142,7 +156,7 @@ export default function AccountPage({ params: { lang } }: { params: { lang: Loca
 
       fetch('/api/yomiplay/v1/devices', { headers: { Authorization: bearer } })
         .then((r) => r.json())
-        .then((d) => setDeviceCount(d?.data?.devices?.length ?? 0))
+        .then((d) => setDevices(d?.data?.devices ?? []))
         .catch(() => {});
     });
   }, []);
@@ -297,18 +311,32 @@ export default function AccountPage({ params: { lang } }: { params: { lang: Loca
           )}
 
           {/* Devices */}
-          {deviceCount !== null && (
-            <div className="flex items-center justify-between pt-2 border-t border-[var(--border)]">
-              <div className="flex items-center gap-2 text-sm text-[var(--muted-foreground)]">
-                <Smartphone size={14} />
-                {c.devices}: {deviceCount}/3
+          {devices !== null && (
+            <div className="pt-2 border-t border-[var(--border)] space-y-2">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[var(--muted-foreground)]">
+                <Smartphone size={13} />
+                {c.devices} ({devices.length}/3)
               </div>
-              <a
-                href={`/${lang}/yomiplay/community`}
-                className="text-xs text-[rgb(var(--accent))] hover:underline"
-              >
-                {c.manageDevices}
-              </a>
+              {devices.length === 0 ? (
+                <p className="text-sm text-[var(--muted-foreground)]">{c.noDevices}</p>
+              ) : (
+                <div className="space-y-2">
+                  {devices.map((d) => (
+                    <div key={d.device_id} className="flex items-center justify-between py-2 px-3 rounded-lg bg-[var(--muted)]/40 text-sm">
+                      <div>
+                        <p className="font-medium">{d.device_name || d.device_model || d.device_id}</p>
+                        <p className="text-xs text-[var(--muted-foreground)]">
+                          {[d.device_brand, d.os_version ? `Android ${d.os_version}` : null, d.app_version ? `v${d.app_version}` : null]
+                            .filter(Boolean).join(' · ')}
+                        </p>
+                        <p className="text-xs text-[var(--muted-foreground)]">
+                          {c.lastSeen}: {new Date(d.last_seen_at).toLocaleDateString(lang === 'en' ? 'en-US' : lang)}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
