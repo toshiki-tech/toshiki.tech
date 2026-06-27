@@ -117,11 +117,12 @@ async function handleSubscriptionChange(svc: SupabaseClient, sub: Stripe.Subscri
   await svc
     .from('toshiki_tech_subscriptions')
     .update({
-      status:             sub.status,
-      current_period_end: sub.items.data[0]
+      status:                sub.status,
+      cancel_at_period_end:  sub.cancel_at_period_end ?? false,
+      current_period_end:    sub.items.data[0]
           ? new Date(sub.items.data[0].current_period_end * 1000).toISOString()
           : undefined,
-      updated_at:         new Date().toISOString(),
+      updated_at:            new Date().toISOString(),
     })
     .eq('stripe_subscription_id', sub.id);
 

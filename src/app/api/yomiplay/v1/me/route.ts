@@ -28,7 +28,7 @@ export async function GET(request: Request) {
   // Query the unified subscriptions table for this user + product
   const { data: sub } = await supabase
     .from('toshiki_tech_subscriptions')
-    .select('plan, status, current_period_end, is_lifetime, updated_at')
+    .select('plan, status, cancel_at_period_end, current_period_end, is_lifetime, updated_at')
     .eq('user_id', user.id)
     .eq('product', 'yomiplay')
     .single();
@@ -43,13 +43,14 @@ export async function GET(request: Request) {
   return NextResponse.json(
     {
       data: {
-        user_id:             user.id,
-        is_pro:              isPro,
-        plan:                sub?.plan            ?? null,
-        status:              sub?.status          ?? null,
-        current_period_end:  sub?.current_period_end ?? null,
-        is_lifetime:         sub?.is_lifetime     ?? false,
-        updated_at:          sub?.updated_at      ?? null,
+        user_id:               user.id,
+        is_pro:                isPro,
+        plan:                  sub?.plan                 ?? null,
+        status:                sub?.status               ?? null,
+        cancel_at_period_end:  sub?.cancel_at_period_end ?? false,
+        current_period_end:    sub?.current_period_end   ?? null,
+        is_lifetime:           sub?.is_lifetime           ?? false,
+        updated_at:            sub?.updated_at            ?? null,
       },
     },
     { headers: CORS }
