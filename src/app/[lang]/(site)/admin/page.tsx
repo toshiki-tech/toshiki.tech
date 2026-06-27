@@ -134,16 +134,22 @@ export default async function AdminPage({ params: { lang } }: { params: { lang: 
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
-  // Fetch all subscriptions with display_name
+  // Fetch all subscriptions (no FK to yomi_profiles, so query separately)
   const { data: subscriptions } = await svc
     .from('toshiki_tech_subscriptions')
-    .select(`
-      user_id, product, plan, status,
-      current_period_end, is_lifetime, updated_at,
-      toshiki_tech_yomi_profiles(display_name)
-    `)
+    .select('user_id, product, plan, status, current_period_end, is_lifetime, updated_at')
     .order('updated_at', { ascending: false })
     .limit(100);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const subUserIds = Array.from(new Set((subscriptions ?? []).map((s: any) => s.user_id as string)));
+  const { data: subProfiles } = subUserIds.length > 0
+    ? await svc.from('toshiki_tech_yomi_profiles').select('id, display_name').in('id', subUserIds)
+    : { data: [] };
+  const subProfileMap: Record<string, string | null> = Object.fromEntries(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (subProfiles ?? []).map((p: any) => [p.id as string, (p.display_name ?? null) as string | null])
+  );
 
   // Community download stats: total + top 10
   const { data: topUploads } = await svc
@@ -174,11 +180,10 @@ export default async function AdminPage({ params: { lang } }: { params: { lang: 
     apkByVersion[row.version_name] = (apkByVersion[row.version_name] ?? 0) + 1;
   }
 
-  // Flatten subscriptions with display_name
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const flatSubs = (subscriptions ?? []).map((s: any) => ({
     user_id:            s.user_id,
-    display_name:       s.toshiki_tech_yomi_profiles?.display_name ?? null,
+    display_name:       subProfileMap[s.user_id] ?? null,
     product:            s.product,
     plan:               s.plan,
     status:             s.status,
