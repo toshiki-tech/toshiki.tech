@@ -24,7 +24,7 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from('yomiplay_apk_releases')
-    .select('version_code, version_name, apk_sha256, release_notes, min_supported_version_code, force_update')
+    .select('version_code, version_name, apk_sha256, file_size, release_notes, min_supported_version_code, force_update')
     .eq('is_active', true)
     .order('version_code', { ascending: false })
     .limit(1)
@@ -40,6 +40,7 @@ export async function GET() {
       versionCode:              data.version_code,
       versionName:              data.version_name,
       apkUrl:                   APK_DOWNLOAD_URL,
+      fileSize:                 data.file_size,
       releaseNotes:             data.release_notes,
       minSupportedVersionCode:  data.min_supported_version_code,
       forceUpdate:              data.force_update,
