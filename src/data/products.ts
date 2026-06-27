@@ -74,6 +74,7 @@ export const products: Product[] = [
           "Gairaigo / English etymological annotations",
           "On-device AI-powered auto-subtitling",
           "Immersive shadowing & sentence-by-sentence playback",
+          "Text-to-Speech (TTS) for any subtitle line",
           "Subtitle editing & resource sharing"
         ]
       },
@@ -86,6 +87,7 @@ export const products: Product[] = [
           "外来词 (Gairaigo) 英语原词标注",
           "基于离线 AI 识别技术的自动字幕",
           "沉浸式跟读与逐句播放",
+          "文字转语音（TTS）字幕朗读",
           "支持字幕编辑与优质资料共享"
         ]
       },
@@ -98,6 +100,7 @@ export const products: Product[] = [
           "外来語・カタカナ語の英語原義注釈機能",
           "オフラインAI認識による自動字幕生成",
           "没入型シャドーイング＆文単位再生",
+          "字幕テキスト読み上げ（TTS）機能",
           "字幕編集機能と学習リソースの共有"
         ]
       },
@@ -110,6 +113,7 @@ export const products: Product[] = [
           "外來詞 (Gairaigo) 英語原詞標注",
           "基於離線 AI 識別技術的自動字幕",
           "沉浸式跟讀與逐句播放",
+          "文字轉語音（TTS）字幕朗讀",
           "支持字幕編輯與優質資料共享"
         ]
       }
