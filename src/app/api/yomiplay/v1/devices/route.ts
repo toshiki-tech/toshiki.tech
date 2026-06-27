@@ -29,7 +29,7 @@ export async function GET(request: Request) {
   const svc = serviceClient();
   const { data: devices } = await svc
     .from('toshiki_tech_yomi_devices')
-    .select('device_id, device_name, last_seen_at, created_at')
+    .select('device_id, device_name, platform, device_model, device_brand, os_version, app_version, last_seen_at, created_at')
     .eq('user_id', user.id)
     .order('last_seen_at', { ascending: false });
 
@@ -44,14 +44,22 @@ export async function POST(request: Request) {
   const user = await getUserFromBearer(extractBearerToken(request));
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers: CORS });
 
-  let body: { device_id?: string; device_name?: string };
+  let body: {
+    device_id?:    string;
+    device_name?:  string;
+    platform?:     string;
+    device_model?: string;
+    device_brand?: string;
+    os_version?:   string;
+    app_version?:  string;
+  };
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400, headers: CORS });
   }
 
-  const { device_id, device_name } = body;
+  const { device_id, device_name, platform, device_model, device_brand, os_version, app_version } = body;
   if (!device_id || typeof device_id !== 'string') {
     return NextResponse.json({ error: 'device_id is required' }, { status: 400, headers: CORS });
   }
@@ -67,10 +75,18 @@ export async function POST(request: Request) {
     .single();
 
   if (existing) {
-    // Already registered — just refresh last_seen_at
+    // Already registered — refresh last_seen_at and device metadata
     await svc
       .from('toshiki_tech_yomi_devices')
-      .update({ last_seen_at: new Date().toISOString(), ...(device_name ? { device_name } : {}) })
+      .update({
+        last_seen_at: new Date().toISOString(),
+        ...(device_name  ? { device_name }  : {}),
+        ...(platform     ? { platform }     : {}),
+        ...(device_model ? { device_model } : {}),
+        ...(device_brand ? { device_brand } : {}),
+        ...(os_version   ? { os_version }   : {}),
+        ...(app_version  ? { app_version }  : {}),
+      })
       .eq('user_id', user.id)
       .eq('device_id', device_id);
 
@@ -97,9 +113,14 @@ export async function POST(request: Request) {
 
   // Register new device
   await svc.from('toshiki_tech_yomi_devices').insert({
-    user_id:     user.id,
+    user_id:      user.id,
     device_id,
-    device_name: device_name ?? null,
+    device_name:  device_name  ?? null,
+    platform:     platform     ?? null,
+    device_model: device_model ?? null,
+    device_brand: device_brand ?? null,
+    os_version:   os_version   ?? null,
+    app_version:  app_version  ?? null,
     last_seen_at: new Date().toISOString(),
   });
 
