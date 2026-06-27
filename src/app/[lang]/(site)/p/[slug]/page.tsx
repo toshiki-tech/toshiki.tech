@@ -377,8 +377,7 @@ export default async function ProductDetailPage({ params }: { params: { lang: Lo
             heading: 'Get YomiPlay',
             sub: 'Download on iOS or get the Android APK — start reading with audio in minutes.',
             ios: 'Download on the App Store',
-            android: 'Android APK',
-            androidSub: 'Coming Soon',
+            android: 'Download Android APK',
             allPlatforms: 'All platforms & versions',
           },
           zh: {
@@ -386,8 +385,7 @@ export default async function ProductDetailPage({ params }: { params: { lang: Lo
             heading: '下载 YomiPlay',
             sub: '在 iOS 上下载，或获取安卓 APK — 几分钟内开启带音频的沉浸阅读体验。',
             ios: '在 App Store 下载',
-            android: '安卓 APK',
-            androidSub: '即将推出',
+            android: '下载安卓 APK',
             allPlatforms: '查看全部平台及版本',
           },
           'zh-tw': {
@@ -395,8 +393,7 @@ export default async function ProductDetailPage({ params }: { params: { lang: Lo
             heading: '下載 YomiPlay',
             sub: '在 iOS 上下載，或取得安卓 APK — 幾分鐘內開啟帶音訊的沉浸閱讀體驗。',
             ios: '在 App Store 下載',
-            android: '安卓 APK',
-            androidSub: '即將推出',
+            android: '下載安卓 APK',
             allPlatforms: '查看全部平台及版本',
           },
           ja: {
@@ -404,8 +401,7 @@ export default async function ProductDetailPage({ params }: { params: { lang: Lo
             heading: 'YomiPlay を入手',
             sub: 'iOS は App Store から、Android は APK を直接ダウンロード。',
             ios: 'App Store からダウンロード',
-            android: 'Android APK',
-            androidSub: '近日公開',
+            android: 'Android APK をダウンロード',
             allPlatforms: 'すべてのプラットフォーム・バージョン',
           },
         }[params.lang];
@@ -431,11 +427,13 @@ export default async function ProductDetailPage({ params }: { params: { lang: Lo
                     <span className="text-sm">{dl.ios}</span>
                   </a>
 
-                  <div className="flex flex-col items-center gap-3 p-6 rounded-2xl border-2 border-dashed border-[var(--border)] text-center opacity-50 select-none">
-                    <Smartphone size={32} className="text-[var(--muted-foreground)]" />
+                  <a
+                    href="/api/yomiplay/apk/download"
+                    className="group flex flex-col items-center gap-3 p-6 rounded-2xl border-2 border-[rgb(var(--accent))]/30 bg-[rgb(var(--accent))]/5 text-center hover:bg-[rgb(var(--accent))]/10 transition-colors"
+                  >
+                    <Smartphone size={32} className="text-[rgb(var(--accent))]" />
                     <span className="font-bold text-sm">{dl.android}</span>
-                    <span className="text-xs text-[var(--muted-foreground)]">{dl.androidSub}</span>
-                  </div>
+                  </a>
                 </div>
 
                 <div className="text-center">
@@ -543,7 +541,16 @@ export default async function ProductDetailPage({ params }: { params: { lang: Lo
                   ))}
                 </div>
 
-                <div className="text-center">
+                <div className="space-y-4 text-center">
+                  <p className="text-xs text-[var(--muted-foreground)] max-w-xl mx-auto">
+                    {params.lang === 'en'
+                      ? 'Prices above apply to the Android version. iOS pricing is set by the App Store and may differ.'
+                      : params.lang === 'zh'
+                        ? '以上价格仅适用于 Android 版本。iOS 版本价格由 App Store 决定，以 App Store 内显示为准。'
+                        : params.lang === 'zh-tw'
+                          ? '以上價格僅適用於 Android 版本。iOS 版本價格由 App Store 決定，以 App Store 內顯示為準。'
+                          : '上記の価格は Android 版の料金です。iOS 版は App Store の価格が適用されます。'}
+                  </p>
                   <Link
                     href={`/${params.lang}/yomiplay/pricing`}
                     className="inline-flex items-center gap-1.5 text-sm font-bold text-[var(--muted-foreground)] hover:text-[rgb(var(--accent))] transition-colors"

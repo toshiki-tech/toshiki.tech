@@ -139,8 +139,8 @@ export const products: Product[] = [
     translations: {
       en: {
         title: "YomiPlay",
-        subtitle: "AI Speech Recognition for audio/video Japanese learning (iOS App)",
-        description: "YomiPlay is a premium iOS application that transforms your favorite audio and video into versatile learning materials. Using on-device AI recognition for precision subtitling, it enables immersive shadowing to master the language naturally while supporting subtitle editing and resource sharing.",
+        subtitle: "AI Speech Recognition for immersive Japanese learning — iOS & Android",
+        description: "YomiPlay transforms your favorite audio and video into powerful Japanese learning materials. Using on-device AI recognition for precision subtitling, it enables immersive shadowing to master the language naturally — available on iOS and Android, with subtitle editing and community resource sharing.",
         features: [
           "Automated Furigana (reading) system",
           "Gairaigo / English etymological annotations",
@@ -151,8 +151,8 @@ export const products: Product[] = [
       },
       zh: {
         title: "YomiPlay",
-        subtitle: "基于 AI 语音识别的音视频日语学习 iOS 应用",
-        description: "YomiPlay 是一款专为 iOS 设计的沉浸式日语学习应用。它将您喜爱的音视频转化为多功能学习材料，利用离线 AI 识别技术构建精准字幕，助您在“影子跟读”中自然掌握语言。同时支持字幕完善与优质资料共享。",
+        subtitle: "基于 AI 语音识别的沉浸式日语学习应用（iOS & Android）",
+        description: "YomiPlay 是一款支持 iOS 与 Android 双平台的沉浸式日语学习应用。它将您喜爱的音视频转化为多功能学习材料，利用离线 AI 识别技术构建精准字幕，助您在「影子跟读」中自然掌握语言，同时支持字幕完善与优质资料共享。",
         features: [
           "自动假名 (Furigana) 标注系统",
           "外来词 (Gairaigo) 英语原词标注",
@@ -163,8 +163,8 @@ export const products: Product[] = [
       },
       ja: {
         title: "YomiPlay",
-        subtitle: "AI音声認識を駆使した音声・動画による日本語学習 iOS アプリ",
-        description: "YomiPlayは、iOS向けに設計された没入型学習アプリです。お気に入りのリソースを多機能な教材に変え、日本語のリスニングとスピーキング力を効果的に向上させます。オンデバイスAI認識で精緻な字幕を生成し、シャドーイングをサポートします。",
+        subtitle: "AI音声認識を駆使した没入型日本語学習アプリ（iOS & Android）",
+        description: "YomiPlayは、iOSとAndroidに対応した没入型日本語学習アプリです。お気に入りのリソースを多機能な教材に変え、日本語のリスニングとスピーキング力を効果的に向上させます。オンデバイスAI認識で精緻な字幕を生成し、シャドーイングをサポートします。",
         features: [
           "全自動ふりがな（振假名）付与システム",
           "外来語・カタカナ語の英語原義注釈機能",
@@ -175,8 +175,8 @@ export const products: Product[] = [
       },
       'zh-tw': {
         title: "YomiPlay",
-        subtitle: "基於 AI 語音識別的影音日語學習 iOS 應用",
-        description: "YomiPlay 是一款專為 iOS 設計的沉浸式日語學習應用。它將您喜愛的影音轉化為多功能學習材料，利用離線 AI 識別技術構建精準字幕，助您在「影子跟讀」中自然掌握語言。同時支持字幕完善與優質資料共享。",
+        subtitle: "基於 AI 語音識別的沉浸式日語學習應用（iOS & Android）",
+        description: "YomiPlay 是一款支援 iOS 與 Android 雙平台的沉浸式日語學習應用。它將您喜愛的影音轉化為多功能學習材料，利用離線 AI 識別技術構建精準字幕，助您在「影子跟讀」中自然掌握語言，同時支持字幕完善與優質資料共享。",
         features: [
           "自動假名 (Furigana) 標注系統",
           "外來詞 (Gairaigo) 英語原詞標注",

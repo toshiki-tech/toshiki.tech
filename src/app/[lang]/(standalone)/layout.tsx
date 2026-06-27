@@ -178,9 +178,22 @@ function StandaloneLayoutInner({
       <header className="sticky top-0 z-10 bg-[var(--background)]/80 backdrop-blur-md border-b border-[var(--border)]">
         <div className="container-custom h-14 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href={`/${params.lang}`} className="flex items-center gap-2 hover:opacity-70 transition-opacity">
+            <Link href={`/${params.lang}`} className="flex items-center gap-2 hover:opacity-70 transition-opacity shrink-0">
               <Logo className="w-6 h-6" />
-              <span className="text-sm font-bold tracking-tight uppercase">Toshiki Tech</span>
+              <span className="text-sm font-bold tracking-tight uppercase hidden sm:inline">Toshiki Tech</span>
+            </Link>
+            <span className="text-[var(--border)] hidden sm:inline select-none">›</span>
+            <Link
+              href={`/${params.lang}/yomiplay`}
+              className="text-sm font-bold text-[var(--foreground-rgb)] hover:text-[rgb(var(--accent))] transition-colors"
+            >
+              YomiPlay
+            </Link>
+            <Link
+              href={`/${params.lang}/yomiplay/pricing`}
+              className="text-xs font-bold text-[var(--muted-foreground)] hover:text-[rgb(var(--accent))] transition-colors hidden sm:inline"
+            >
+              {params.lang === 'zh' ? '价格' : params.lang === 'zh-tw' ? '價格' : params.lang === 'ja' ? '料金' : 'Pricing'}
             </Link>
             <Link
               href={`/${params.lang}/yomiplay/community`}
