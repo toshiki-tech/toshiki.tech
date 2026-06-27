@@ -1,5 +1,6 @@
 import { Locale } from '@/lib/get-dictionary';
 import { Metadata } from 'next';
+import BuyButton from './BuyButton';
 
 const content = {
   en: {
@@ -9,39 +10,46 @@ const content = {
     perMonth: '/month',
     perYear: '/year',
     oneTime: 'one-time',
-    comingSoon: 'Coming Soon',
     plans: [
       {
         name: 'Free',
+        planKey: 'free' as const,
         price: '¥0',
         period: '',
         tagline: '1 hour/month of free speech-to-text — experience the core listening workflow at no cost.',
         highlight: false,
-        badge: ''
+        badge: '',
+        cta: 'Download Free',
       },
       {
         name: 'Premium Monthly',
+        planKey: 'monthly' as const,
         price: '¥180',
         period: '/month',
         tagline: 'Unlock unlimited subtitle generation, shadowing, TTS, and audio/video subtitle import, export & sharing.',
         highlight: false,
-        badge: ''
+        badge: '',
+        cta: 'Subscribe Monthly',
       },
       {
         name: 'Premium Yearly',
+        planKey: 'yearly' as const,
         price: '¥1,480',
         period: '/year',
         tagline: 'All Premium features at the best value — roughly 2 months free vs. monthly.',
         highlight: true,
-        badge: 'Best Value'
+        badge: 'Best Value',
+        cta: 'Subscribe Yearly',
       },
       {
         name: 'Premium Lifetime',
+        planKey: 'lifetime' as const,
         price: '¥2,980',
         period: 'one-time',
         tagline: 'Pay once, use forever. No recurring fees, all future Premium updates included.',
         highlight: false,
-        badge: ''
+        badge: '',
+        cta: 'Buy Lifetime',
       }
     ],
     compareTitle: 'Feature Comparison',
@@ -90,39 +98,46 @@ const content = {
     perMonth: '/月',
     perYear: '/年',
     oneTime: '一次性',
-    comingSoon: '准备中',
     plans: [
       {
         name: 'Free 免费版',
+        planKey: 'free' as const,
         price: '¥0',
         period: '',
         tagline: '每月 1 小时语音转文字配额，免费体验核心精听功能。',
         highlight: false,
-        badge: ''
+        badge: '',
+        cta: '免费下载',
       },
       {
         name: 'Premium 月付',
+        planKey: 'monthly' as const,
         price: '¥180',
         period: '/月',
         tagline: '解锁无限字幕生成、跟读、文本朗读及音视频字幕资源导入导出分享功能。',
         highlight: false,
-        badge: ''
+        badge: '',
+        cta: '月付订阅',
       },
       {
         name: 'Premium 年付',
+        planKey: 'yearly' as const,
         price: '¥1,480',
         period: '/年',
         tagline: '全部 Premium 功能，最划算之选 —— 相比月付约省 2 个月。',
         highlight: true,
-        badge: '最划算'
+        badge: '最划算',
+        cta: '年付订阅',
       },
       {
         name: 'Premium 买断',
+        planKey: 'lifetime' as const,
         price: '¥2,980',
         period: '一次性',
         tagline: '一次付费，永久使用。无定期扣费，含未来全部 Premium 更新。',
         highlight: false,
-        badge: ''
+        badge: '',
+        cta: '一次性购买',
       }
     ],
     compareTitle: '功能对比',
@@ -171,39 +186,46 @@ const content = {
     perMonth: '/月',
     perYear: '/年',
     oneTime: '一次性',
-    comingSoon: '準備中',
     plans: [
       {
         name: 'Free 免費版',
+        planKey: 'free' as const,
         price: '¥0',
         period: '',
         tagline: '每月 1 小時語音轉文字配額，免費體驗核心精聽功能。',
         highlight: false,
-        badge: ''
+        badge: '',
+        cta: '免費下載',
       },
       {
         name: 'Premium 月付',
+        planKey: 'monthly' as const,
         price: '¥180',
         period: '/月',
         tagline: '解鎖無限字幕生成、跟讀、文字朗讀及音視頻字幕資源導入導出分享功能。',
         highlight: false,
-        badge: ''
+        badge: '',
+        cta: '月付訂閱',
       },
       {
         name: 'Premium 年付',
+        planKey: 'yearly' as const,
         price: '¥1,480',
         period: '/年',
         tagline: '全部 Premium 功能，最划算之選 —— 相比月付約省 2 個月。',
         highlight: true,
-        badge: '最划算'
+        badge: '最划算',
+        cta: '年付訂閱',
       },
       {
         name: 'Premium 買斷',
+        planKey: 'lifetime' as const,
         price: '¥2,980',
         period: '一次性',
         tagline: '一次付費，永久使用。無定期扣費，含未來全部 Premium 更新。',
         highlight: false,
-        badge: ''
+        badge: '',
+        cta: '一次性購買',
       }
     ],
     compareTitle: '功能對比',
@@ -252,39 +274,46 @@ const content = {
     perMonth: '/月',
     perYear: '/年',
     oneTime: '買い切り',
-    comingSoon: '準備中',
     plans: [
       {
         name: 'Free（無料）',
+        planKey: 'free' as const,
         price: '¥0',
         period: '',
         tagline: '毎月1時間の音声テキスト変換枠付き、無料でコア精聴機能をお試しいただけます。',
         highlight: false,
-        badge: ''
+        badge: '',
+        cta: '無料でダウンロード',
       },
       {
         name: 'Premium 月額',
+        planKey: 'monthly' as const,
         price: '¥180',
         period: '/月',
         tagline: '無制限の字幕生成・シャドーイング・読み上げ、音声／動画字幕リソースのインポート・エクスポート・共有を解放。',
         highlight: false,
-        badge: ''
+        badge: '',
+        cta: '月額プランに登録',
       },
       {
         name: 'Premium 年額',
+        planKey: 'yearly' as const,
         price: '¥1,480',
         period: '/年',
         tagline: 'すべての Premium 機能を最もお得に。月額換算で約2ヶ月分お得です。',
         highlight: true,
-        badge: 'お得'
+        badge: 'お得',
+        cta: '年額プランに登録',
       },
       {
         name: 'Premium 買い切り',
+        planKey: 'lifetime' as const,
         price: '¥2,980',
         period: '買い切り',
         tagline: '一度の購入で永久に利用可能。継続課金なし、今後の Premium アップデートもすべて含まれます。',
         highlight: false,
-        badge: ''
+        badge: '',
+        cta: '買い切りで購入',
       }
     ],
     compareTitle: '機能比較',
@@ -393,17 +422,12 @@ export default function YomiPlayPricingPage({ params: { lang } }: { params: { la
             <p className="flex-1 text-sm text-[var(--muted-foreground)] leading-relaxed mb-6">
               {plan.tagline}
             </p>
-            <button
-              type="button"
-              disabled
-              className={`w-full cursor-not-allowed rounded-lg px-4 py-2.5 text-sm font-semibold ${
-                plan.highlight
-                  ? 'bg-[rgb(var(--accent))] text-white opacity-60'
-                  : 'border border-[var(--border)] text-[var(--muted-foreground)]'
-              }`}
-            >
-              {t.comingSoon}
-            </button>
+            <BuyButton
+              plan={plan.planKey}
+              lang={lang}
+              highlight={plan.highlight}
+              label={plan.cta}
+            />
           </div>
         ))}
       </div>

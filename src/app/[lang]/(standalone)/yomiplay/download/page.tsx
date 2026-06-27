@@ -31,10 +31,9 @@ const content = {
     android: {
       label: 'Android',
       devices: 'Phone · Tablet',
-      req: 'Android 8.0 or later (coming soon)',
-      desc: 'APK distributed directly through this site — no app store needed. Coming soon.',
-      cta: 'Android APK',
-      badge: 'Coming Soon',
+      req: 'Requires Android 8.0 or later',
+      desc: 'Download the APK directly from this site — no app store needed. Sideload and install in seconds.',
+      cta: 'Download Android APK',
     },
     highlightsTitle: 'What you can do',
     highlights: [
@@ -61,7 +60,7 @@ const content = {
     ],
     freeNote: 'Free plan includes 1 hr/month of speech-to-text. Upgrade for unlimited recognition and TTS.',
     pricingLink: 'Compare all plans',
-    versionNote: 'v1.6.0  ·  Updated June 2026',
+    versionNote: 'v0.1.0  ·  Released June 2026',
   },
   zh: {
     eyebrow: 'YomiPlay',
@@ -77,10 +76,9 @@ const content = {
     android: {
       label: 'Android',
       devices: '手机 · 平板',
-      req: 'Android 8.0 及以上（即将支持）',
-      desc: 'APK 将直接通过本站（toshiki.tech）发布，下载安装即可使用，无需任何应用商店。',
-      cta: 'Android APK',
-      badge: '即将推出',
+      req: '需要 Android 8.0 或更高版本',
+      desc: 'APK 直接通过本站（toshiki.tech）发布，下载安装即可使用，无需任何应用商店。',
+      cta: '下载 Android APK',
     },
     highlightsTitle: '你能做什么',
     highlights: [
@@ -107,7 +105,7 @@ const content = {
     ],
     freeNote: '免费版每月包含 1 小时语音转文字额度。升级 Premium 可解锁无限识别与 TTS 功能。',
     pricingLink: '查看全部价格方案',
-    versionNote: 'v1.6.0  ·  更新于 2026年6月',
+    versionNote: 'v0.1.0  ·  发布于 2026年6月',
   },
   'zh-tw': {
     eyebrow: 'YomiPlay',
@@ -123,10 +121,9 @@ const content = {
     android: {
       label: 'Android',
       devices: '手機 · 平板',
-      req: 'Android 8.0 及以上（即將支援）',
-      desc: 'APK 將直接透過本站（toshiki.tech）發佈，下載安裝即可使用，無需任何應用商店。',
-      cta: 'Android APK',
-      badge: '即將推出',
+      req: '需要 Android 8.0 或更高版本',
+      desc: 'APK 直接透過本站（toshiki.tech）發佈，下載安裝即可使用，無需任何應用商店。',
+      cta: '下載 Android APK',
     },
     highlightsTitle: '你能做什麼',
     highlights: [
@@ -153,7 +150,7 @@ const content = {
     ],
     freeNote: '免費版每月包含 1 小時語音轉文字額度。升級 Premium 可解鎖無限識別與 TTS 功能。',
     pricingLink: '查看全部價格方案',
-    versionNote: 'v1.6.0  ·  更新於 2026年6月',
+    versionNote: 'v0.1.0  ·  發布於 2026年6月',
   },
   ja: {
     eyebrow: 'YomiPlay',
@@ -169,10 +166,9 @@ const content = {
     android: {
       label: 'Android',
       devices: 'スマホ · タブレット',
-      req: 'Android 8.0 以降（近日対応）',
-      desc: '公式サイト（toshiki.tech）から APK を直接ダウンロード・インストール可能に。アプリストア不要で近日公開。',
-      cta: 'Android APK',
-      badge: '近日公開',
+      req: 'Android 8.0 以降が必要',
+      desc: '公式サイト（toshiki.tech）から APK を直接ダウンロード・インストール可能。アプリストア不要です。',
+      cta: 'Android APK をダウンロード',
     },
     highlightsTitle: 'できること',
     highlights: [
@@ -199,7 +195,7 @@ const content = {
     ],
     freeNote: '無料プランには月1時間の音声テキスト変換枠が含まれます。Premium にアップグレードすると無制限 & TTS が使えます。',
     pricingLink: '料金プランを比較する',
-    versionNote: 'v1.6.0  ·  2026年6月 更新',
+    versionNote: 'v0.1.0  ·  2026年6月 公開',
   },
 };
 
@@ -264,29 +260,29 @@ export default function YomiPlayDownloadPage({ params: { lang } }: { params: { l
               </div>
             </div>
 
-            {/* Android — coming soon */}
-            <div className="relative rounded-3xl border-2 border-dashed border-[var(--border)] bg-[var(--muted)]/20 p-8 flex flex-col gap-6">
-              <span className="absolute top-5 right-5 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-[var(--muted)] text-[var(--muted-foreground)] border border-[var(--border)]">
-                {t.android.badge}
-              </span>
+            {/* Android — live */}
+            <div className="rounded-3xl border border-[var(--border)] bg-[var(--card)] p-8 flex flex-col gap-6 shadow-sm">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-[var(--muted)] flex items-center justify-center shrink-0 text-[var(--muted-foreground)]">
+                <div className="w-14 h-14 rounded-2xl bg-[#3DDC84]/10 flex items-center justify-center shrink-0 text-[#3DDC84]">
                   <AndroidIcon />
                 </div>
                 <div>
-                  <p className="text-2xl font-black text-[var(--muted-foreground)]">{t.android.label}</p>
-                  <p className="text-sm text-[var(--muted-foreground)]/70">{t.android.devices}</p>
+                  <p className="text-2xl font-black text-[var(--foreground-rgb)]">{t.android.label}</p>
+                  <p className="text-sm text-[var(--muted-foreground)]">{t.android.devices}</p>
                 </div>
               </div>
-              <p className="text-sm text-[var(--muted-foreground)]/70 leading-relaxed flex-1">
+              <p className="text-sm text-[var(--muted-foreground)] leading-relaxed flex-1">
                 {t.android.desc}
               </p>
               <div className="space-y-2.5">
-                <div className="flex items-center justify-center gap-2.5 w-full rounded-xl border-2 border-dashed border-[var(--border)] text-[var(--muted-foreground)] font-bold py-3.5 cursor-not-allowed select-none opacity-50">
+                <a
+                  href="/api/yomiplay/apk/download"
+                  className="flex items-center justify-center gap-2.5 w-full rounded-xl bg-[#3DDC84] text-black font-bold py-3.5 hover:opacity-90 transition-opacity"
+                >
                   <AndroidIcon />
                   {t.android.cta}
-                </div>
-                <p className="text-xs text-center text-[var(--muted-foreground)]/60">{t.android.req}</p>
+                </a>
+                <p className="text-xs text-center text-[var(--muted-foreground)]">{t.android.req}</p>
               </div>
             </div>
 
