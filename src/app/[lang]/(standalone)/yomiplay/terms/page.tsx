@@ -60,15 +60,19 @@ const content = {
         content: 'The YomiPlay application, its software, and all related content are owned by the operator and protected by applicable laws. You retain ownership of content you upload, but grant the operator the limited license necessary to process, store, and transmit it solely to provide the service to you.'
       },
       {
-        title: '10. Governing Law & Jurisdiction',
+        title: '10. Copyright & Content Policy',
+        content: 'YomiPlay is an AI-powered learning tool that processes audio and video content provided by the user. Users may only upload or process content that they own or are authorized to use. YomiPlay does not host, distribute, or provide copyrighted media content. The app does not store or reproduce third-party media — it processes user-provided files locally on-device or transiently on the server solely to generate subtitle data. Users are solely responsible for ensuring they have the right to process any content they submit to the service.'
+      },
+      {
+        title: '11. Governing Law & Jurisdiction',
         content: 'These terms are governed by the laws of Japan. Any disputes arising in connection with the service shall be subject to the exclusive jurisdiction of the courts of Japan as the court of first instance.'
       },
       {
-        title: '11. Operator & Contact',
+        title: '12. Operator & Contact',
         content: 'This service is operated by DU BIAOQI, an individual developer based in Japan. For inquiries, contact toshiki.tech.jp@gmail.com.'
       },
       {
-        title: '12. Term Modifications',
+        title: '13. Term Modifications',
         content: 'We reserve the right to modify these terms at any time. Significant changes will be announced in-app or on this website.'
       }
     ],
@@ -139,15 +143,19 @@ const content = {
         content: 'YomiPlay 应用、软件及相关内容的知识产权归运营者所有，并受相关法律保护。您上传的内容仍归您所有，但您授予运营者为向您提供服务所必需的、用于处理、存储与传输该内容的有限许可。'
       },
       {
-        title: '10. 准据法与管辖',
+        title: '10. 版权与内容政策',
+        content: 'YomiPlay 是一款由 AI 驱动的学习工具，仅处理用户自行提供的音视频内容。用户只能上传或处理其本人拥有版权或已获得授权使用的内容。YomiPlay 不托管、分发或提供任何受版权保护的媒体内容。本应用不存储或复制第三方媒体——仅在用户设备本地或服务器端短暂处理用户提供的文件以生成字幕数据。用户自行承担确保其提交内容合法合规的全部责任。'
+      },
+      {
+        title: '11. 准据法与管辖',
         content: '本条款适用日本法。因本服务产生的相关纠纷，以日本法院为第一审专属管辖法院。'
       },
       {
-        title: '11. 运营者与联系方式',
+        title: '12. 运营者与联系方式',
         content: '本服务由日本个人开发者 DU BIAOQI 运营。如有咨询，请联系 toshiki.tech.jp@gmail.com。'
       },
       {
-        title: '12. 条款变更',
+        title: '13. 条款变更',
         content: '我们保留随时修改条款的权利。重大变更将通过应用内或在本网站进行公示。'
       }
     ],
@@ -218,15 +226,19 @@ const content = {
         content: 'YomiPlay 應用程式、軟體及相關內容的智慧財產權歸營運者所有，並受相關法律保護。您上傳的內容仍歸您所有，但您授予營運者為向您提供服務所必需的、用於處理、儲存與傳輸該內容的有限授權。'
       },
       {
-        title: '10. 準據法與管轄',
+        title: '10. 著作權與內容政策',
+        content: 'YomiPlay 是一款由 AI 驅動的學習工具，僅處理用戶自行提供的影音內容。用戶只能上傳或處理其本人擁有著作權或已獲得授權使用的內容。YomiPlay 不托管、分發或提供任何受著作權保護的媒體內容。本應用不儲存或複製第三方媒體——僅在用戶裝置本地或伺服器端短暫處理用戶提供的檔案以生成字幕資料。用戶自行承擔確保其提交內容合法合規的全部責任。'
+      },
+      {
+        title: '11. 準據法與管轄',
         content: '本條款適用日本法。因本服務產生的相關糾紛，以日本法院為第一審專屬管轄法院。'
       },
       {
-        title: '11. 營運者與聯絡方式',
+        title: '12. 營運者與聯絡方式',
         content: '本服務由日本個人開發者 DU BIAOQI 營運。如有諮詢，請聯絡 toshiki.tech.jp@gmail.com。'
       },
       {
-        title: '12. 條款變更',
+        title: '13. 條款變更',
         content: '我們保留隨時修改條款的權利。重大變更將透過應用程式內或在本網站進行公示。'
       }
     ],
@@ -297,15 +309,19 @@ const content = {
         content: 'YomiPlay アプリケーション、ソフトウェアおよび関連コンテンツの知的財産権は運営者に帰属し、関連法令により保護されます。お客様がアップロードしたコンテンツの権利はお客様に帰属しますが、サービス提供に必要な範囲で、当該コンテンツを処理・保存・送信するための限定的なライセンスを運営者に許諾するものとします。'
       },
       {
-        title: '10. 準拠法・管轄',
+        title: '10. 著作権・コンテンツポリシー',
+        content: 'YomiPlayは、ユーザーが提供した音声・動画コンテンツを処理するAI学習ツールです。ユーザーは、自身が所有または使用を許諾された コンテンツのみをアップロードまたは処理することができます。YomiPlayは、著作権で保護されたメディアコンテンツのホスト、配布、または提供を行いません。本アプリは第三者のメディアを保存・複製せず、字幕データを生成するためにユーザーが提供したファイルをデバイス上でローカルに、またはサーバー上で一時的に処理するのみです。ユーザーは、サービスに提出するコンテンツの適法な利用権を確保する責任を単独で負います。'
+      },
+      {
+        title: '11. 準拠法・管轄',
         content: '本規約は日本法に準拠します。本サービスに関連して生じる紛争については、日本の裁判所を第一審の専属的合意管轄裁判所とします。'
       },
       {
-        title: '11. 運営者・お問い合わせ',
+        title: '12. 運営者・お問い合わせ',
         content: '本サービスは、日本の個人開発者である DU BIAOQI が運営しています。お問い合わせは toshiki.tech.jp@gmail.com までご連絡ください。'
       },
       {
-        title: '12. 規約の変更',
+        title: '13. 規約の変更',
         content: '規約を随时変更する権利を留保します。重大な変更はアプリ内または本サイトで告知されます。'
       }
     ],

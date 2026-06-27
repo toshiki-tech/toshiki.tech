@@ -114,7 +114,7 @@ function AuthNav({ lang }: { lang: Locale }) {
             </Link>
             {isAdmin && (
               <Link
-                href={`/${lang}/yomiplay/admin`}
+                href={`/${lang}/admin`}
                 onClick={() => setMenuOpen(false)}
                 className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-[rgb(var(--accent))] hover:bg-[var(--muted)] transition-colors border-t border-[var(--border)]"
               >
@@ -153,6 +153,16 @@ function StandaloneLayoutInner({
   params: { lang: Locale };
 }>) {
   const pathname = usePathname();
+  const [communityEnabled, setCommunityEnabled] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/yomiplay/feature-flags')
+      .then((r) => r.json())
+      .then((d) => {
+        if (typeof d?.community_enabled === 'boolean') setCommunityEnabled(d.community_enabled);
+      })
+      .catch(() => {});
+  }, []);
 
   const redirectedPathName = (locale: string) => {
     if (!pathname) return '/';
@@ -195,12 +205,14 @@ function StandaloneLayoutInner({
             >
               {params.lang === 'zh' ? '价格' : params.lang === 'zh-tw' ? '價格' : params.lang === 'ja' ? '料金' : 'Pricing'}
             </Link>
-            <Link
-              href={`/${params.lang}/yomiplay/community`}
-              className="text-xs font-bold text-[var(--muted-foreground)] hover:text-[rgb(var(--accent))] transition-colors hidden sm:inline"
-            >
-              {params.lang === 'zh' ? '社区' : params.lang === 'zh-tw' ? '社區' : params.lang === 'ja' ? 'コミュニティ' : 'Community'}
-            </Link>
+            {communityEnabled && (
+              <Link
+                href={`/${params.lang}/yomiplay/community`}
+                className="text-xs font-bold text-[var(--muted-foreground)] hover:text-[rgb(var(--accent))] transition-colors hidden sm:inline"
+              >
+                {params.lang === 'zh' ? '社区' : params.lang === 'zh-tw' ? '社區' : params.lang === 'ja' ? 'コミュニティ' : 'Community'}
+              </Link>
+            )}
           </div>
 
           <div className="flex items-center gap-4">

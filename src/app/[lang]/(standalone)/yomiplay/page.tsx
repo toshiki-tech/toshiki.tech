@@ -3,6 +3,8 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Apple, Smartphone, ArrowRight, CheckCircle2, Users, MessageCircle } from 'lucide-react';
+import { createClient } from '@supabase/supabase-js';
+import { getFeatureFlags } from '@/lib/yomi-feature-flags';
 
 export async function generateStaticParams() {
   return (['en', 'zh', 'ja', 'zh-tw'] as Locale[]).map((lang) => ({ lang }));
@@ -138,8 +140,17 @@ const content = {
   viewPricing: string; communityTitle: string; communitySub: string; communityBtn: string;
 }>;
 
-export default function YomiPlayHomePage({ params }: { params: { lang: Locale } }) {
+export default async function YomiPlayHomePage({ params }: { params: { lang: Locale } }) {
   const t = content[params.lang] ?? content.en;
+
+  const supa = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY ||
+      process.env.PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY || ''
+  );
+  const flags = await getFeatureFlags(supa);
+  const communityEnabled = flags.community_enabled;
 
   return (
     <div className="min-h-screen">
@@ -267,24 +278,26 @@ export default function YomiPlayHomePage({ params }: { params: { lang: Locale } 
       </section>
 
       {/* Community CTA */}
-      <section className="py-20 border-t border-[var(--border)] bg-[var(--muted)]/20">
-        <div className="container-custom max-w-3xl mx-auto text-center space-y-8">
-          <div className="w-14 h-14 rounded-2xl bg-[rgb(var(--accent))]/10 flex items-center justify-center text-[rgb(var(--accent))] mx-auto">
-            <Users size={28} />
+      {communityEnabled && (
+        <section className="py-20 border-t border-[var(--border)] bg-[var(--muted)]/20">
+          <div className="container-custom max-w-3xl mx-auto text-center space-y-8">
+            <div className="w-14 h-14 rounded-2xl bg-[rgb(var(--accent))]/10 flex items-center justify-center text-[rgb(var(--accent))] mx-auto">
+              <Users size={28} />
+            </div>
+            <div className="space-y-3">
+              <h2 className="text-3xl font-black tracking-tight">{t.communityTitle}</h2>
+              <p className="text-[var(--muted-foreground)]">{t.communitySub}</p>
+            </div>
+            <Link
+              href={`/${params.lang}/yomiplay/community`}
+              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-[rgb(var(--accent))] text-white font-bold hover:opacity-90 transition-opacity shadow-lg"
+            >
+              <MessageCircle size={18} />
+              {t.communityBtn}
+            </Link>
           </div>
-          <div className="space-y-3">
-            <h2 className="text-3xl font-black tracking-tight">{t.communityTitle}</h2>
-            <p className="text-[var(--muted-foreground)]">{t.communitySub}</p>
-          </div>
-          <Link
-            href={`/${params.lang}/yomiplay/community`}
-            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-[rgb(var(--accent))] text-white font-bold hover:opacity-90 transition-opacity shadow-lg"
-          >
-            <MessageCircle size={18} />
-            {t.communityBtn}
-          </Link>
-        </div>
-      </section>
+        </section>
+      )}
 
     </div>
   );

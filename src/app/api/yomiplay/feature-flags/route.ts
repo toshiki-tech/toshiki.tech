@@ -38,6 +38,7 @@ export async function GET() {
       points_feature_enabled: flags.points_feature,
       pro_redemption_enabled: flags.pro_redemption,
       community_download_enabled: flags.community_download,
+      community_enabled: flags.community_enabled,
       updated_at: new Date().toISOString(),
     },
     { headers: { ...CORS_HEADERS, ...CACHE_HEADERS } }

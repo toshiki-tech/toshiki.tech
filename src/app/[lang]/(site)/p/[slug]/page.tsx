@@ -6,6 +6,8 @@ import { Locale, getDictionary } from '@/lib/get-dictionary';
 import ZoomableImage from '@/components/ZoomableImage';
 import { ZOOM_LABELS } from '@/lib/zoom-labels';
 import { detectStore, STORE_LABELS } from '@/lib/external-store';
+import { createClient } from '@supabase/supabase-js';
+import { getFeatureFlags } from '@/lib/yomi-feature-flags';
 
 export async function generateStaticParams() {
   const locales: Locale[] = ['en', 'zh', 'ja', 'zh-tw'];
@@ -39,6 +41,15 @@ export default async function ProductDetailPage({ params }: { params: { lang: Lo
   }
 
   const t = product.translations[params.lang];
+
+  const supa = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY ||
+      process.env.PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY || ''
+  );
+  const flags = await getFeatureFlags(supa);
+  const communityEnabled = flags.community_enabled;
 
   return (
     <div className="min-h-screen bg-[var(--background-start-rgb)]">
@@ -566,7 +577,7 @@ export default async function ProductDetailPage({ params }: { params: { lang: Lo
       })()}
 
       {/* Community Section - YomiPlay only */}
-      {product.slug === 'yomiplay' && (
+      {product.slug === 'yomiplay' && communityEnabled && (
         <section className="py-24 border-t border-[var(--border)]">
           <div className="container-custom">
             <div className="max-w-3xl mx-auto space-y-12">

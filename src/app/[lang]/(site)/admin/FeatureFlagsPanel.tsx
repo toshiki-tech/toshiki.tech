@@ -5,6 +5,10 @@ import { Flag, Loader2 } from 'lucide-react';
 import { FEATURE_FLAG_KEYS, type FeatureFlagKey, type FeatureFlags } from '@/lib/yomi-feature-flags';
 
 const FLAG_META: Record<FeatureFlagKey, { title: string; description: string }> = {
+  community_enabled: {
+    title: 'Community (master switch)',
+    description: 'Hide all community entry points across the site — the Community nav link in standalone layout, the community CTA on the YomiPlay homepage, and the community section on /p/yomiplay. Disabling does not block direct URL access; use during maintenance to reduce visibility.',
+  },
   points_feature: {
     title: 'Points feature',
     description: 'Master switch for the entire points UI: rules card, header points badge, my-uploads PointsPanel, and the daily-login bonus.',
@@ -14,8 +18,8 @@ const FLAG_META: Record<FeatureFlagKey, { title: string; description: string }> 
     description: 'Allow users to redeem points for Pro membership. Controls the Apply-for-Pro form, the Pro CTA banner, the launch-promotion notice, and the /api/yomi/pro/apply endpoint.',
   },
   community_download: {
-    title: 'Community download (iOS app)',
-    description: 'Exposed via /api/yomiplay/feature-flags so the iOS app can hide its community download entry point.',
+    title: 'Community download (iOS / Android)',
+    description: 'Exposed via /api/yomiplay/feature-flags so mobile clients can hide the community download entry point.',
   },
 };
 

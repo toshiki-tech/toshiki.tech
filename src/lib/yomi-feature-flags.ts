@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-export const FEATURE_FLAG_KEYS = ['points_feature', 'pro_redemption', 'community_download'] as const;
+export const FEATURE_FLAG_KEYS = ['points_feature', 'pro_redemption', 'community_download', 'community_enabled'] as const;
 
 export type FeatureFlagKey = typeof FEATURE_FLAG_KEYS[number];
 
@@ -12,6 +12,7 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
   points_feature: true,
   pro_redemption: true,
   community_download: true,
+  community_enabled: true,
 };
 
 export function isFeatureFlagKey(key: string): key is FeatureFlagKey {
