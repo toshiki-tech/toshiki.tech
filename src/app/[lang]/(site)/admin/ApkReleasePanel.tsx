@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Smartphone, CheckCircle2, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { Smartphone, CheckCircle2, AlertCircle, ChevronDown, ChevronUp, Upload, X } from 'lucide-react';
 
 interface Release {
   id: string;
@@ -20,24 +20,96 @@ export default function ApkReleasePanel({ releases }: { releases: Release[] }) {
   const [open, setOpen] = useState(false);
   const [versionCode, setVersionCode]   = useState('');
   const [versionName, setVersionName]   = useState('');
-  const [r2Path, setR2Path]             = useState('');
   const [releaseNotes, setReleaseNotes] = useState('');
-  const [sha256, setSha256]             = useState('');
-  const [fileSize, setFileSize]         = useState('');
   const [minVersion, setMinVersion]     = useState('1');
   const [forceUpdate, setForceUpdate]   = useState(false);
-  const [status, setStatus]             = useState<'idle' | 'submitting' | 'ok' | 'error'>('idle');
-  const [errMsg, setErrMsg]             = useState('');
+
+  const [apkFile, setApkFile]               = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [status, setStatus] = useState<'idle' | 'uploading' | 'submitting' | 'ok' | 'error'>('idle');
+  const [errMsg, setErrMsg] = useState('');
 
   const inputClass =
     'w-full px-3 py-2 rounded-lg bg-[var(--background)] border border-[var(--border)] text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(var(--accent))]/20 focus:border-[rgb(var(--accent))] transition-colors';
   const labelClass = 'block text-xs font-bold uppercase tracking-widest text-[var(--muted-foreground)] mb-1';
 
+  function clearFile() {
+    setApkFile(null);
+    setUploadProgress(0);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  }
+
+  async function computeSha256(file: File): Promise<string> {
+    const buffer = await file.arrayBuffer();
+    const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+    return Array.from(new Uint8Array(hashBuffer))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setStatus('submitting');
     setErrMsg('');
 
+    if (!apkFile) {
+      setErrMsg('Please select an APK file.');
+      setStatus('error');
+      return;
+    }
+
+    // 1. Compute SHA-256 and get presigned upload URL
+    setStatus('uploading');
+    setUploadProgress(0);
+
+    let sha256: string;
+    let r2Path: string;
+    let presignedUrl: string;
+
+    try {
+      sha256 = await computeSha256(apkFile);
+
+      const urlRes = await fetch('/api/admin/apk/upload-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ versionName }),
+      });
+      if (!urlRes.ok) {
+        const d = await urlRes.json();
+        throw new Error(d.error || 'Failed to get upload URL');
+      }
+      ({ r2Path, presignedUrl } = await urlRes.json());
+    } catch (err) {
+      setErrMsg(err instanceof Error ? err.message : 'Upload init failed');
+      setStatus('error');
+      return;
+    }
+
+    // 2. PUT file directly to R2 with progress
+    try {
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.upload.onprogress = (ev) => {
+          if (ev.lengthComputable) setUploadProgress(Math.round((ev.loaded / ev.total) * 100));
+        };
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) resolve();
+          else reject(new Error(`R2 upload failed (${xhr.status})`));
+        };
+        xhr.onerror = () => reject(new Error('Network error during upload'));
+        xhr.open('PUT', presignedUrl);
+        xhr.setRequestHeader('Content-Type', 'application/vnd.android.package-archive');
+        xhr.send(apkFile);
+      });
+    } catch (err) {
+      setErrMsg(err instanceof Error ? err.message : 'Upload failed');
+      setStatus('error');
+      return;
+    }
+
+    // 3. Publish release record
+    setStatus('submitting');
     const res = await fetch('/api/yomiplay/apk/release', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -46,8 +118,8 @@ export default function ApkReleasePanel({ releases }: { releases: Release[] }) {
         versionName,
         r2Path,
         releaseNotes,
-        apkSha256:               sha256   || undefined,
-        fileSize:                fileSize  ? parseInt(fileSize)  : undefined,
+        apkSha256:               sha256,
+        fileSize:                apkFile.size,
         minSupportedVersionCode: minVersion ? parseInt(minVersion) : 1,
         forceUpdate,
       }),
@@ -55,18 +127,16 @@ export default function ApkReleasePanel({ releases }: { releases: Release[] }) {
 
     const data = await res.json();
     if (!res.ok) {
-      setErrMsg(data.error || 'Failed');
+      setErrMsg(data.error || 'Failed to publish release');
       setStatus('error');
       return;
     }
 
     setStatus('ok');
-    // Reset form
-    setVersionCode(''); setVersionName(''); setR2Path('');
-    setReleaseNotes(''); setSha256(''); setFileSize('');
+    setVersionCode(''); setVersionName(''); setReleaseNotes('');
     setMinVersion('1'); setForceUpdate(false);
+    clearFile();
     setOpen(false);
-    // Reload to show new release in list
     setTimeout(() => window.location.reload(), 800);
   }
 
@@ -77,7 +147,6 @@ export default function ApkReleasePanel({ releases }: { releases: Release[] }) {
         Android APK Releases
       </h2>
 
-      {/* Current latest */}
       {latest ? (
         <div className="p-4 rounded-xl border border-green-500/30 bg-green-500/5 mb-4 flex items-center justify-between gap-4">
           <div>
@@ -109,7 +178,6 @@ export default function ApkReleasePanel({ releases }: { releases: Release[] }) {
         <p className="text-sm text-[var(--muted-foreground)] mb-4">No releases yet.</p>
       )}
 
-      {/* Release history */}
       {releases.length > 1 && (
         <div className="mb-4 space-y-2">
           {releases.slice(1).map((r) => (
@@ -123,7 +191,6 @@ export default function ApkReleasePanel({ releases }: { releases: Release[] }) {
         </div>
       )}
 
-      {/* Publish new release */}
       <button
         type="button"
         onClick={() => setOpen(!open)}
@@ -136,11 +203,6 @@ export default function ApkReleasePanel({ releases }: { releases: Release[] }) {
       {open && (
         <form onSubmit={handleSubmit} className="mt-4 p-5 rounded-2xl border border-[var(--border)] bg-[var(--card)] space-y-4">
 
-          <div className="p-3 rounded-lg bg-[var(--muted)]/40 text-xs text-[var(--muted-foreground)] leading-relaxed">
-            <strong>Before publishing:</strong> upload the APK to R2 first (via Cloudflare Dashboard or CLI),
-            then fill in the path below. Format: <code className="font-mono">apk/yomiplay-x.x.x.apk</code>
-          </div>
-
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className={labelClass}>Version Code *</label>
@@ -150,27 +212,72 @@ export default function ApkReleasePanel({ releases }: { releases: Release[] }) {
                 placeholder={latest ? String(latest.version_code + 1) : '1'}
                 className={inputClass}
               />
+              <p className="text-[10px] text-[var(--muted-foreground)] mt-1">build.gradle → versionCode</p>
             </div>
             <div>
               <label className={labelClass}>Version Name *</label>
               <input
                 type="text" required
                 value={versionName} onChange={e => setVersionName(e.target.value)}
-                placeholder="e.g. 1.2.0"
+                placeholder="e.g. 0.1.2"
                 className={inputClass}
               />
+              <p className="text-[10px] text-[var(--muted-foreground)] mt-1">build.gradle → versionName</p>
             </div>
           </div>
 
+          {/* APK file picker */}
           <div>
-            <label className={labelClass}>R2 Path *</label>
+            <label className={labelClass}>APK File *</label>
+            {apkFile ? (
+              <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-[rgb(var(--accent))]/40 bg-[rgb(var(--accent))]/5">
+                <Smartphone size={14} className="text-[rgb(var(--accent))] shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{apkFile.name}</p>
+                  <p className="text-[10px] text-[var(--muted-foreground)]">{(apkFile.size / 1024 / 1024).toFixed(1)} MB</p>
+                </div>
+                <button type="button" onClick={clearFile} className="shrink-0 text-[var(--muted-foreground)] hover:text-red-400 transition-colors">
+                  <X size={14} />
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full flex items-center justify-center gap-2 px-3 py-4 rounded-lg border-2 border-dashed border-[var(--border)] text-sm text-[var(--muted-foreground)] hover:border-[rgb(var(--accent))]/50 hover:text-[rgb(var(--accent))] transition-colors"
+              >
+                <Upload size={16} />
+                Click to select APK file
+              </button>
+            )}
             <input
-              type="text" required
-              value={r2Path} onChange={e => setR2Path(e.target.value)}
-              placeholder="apk/yomiplay-1.2.0.apk"
-              className={inputClass}
+              ref={fileInputRef}
+              type="file"
+              accept=".apk,application/vnd.android.package-archive"
+              className="hidden"
+              onChange={e => {
+                const f = e.target.files?.[0] ?? null;
+                setApkFile(f);
+                setUploadProgress(0);
+              }}
             />
           </div>
+
+          {/* Upload progress bar */}
+          {status === 'uploading' && (
+            <div className="space-y-1">
+              <div className="flex justify-between text-xs text-[var(--muted-foreground)]">
+                <span>Uploading to R2…</span>
+                <span>{uploadProgress}%</span>
+              </div>
+              <div className="w-full h-1.5 rounded-full bg-[var(--muted)] overflow-hidden">
+                <div
+                  className="h-full bg-[rgb(var(--accent))] rounded-full transition-all"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
+            </div>
+          )}
 
           <div>
             <label className={labelClass}>Release Notes *</label>
@@ -180,27 +287,6 @@ export default function ApkReleasePanel({ releases }: { releases: Release[] }) {
               placeholder={'• New feature\n• Bug fixes'}
               className={inputClass}
             />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className={labelClass}>APK SHA-256 (optional)</label>
-              <input
-                type="text"
-                value={sha256} onChange={e => setSha256(e.target.value)}
-                placeholder="abc123..."
-                className={inputClass}
-              />
-            </div>
-            <div>
-              <label className={labelClass}>File Size in bytes (optional)</label>
-              <input
-                type="number" min={0}
-                value={fileSize} onChange={e => setFileSize(e.target.value)}
-                placeholder="e.g. 48234567"
-                className={inputClass}
-              />
-            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -238,10 +324,12 @@ export default function ApkReleasePanel({ releases }: { releases: Release[] }) {
 
           <button
             type="submit"
-            disabled={status === 'submitting'}
+            disabled={status === 'uploading' || status === 'submitting'}
             className="btn-primary px-6 py-2 rounded-xl font-bold text-sm disabled:opacity-50"
           >
-            {status === 'submitting' ? 'Publishing…' : 'Publish Release'}
+            {status === 'uploading' ? `Uploading… ${uploadProgress}%`
+              : status === 'submitting' ? 'Publishing…'
+              : 'Publish Release'}
           </button>
         </form>
       )}
