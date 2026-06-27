@@ -2,7 +2,7 @@
 
 ## 概述
 
-本文档覆盖 Android App 与服务端的所有主要接口，包括：社区字幕资源浏览/下载、订阅结账、以及订阅管理（取消）。
+本文档覆盖 Android App 与服务端的所有主要接口，包括：社区字幕资源浏览/下载、订阅结账、订阅管理（取消）、以及设备绑定（账号共享防护）。
 
 Base URL（社区接口）：`https://www.toshiki.tech/api/yomiplay/v1`
 
@@ -20,6 +20,9 @@ Base URL（社区接口）：`https://www.toshiki.tech/api/yomiplay/v1`
 | 下载文件 | **可选**（登录用户下载可获得积分奖励） |
 | 创建结账会话 | **必须** |
 | 打开订阅管理门户 | **必须** |
+| 注册/刷新设备 | **必须** |
+| 查询已绑定设备 | **必须** |
+| 解绑设备 | **必须** |
 
 Token 格式：
 
@@ -383,7 +386,181 @@ suspend fun openBillingPortal(context: Context, accessToken: String) {
 
 ---
 
+## 设备绑定
+
+每个账号最多绑定 **3 台**设备。超出上限时，新设备无法注册，需要先解绑旧设备。
+
+App 在用户登录成功后应立即调用注册接口，每次启动也建议调用一次以刷新 `last_seen_at` 和 `app_version`。
+
+### 6. POST /api/yomiplay/v1/devices — 注册或刷新设备
+
+设备已存在则刷新元数据，新设备则写入并计入绑定数量。
+
+**请求**
+
+```
+POST https://www.toshiki.tech/api/yomiplay/v1/devices
+Authorization: Bearer <supabase_access_token>
+Content-Type: application/json
+```
+
+**Body 参数**
+
+| 字段 | 类型 | 必须 | 说明 |
+|------|------|------|------|
+| `device_id` | string | **是** | 设备唯一标识。Android 推荐使用 `Settings.Secure.ANDROID_ID`，或首次启动时生成 UUID 存入 SharedPreferences |
+| `device_name` | string | 否 | 设备友好名称，如 `Pixel 8 Pro`（`Build.MODEL`） |
+| `platform` | string | 否 | 平台标识，固定传 `android` |
+| `device_model` | string | 否 | 设备型号（`Build.MODEL`） |
+| `device_brand` | string | 否 | 品牌（`Build.BRAND`，如 `Google`、`Samsung`） |
+| `os_version` | string | 否 | Android 系统版本（`Build.VERSION.RELEASE`，如 `14`） |
+| `app_version` | string | 否 | App 版本号（`BuildConfig.VERSION_NAME`，如 `1.2.0`） |
+
+**请求示例**
+
+```json
+{
+  "device_id":    "a1b2c3d4e5f6a1b2",
+  "device_name":  "Pixel 8 Pro",
+  "platform":     "android",
+  "device_model": "Pixel 8 Pro",
+  "device_brand": "Google",
+  "os_version":   "14",
+  "app_version":  "1.2.0"
+}
+```
+
+**响应**
+
+```json
+{
+  "data": {
+    "registered": true,
+    "is_new": true
+  }
+}
+```
+
+| 字段 | 说明 |
+|------|------|
+| `registered` | 始终为 `true` |
+| `is_new` | `true` 表示首次注册该设备，`false` 表示已存在并刷新 |
+
+**错误**
+
+| 状态码 | error_code | 说明 | 处理建议 |
+|--------|------------|------|----------|
+| `400` | — | `device_id` 缺失或格式错误 | 检查请求参数 |
+| `401` | — | 未认证 | 引导用户登录 |
+| `409` | `DEVICE_LIMIT_REACHED` | 已达设备上限（3 台） | 提示用户前往设备管理页解绑旧设备 |
+
+**409 响应体示例**
+
+```json
+{
+  "error": "Device limit reached",
+  "error_code": "DEVICE_LIMIT_REACHED",
+  "message": "This account is already linked to 3 devices. Please unbind an existing device before adding a new one.",
+  "max_devices": 3
+}
+```
+
+---
+
+### 7. GET /api/yomiplay/v1/devices — 查询已绑定设备列表
+
+返回当前账号所有已绑定的设备，按最后活跃时间倒序排列。用于展示"设备管理"页面。
+
+**请求**
+
+```
+GET https://www.toshiki.tech/api/yomiplay/v1/devices
+Authorization: Bearer <supabase_access_token>
+```
+
+**响应示例**
+
+```json
+{
+  "data": {
+    "devices": [
+      {
+        "device_id":    "a1b2c3d4e5f6a1b2",
+        "device_name":  "Pixel 8 Pro",
+        "platform":     "android",
+        "device_model": "Pixel 8 Pro",
+        "device_brand": "Google",
+        "os_version":   "14",
+        "app_version":  "1.2.0",
+        "last_seen_at": "2026-06-27T08:00:00Z",
+        "created_at":   "2026-06-01T10:00:00Z"
+      }
+    ],
+    "max_devices": 3
+  }
+}
+```
+
+| 字段 | 说明 |
+|------|------|
+| `devices` | 已绑定设备列表，按 `last_seen_at` 倒序 |
+| `max_devices` | 该账号允许绑定的最大设备数 |
+
+---
+
+### 8. DELETE /api/yomiplay/v1/devices/:deviceId — 解绑设备
+
+解绑后，该设备下次登录时可重新注册（不消耗新配额，原配额释放）。
+
+**请求**
+
+```
+DELETE https://www.toshiki.tech/api/yomiplay/v1/devices/{device_id}
+Authorization: Bearer <supabase_access_token>
+```
+
+`device_id` 如包含特殊字符需做 URL encode。
+
+**响应**
+
+```json
+{
+  "data": {
+    "unbound": true
+  }
+}
+```
+
+---
+
 ## Android 集成示例
+
+### 登录后注册设备
+
+```kotlin
+suspend fun registerDevice(context: Context, accessToken: String) {
+    val deviceId = Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
+
+    httpClient.post("https://www.toshiki.tech/api/yomiplay/v1/devices") {
+        header("Authorization", "Bearer $accessToken")
+        contentType(ContentType.Application.Json)
+        setBody(mapOf(
+            "device_id"    to deviceId,
+            "device_name"  to Build.MODEL,
+            "platform"     to "android",
+            "device_model" to Build.MODEL,
+            "device_brand" to Build.BRAND,
+            "os_version"   to Build.VERSION.RELEASE,
+            "app_version"  to BuildConfig.VERSION_NAME,
+        ))
+    }.let { response ->
+        if (response.status.value == 409) {
+            // 设备上限，提示用户去设备管理页解绑
+            showDeviceLimitDialog()
+        }
+    }
+}
+```
 
 ### 加载字幕列表
 
@@ -449,6 +626,7 @@ GET /api/yomiplay/v1/subtitles/{id}/download
 |-------------|------|----------|
 | `401` | 未认证（需要 Token 的接口未携带或 Token 已过期） | 引导用户重新登录 |
 | `404` | 资源不存在、未公开，或无 Stripe 账单账户 | 提示用户资源不可用或联系客服 |
+| `409` | 设备绑定数量已达上限（`DEVICE_LIMIT_REACHED`） | 提示用户前往设备管理页解绑旧设备 |
 | `503` | 社区下载功能暂时关闭（管理员维护中） | 提示用户稍后重试 |
 | `500` | 服务器错误 | 提示用户稍后重试 |
 
