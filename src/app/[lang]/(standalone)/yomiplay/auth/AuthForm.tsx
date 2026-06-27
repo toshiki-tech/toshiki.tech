@@ -15,6 +15,10 @@ const content = {
     orDivider: 'or',
     switchToSignUp: "Don't have an account? Sign up",
     switchToSignIn: 'Already have an account? Sign in',
+    forgotPassword: 'Forgot password?',
+    backToSignIn: 'Back to sign in',
+    sendResetEmail: 'Send Reset Email',
+    resetEmailSent: 'Check your email for a password reset link.',
     submitting: 'Processing...',
     signUpSuccess: 'Check your email to confirm your account.',
     passwordMismatch: 'Passwords do not match.',
@@ -30,6 +34,10 @@ const content = {
     orDivider: '或',
     switchToSignUp: '没有账号？注册',
     switchToSignIn: '已有账号？登录',
+    forgotPassword: '忘记密码？',
+    backToSignIn: '返回登录',
+    sendResetEmail: '发送重置邮件',
+    resetEmailSent: '重置密码邮件已发送，请查看您的邮箱。',
     submitting: '处理中...',
     signUpSuccess: '请查看邮箱确认您的账号。',
     passwordMismatch: '两次输入的密码不一致。',
@@ -43,8 +51,12 @@ const content = {
     confirmPassword: '確認密碼',
     googleSignIn: '使用 Google 登入',
     orDivider: '或',
-    switchToSignUp: '沒有帳���？註冊',
+    switchToSignUp: '沒有帳號？註冊',
     switchToSignIn: '已有帳號？登入',
+    forgotPassword: '忘記密碼？',
+    backToSignIn: '返回登入',
+    sendResetEmail: '發送重設郵件',
+    resetEmailSent: '重設密碼郵件已發送，請查看您的電子郵件。',
     submitting: '處理中...',
     signUpSuccess: '請查看電子郵件以確認您的帳號。',
     passwordMismatch: '兩次輸入的密碼不一致。',
@@ -60,6 +72,10 @@ const content = {
     orDivider: 'または',
     switchToSignUp: 'アカウントをお持ちでない方はこちら',
     switchToSignIn: 'アカウントをお持ちの方はこちら',
+    forgotPassword: 'パスワードをお忘れですか？',
+    backToSignIn: 'ログインに戻る',
+    sendResetEmail: 'リセットメールを送信',
+    resetEmailSent: 'パスワードリセットのメールを送信しました。メールをご確認ください。',
     submitting: '処理中...',
     signUpSuccess: 'メールを確認してアカウントを有効化してください。',
     passwordMismatch: 'パスワードが一致しません。',
@@ -69,25 +85,44 @@ const content = {
 
 export default function AuthForm({ lang }: { lang: Locale }) {
   const t = content[lang] || content.en;
-  const [mode, setMode] = useState<'signin' | 'signup'>('signin');
+  const [mode, setMode] = useState<'signin' | 'signup' | 'forgot'>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
 
+  const resetState = (nextMode: 'signin' | 'signup' | 'forgot') => {
+    setMode(nextMode);
+    setStatus('idle');
+    setErrorMessage('');
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus('submitting');
     setErrorMessage('');
+
+    const supabase = createClient();
+
+    if (mode === 'forgot') {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/${lang}/yomiplay/auth/reset-password`,
+      });
+      if (error) {
+        setErrorMessage(error.message);
+        setStatus('error');
+      } else {
+        setStatus('success');
+      }
+      return;
+    }
 
     if (mode === 'signup' && password !== confirmPassword) {
       setErrorMessage(t.passwordMismatch);
       setStatus('error');
       return;
     }
-
-    const supabase = createClient();
 
     if (mode === 'signin') {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -131,103 +166,154 @@ export default function AuthForm({ lang }: { lang: Locale }) {
   return (
     <div className="max-w-md mx-auto">
       <div className="card p-8 space-y-6 border border-[var(--border)] rounded-2xl bg-[var(--card)]">
-        {/* Google Sign In */}
-        <button
-          onClick={handleGoogleSignIn}
-          className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--card)] hover:bg-[var(--muted)] transition-colors font-medium"
-        >
-          <svg className="w-5 h-5" viewBox="0 0 24 24">
-            <path
-              d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
-              fill="#4285F4"
-            />
-            <path
-              d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-              fill="#34A853"
-            />
-            <path
-              d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-              fill="#FBBC05"
-            />
-            <path
-              d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-              fill="#EA4335"
-            />
-          </svg>
-          {t.googleSignIn}
-        </button>
 
-        {/* Divider */}
-        <div className="flex items-center gap-4">
-          <div className="flex-1 h-px bg-[var(--border)]" />
-          <span className="text-xs text-[var(--muted-foreground)] uppercase">{t.orDivider}</span>
-          <div className="flex-1 h-px bg-[var(--border)]" />
-        </div>
+        {/* Forgot password mode */}
+        {mode === 'forgot' ? (
+          <>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className={labelClass}>{t.email}</label>
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className={inputClass}
+                />
+              </div>
 
-        {/* Email/Password Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className={labelClass}>{t.email}</label>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <label className={labelClass}>{t.password}</label>
-            <input
-              type="password"
-              required
-              minLength={6}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className={inputClass}
-            />
-          </div>
-          {mode === 'signup' && (
-            <div>
-              <label className={labelClass}>{t.confirmPassword}</label>
-              <input
-                type="password"
-                required
-                minLength={6}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className={inputClass}
-              />
+              {status === 'error' && (
+                <p className="text-red-500 text-sm">{errorMessage || t.errorGeneric}</p>
+              )}
+              {status === 'success' && (
+                <p className="text-green-500 text-sm">{t.resetEmailSent}</p>
+              )}
+
+              <button
+                type="submit"
+                disabled={status === 'submitting' || status === 'success'}
+                className="btn-primary w-full py-3 rounded-xl font-bold disabled:opacity-50"
+              >
+                {status === 'submitting' ? t.submitting : t.sendResetEmail}
+              </button>
+            </form>
+
+            <button
+              onClick={() => resetState('signin')}
+              className="w-full text-center text-sm text-[rgb(var(--accent))] hover:underline"
+            >
+              {t.backToSignIn}
+            </button>
+          </>
+        ) : (
+          <>
+            {/* Google Sign In */}
+            <button
+              onClick={handleGoogleSignIn}
+              className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--card)] hover:bg-[var(--muted)] transition-colors font-medium"
+            >
+              <svg className="w-5 h-5" viewBox="0 0 24 24">
+                <path
+                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
+                  fill="#4285F4"
+                />
+                <path
+                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                  fill="#34A853"
+                />
+                <path
+                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                  fill="#FBBC05"
+                />
+                <path
+                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                  fill="#EA4335"
+                />
+              </svg>
+              {t.googleSignIn}
+            </button>
+
+            {/* Divider */}
+            <div className="flex items-center gap-4">
+              <div className="flex-1 h-px bg-[var(--border)]" />
+              <span className="text-xs text-[var(--muted-foreground)] uppercase">{t.orDivider}</span>
+              <div className="flex-1 h-px bg-[var(--border)]" />
             </div>
-          )}
 
-          {status === 'error' && (
-            <p className="text-red-500 text-sm">{errorMessage || t.errorGeneric}</p>
-          )}
-          {status === 'success' && (
-            <p className="text-green-500 text-sm">{t.signUpSuccess}</p>
-          )}
+            {/* Email/Password Form */}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className={labelClass}>{t.email}</label>
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className={labelClass}>{t.password}</label>
+                <input
+                  type="password"
+                  required
+                  minLength={6}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className={inputClass}
+                />
+              </div>
+              {mode === 'signup' && (
+                <div>
+                  <label className={labelClass}>{t.confirmPassword}</label>
+                  <input
+                    type="password"
+                    required
+                    minLength={6}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className={inputClass}
+                  />
+                </div>
+              )}
 
-          <button
-            type="submit"
-            disabled={status === 'submitting'}
-            className="btn-primary w-full py-3 rounded-xl font-bold disabled:opacity-50"
-          >
-            {status === 'submitting' ? t.submitting : mode === 'signin' ? t.signIn : t.signUp}
-          </button>
-        </form>
+              {mode === 'signin' && (
+                <div className="text-right">
+                  <button
+                    type="button"
+                    onClick={() => resetState('forgot')}
+                    className="text-sm text-[var(--muted-foreground)] hover:text-[rgb(var(--accent))] transition-colors"
+                  >
+                    {t.forgotPassword}
+                  </button>
+                </div>
+              )}
 
-        {/* Toggle mode */}
-        <button
-          onClick={() => {
-            setMode(mode === 'signin' ? 'signup' : 'signin');
-            setStatus('idle');
-            setErrorMessage('');
-          }}
-          className="w-full text-center text-sm text-[rgb(var(--accent))] hover:underline"
-        >
-          {mode === 'signin' ? t.switchToSignUp : t.switchToSignIn}
-        </button>
+              {status === 'error' && (
+                <p className="text-red-500 text-sm">{errorMessage || t.errorGeneric}</p>
+              )}
+              {status === 'success' && (
+                <p className="text-green-500 text-sm">{t.signUpSuccess}</p>
+              )}
+
+              <button
+                type="submit"
+                disabled={status === 'submitting'}
+                className="btn-primary w-full py-3 rounded-xl font-bold disabled:opacity-50"
+              >
+                {status === 'submitting' ? t.submitting : mode === 'signin' ? t.signIn : t.signUp}
+              </button>
+            </form>
+
+            {/* Toggle mode */}
+            <button
+              onClick={() => resetState(mode === 'signin' ? 'signup' : 'signin')}
+              className="w-full text-center text-sm text-[rgb(var(--accent))] hover:underline"
+            >
+              {mode === 'signin' ? t.switchToSignUp : t.switchToSignIn}
+            </button>
+          </>
+        )}
       </div>
     </div>
   );
