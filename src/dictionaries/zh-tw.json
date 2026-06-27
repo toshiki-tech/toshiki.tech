@@ -4,7 +4,9 @@
       "products": "產品",
       "writing": "技術札記",
       "about": "關於",
-      "workWithMe": "商務合作"
+      "workWithMe": "商務合作",
+      "signIn": "登入",
+      "account": "我的帳號"
     },
     "footer": {
       "desc": "以代碼、AI 和系統思緒構建現實世界的產品。駐地日本東京。",

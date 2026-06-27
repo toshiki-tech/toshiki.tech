@@ -4,7 +4,9 @@
       "products": "产品",
       "writing": "技术札记",
       "about": "关于",
-      "workWithMe": "商务合作"
+      "workWithMe": "商务合作",
+      "signIn": "登录",
+      "account": "我的账号"
     },
     "footer": {
       "desc": "以代码、AI 和系统思维构建现实世界的产品。驻地日本东京。",

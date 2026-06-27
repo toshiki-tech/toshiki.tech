@@ -4,10 +4,12 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, User } from 'lucide-react';
 import Logo from '@/components/Logo';
 import LangSwitcher from '@/components/LangSwitcher';
 import { Locale } from '@/lib/get-dictionary';
+import { createClient } from '@/lib/supabase-browser';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 const NavLink = ({ href, children, active }: { href: string; children: React.ReactNode; active: boolean }) => (
   <Link
@@ -24,6 +26,44 @@ const NavLink = ({ href, children, active }: { href: string; children: React.Rea
     )}
   </Link>
 );
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function UserNav({ lang, dict }: { lang: Locale; dict: any }) {
+  const [user, setUser] = useState<SupabaseUser | null | undefined>(undefined);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => setUser(data.user ?? null));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Still loading — render nothing to avoid flicker
+  if (user === undefined) return null;
+
+  if (!user) {
+    return (
+      <Link
+        href={`/${lang}/yomiplay/auth`}
+        className="text-sm font-bold text-[var(--muted-foreground)] hover:text-[var(--foreground-rgb)] transition-colors whitespace-nowrap"
+      >
+        {dict.common.nav.signIn}
+      </Link>
+    );
+  }
+
+  return (
+    <Link
+      href={`/${lang}/account`}
+      className="flex items-center justify-center w-8 h-8 rounded-full bg-[rgb(var(--accent))]/20 hover:bg-[rgb(var(--accent))]/30 transition-colors text-[rgb(var(--accent))] font-bold text-sm"
+      title={dict.common.nav.account}
+    >
+      {user.email?.[0].toUpperCase() ?? <User size={14} />}
+    </Link>
+  );
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const Navbar = ({ lang, dict }: { lang: Locale; dict: any }) => {
@@ -84,6 +124,8 @@ const Navbar = ({ lang, dict }: { lang: Locale; dict: any }) => {
             ))}
           </div>
 
+          <UserNav lang={lang} dict={dict} />
+
           <LangSwitcher currentLang={lang} redirectedPathName={redirectedPathName} />
 
           {/* Mobile hamburger */}
@@ -119,6 +161,13 @@ const Navbar = ({ lang, dict }: { lang: Locale; dict: any }) => {
                 </Link>
               );
             })}
+            <Link
+              href={`/${lang}/account`}
+              onClick={() => setMobileOpen(false)}
+              className="px-2 py-3 text-sm font-bold text-[var(--foreground-rgb)] hover:text-[rgb(var(--accent))] transition-colors"
+            >
+              {dict.common.nav.account}
+            </Link>
           </div>
         </div>
       )}

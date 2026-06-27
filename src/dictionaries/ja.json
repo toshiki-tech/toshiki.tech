@@ -4,7 +4,9 @@
       "products": "プロダクト",
       "writing": "技術ノート",
       "about": "プロフィール",
-      "workWithMe": "お仕事のご依頼"
+      "workWithMe": "お仕事のご依頼",
+      "signIn": "ログイン",
+      "account": "アカウント"
     },
     "footer": {
       "desc": "コード、AI、システム思考で現実世界のプロダクトを構築。東京在住。",

@@ -4,7 +4,9 @@
       "products": "Products",
       "writing": "Writing",
       "about": "About",
-      "workWithMe": "Work with me"
+      "workWithMe": "Work with me",
+      "signIn": "Sign In",
+      "account": "My Account"
     },
     "footer": {
       "desc": "Building real-world products with code, AI and systems thinking. Based in Tokyo, Japan.",
