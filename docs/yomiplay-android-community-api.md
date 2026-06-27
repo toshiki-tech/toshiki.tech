@@ -1,10 +1,10 @@
-# YomiPlay Android — 社区字幕资源 API
+# YomiPlay Android — API 文档
 
 ## 概述
 
-社区字幕资源接口允许 Android App 浏览、搜索并下载用户上传的字幕文件（`.yomi`）及对应的音频/视频媒体文件。
+本文档覆盖 Android App 与服务端的所有主要接口，包括：社区字幕资源浏览/下载、订阅结账、以及订阅管理（取消）。
 
-Base URL：`https://www.toshiki.tech/api/yomiplay/v1`
+Base URL（社区接口）：`https://www.toshiki.tech/api/yomiplay/v1`
 
 所有接口支持跨域（`Access-Control-Allow-Origin: *`），无需特殊 CORS 配置。
 
@@ -14,9 +14,12 @@ Base URL：`https://www.toshiki.tech/api/yomiplay/v1`
 
 | 接口 | 是否需要 Token |
 |------|----------------|
+| 获取筛选元数据 | 不需要 |
 | 获取列表 | 不需要 |
 | 获取详情 | 不需要 |
 | 下载文件 | **可选**（登录用户下载可获得积分奖励） |
+| 创建结账会话 | **必须** |
+| 打开订阅管理门户 | **必须** |
 
 Token 格式：
 
@@ -248,6 +251,84 @@ GET /api/yomiplay/v1/subtitles/{id}/download?type=media
 
 ---
 
+## 订阅管理
+
+### 4. POST /api/yomiplay/billing/portal — 打开订阅管理门户
+
+为当前登录用户创建一个 Stripe Customer Portal 会话，返回一个有时效的 URL。App 用系统浏览器打开该 URL，用户可在 Stripe 托管的页面上自助取消订阅、查看账单、更新支付方式。
+
+**请求**
+
+```
+POST https://www.toshiki.tech/api/yomiplay/billing/portal
+Authorization: Bearer <supabase_access_token>
+Content-Type: application/json
+
+{}
+```
+
+Body 可为空 `{}`，或传入可选字段：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `return_url` | string | 用户操作完成后的跳转地址（必须为 `https://` 开头）。默认跳回 `/en/yomiplay/pricing` |
+
+**响应**
+
+```json
+{
+  "data": {
+    "url": "https://billing.stripe.com/p/session/live_xxx..."
+  }
+}
+```
+
+| 字段 | 说明 |
+|------|------|
+| `url` | Stripe Customer Portal 入口链接，**约 5 分钟内有效**，不可缓存，每次点击需重新请求 |
+
+**错误**
+
+| 状态码 | 说明 | 处理建议 |
+|--------|------|----------|
+| `401` | 未认证 | 引导用户登录 |
+| `404` | 该用户没有关联的 Stripe 账单账户（可能是积分兑换的 Pro） | 提示用户联系客服 |
+| `500` | 服务器错误 | 稍后重试 |
+
+**注意事项**
+
+- 必须用**系统浏览器**（`Intent.ACTION_VIEW`）打开，不要用 WebView — Stripe Portal 依赖重定向和 Cookie，WebView 会出现问题
+- 用户取消订阅后，Stripe 会异步触发 Webhook，服务端自动将 `is_pro` 改为 `false`，App 下次同步用户信息时状态会更新
+- 该接口仅支持通过 Stripe 购买的订阅。iOS 用户通过 App Store 管理订阅，不应调用此接口
+
+**Kotlin 示例**
+
+```kotlin
+data class BillingPortalResponse(val data: BillingPortalData)
+data class BillingPortalData(val url: String)
+
+suspend fun openBillingPortal(context: Context, accessToken: String) {
+    val response = httpClient.post(
+        "https://www.toshiki.tech/api/yomiplay/billing/portal"
+    ) {
+        header("Authorization", "Bearer $accessToken")
+        contentType(ContentType.Application.Json)
+        setBody("{}")
+    }
+
+    when (response.status.value) {
+        200 -> {
+            val url = response.body<BillingPortalResponse>().data.url
+            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+        }
+        404 -> showError("您的订阅不是通过信用卡购买，请联系客服")
+        else -> showError("暂时无法打开订阅管理，请稍后重试")
+    }
+}
+```
+
+---
+
 ## Android 集成示例
 
 ### 加载字幕列表
@@ -312,7 +393,8 @@ GET /api/yomiplay/v1/subtitles/{id}/download
 
 | HTTP 状态码 | 说明 | 处理建议 |
 |-------------|------|----------|
-| `404` | 资源不存在或未公开 | 提示用户资源不可用 |
+| `401` | 未认证（需要 Token 的接口未携带或 Token 已过期） | 引导用户重新登录 |
+| `404` | 资源不存在、未公开，或无 Stripe 账单账户 | 提示用户资源不可用或联系客服 |
 | `503` | 社区下载功能暂时关闭（管理员维护中） | 提示用户稍后重试 |
 | `500` | 服务器错误 | 提示用户稍后重试 |
 
