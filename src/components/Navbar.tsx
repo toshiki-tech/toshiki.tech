@@ -91,51 +91,56 @@ function UserNav({ lang, dict }: { lang: Locale; dict: any }) {
     );
   }
 
-  const username = user.email?.split('@')[0] ?? '—';
+  const displayName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
 
   return (
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[var(--border)] hover:bg-white/5 transition-colors text-sm font-bold"
+        className="inline-flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-[var(--muted)] transition-colors"
       >
-        <span className="max-w-[80px] truncate">{username}</span>
-        <ChevronDown size={13} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
+        <span className="text-xs font-bold text-[var(--foreground-rgb)] max-w-[80px] truncate hidden sm:inline">
+          {displayName}
+        </span>
+        <ChevronDown size={12} className={`text-[var(--muted-foreground)] transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-44 rounded-xl border border-[var(--border)] bg-[var(--background)]/95 backdrop-blur-md shadow-xl overflow-hidden z-50">
+        <div className="absolute right-0 top-full mt-2 w-44 rounded-xl border border-[var(--border)] bg-[var(--card)] shadow-lg py-1 z-50">
+          <div className="px-3 py-2 border-b border-[var(--border)] sm:hidden">
+            <p className="text-xs font-bold truncate">{displayName}</p>
+          </div>
           <Link
             href={`/${lang}/account`}
             onClick={() => setOpen(false)}
-            className="flex items-center gap-2.5 px-4 py-3 text-sm hover:bg-white/5 transition-colors border-b border-[var(--border)]"
+            className="flex items-center gap-2 px-3 py-2 text-xs text-[var(--foreground-rgb)] hover:bg-[var(--muted)] transition-colors"
           >
-            <UserCircle size={15} className="text-[var(--muted-foreground)]" />
+            <UserCircle size={14} className="text-[var(--muted-foreground)]" />
             {labels.account}
           </Link>
           <Link
             href={`/${lang}/yomiplay/community/my-uploads`}
             onClick={() => setOpen(false)}
-            className="flex items-center gap-2.5 px-4 py-3 text-sm hover:bg-white/5 transition-colors border-b border-[var(--border)]"
+            className="flex items-center gap-2 px-3 py-2 text-xs text-[var(--foreground-rgb)] hover:bg-[var(--muted)] transition-colors"
           >
-            <FolderOpen size={15} className="text-[var(--muted-foreground)]" />
+            <FolderOpen size={14} className="text-[var(--muted-foreground)]" />
             {labels.uploads}
           </Link>
           {isAdmin && (
             <Link
               href={`/${lang}/admin`}
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2.5 px-4 py-3 text-sm hover:bg-white/5 transition-colors border-b border-[var(--border)] text-[rgb(var(--accent))]"
+              className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-[rgb(var(--accent))] hover:bg-[var(--muted)] transition-colors border-t border-[var(--border)]"
             >
-              <ShieldCheck size={15} />
+              <ShieldCheck size={14} />
               {labels.admin}
             </Link>
           )}
           <button
             onClick={signOut}
-            className="w-full flex items-center gap-2.5 px-4 py-3 text-sm hover:bg-white/5 transition-colors text-red-400"
+            className="flex w-full items-center gap-2 px-3 py-2 text-xs text-red-500 hover:bg-[var(--muted)] transition-colors"
           >
-            <LogOut size={15} />
+            <LogOut size={14} />
             {labels.signOut}
           </button>
         </div>
