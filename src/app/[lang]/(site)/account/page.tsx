@@ -16,7 +16,7 @@ const t = {
     status: 'Status',
     active: 'Active',
     cancelPending: 'Active (cancels on',
-    canceled: 'Inactive',
+    canceled: 'Subscription canceled',
     noPro: 'No active subscription',
     plan: { monthly: 'Monthly', yearly: 'Yearly', lifetime: 'Lifetime' },
     expiresOn: 'Renews on',
@@ -41,7 +41,7 @@ const t = {
     status: '状态',
     active: '订阅中',
     cancelPending: '有效（将于',
-    canceled: '未订阅',
+    canceled: '订阅已取消',
     noPro: '暂无订阅',
     plan: { monthly: '月付', yearly: '年付', lifetime: '买断' },
     expiresOn: '下次续费',
@@ -66,7 +66,7 @@ const t = {
     status: '狀態',
     active: '訂閱中',
     cancelPending: '有效（將於',
-    canceled: '未訂閱',
+    canceled: '訂閱已取消',
     noPro: '暫無訂閱',
     plan: { monthly: '月付', yearly: '年付', lifetime: '買斷' },
     expiresOn: '下次續費',
@@ -91,7 +91,7 @@ const t = {
     status: 'ステータス',
     active: 'サブスク中',
     cancelPending: '有効（',
-    canceled: '未サブスク',
+    canceled: 'サブスク終了',
     noPro: 'サブスクリプションなし',
     plan: { monthly: '月払い', yearly: '年払い', lifetime: '買い切り' },
     expiresOn: '次回更新',
@@ -236,7 +236,7 @@ export default function AccountPage({ params: { lang } }: { params: { lang: Loca
             )}
           </div>
 
-          {sub?.is_pro !== undefined ? (
+          {sub?.is_pro ? (
             <div className="space-y-1">
               <div className="flex gap-6">
                 <div>
@@ -283,7 +283,9 @@ export default function AccountPage({ params: { lang } }: { params: { lang: Loca
             </div>
           ) : (
             <div className="flex items-center justify-between">
-              <p className="text-sm text-[var(--muted-foreground)]">{c.noPro}</p>
+              <p className="text-sm text-[var(--muted-foreground)]">
+                {sub?.status === 'canceled' ? c.canceled : c.noPro}
+              </p>
               <a
                 href={`/${lang}/p/yomiplay`}
                 className="text-sm px-3 py-1.5 rounded-lg border border-[var(--border)] hover:bg-[var(--muted)] transition-colors flex items-center gap-1.5"
