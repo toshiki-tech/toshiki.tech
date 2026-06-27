@@ -67,11 +67,11 @@ const content = {
     faqs: [
       {
         q: 'How do I cancel my subscription?',
-        a: 'On iOS, open Settings → your Apple ID → Subscriptions, select YomiPlay, and tap Cancel Subscription. Your Premium access remains active until the end of the current billing period.'
+        a: 'On iOS, open Settings → your Apple ID → Subscriptions, select YomiPlay, and tap Cancel Subscription. On Android, open the app, go to Settings → Account → Manage Subscription, and follow the steps to cancel. Your Premium access remains active until the end of the current billing period.'
       },
       {
         q: 'Does the subscription renew automatically?',
-        a: 'Yes. Monthly and yearly Premium plans renew automatically unless you cancel at least 24 hours before the current period ends. You can turn off auto-renewal anytime in your App Store account settings.'
+        a: 'Yes. Monthly and yearly Premium plans renew automatically unless you cancel before the current period ends. On iOS, cancel at least 24 hours before renewal via App Store account settings. On Android, cancel anytime through the in-app subscription management page.'
       },
       {
         q: 'Is the Lifetime plan really permanent?',
@@ -148,11 +148,11 @@ const content = {
     faqs: [
       {
         q: '如何取消订阅？',
-        a: '在 iOS 上，打开「设置」→ 你的 Apple ID →「订阅」，选择 YomiPlay 并点击「取消订阅」。在当前计费周期结束前，你仍可继续使用 Premium。'
+        a: '在 iOS 上，打开「设置」→ 你的 Apple ID →「订阅」，选择 YomiPlay 并点击「取消订阅」。在 Android 上，打开 App 后进入「设置」→「账户」→「管理订阅」，按提示操作取消。取消后，在当前计费周期结束前仍可继续使用 Premium。'
       },
       {
         q: '订阅会自动续费吗？',
-        a: '会。月付与年付 Premium 会自动续费，除非你在当前周期结束前至少 24 小时取消。你可随时在 App Store 账户设置中关闭自动续费。'
+        a: '会。月付与年付 Premium 会自动续费，取消请在当前周期结束前操作。iOS 需提前至少 24 小时，在 App Store 账户设置中取消；Android 可随时通过 App 内的订阅管理页面取消。'
       },
       {
         q: '终身会员是否永久有效？',
@@ -229,11 +229,11 @@ const content = {
     faqs: [
       {
         q: '如何取消訂閱？',
-        a: '在 iOS 上，開啟「設定」→ 你的 Apple ID →「訂閱」，選擇 YomiPlay 並點擊「取消訂閱」。在目前計費週期結束前，你仍可繼續使用 Premium。'
+        a: '在 iOS 上，開啟「設定」→ 你的 Apple ID →「訂閱」，選擇 YomiPlay 並點擊「取消訂閱」。在 Android 上，開啟 App 後進入「設定」→「帳號」→「管理訂閱」，依照提示操作取消。取消後，在目前計費週期結束前仍可繼續使用 Premium。'
       },
       {
         q: '訂閱會自動續訂嗎？',
-        a: '會。月付與年付 Premium 會自動續訂，除非你在目前週期結束前至少 24 小時取消。你可隨時在 App Store 帳戶設定中關閉自動續訂。'
+        a: '會。月付與年付 Premium 會自動續訂，請在目前週期結束前取消。iOS 需提前至少 24 小時，在 App Store 帳戶設定中取消；Android 可隨時透過 App 內的訂閱管理頁面取消。'
       },
       {
         q: '終身會員是否永久有效？',
@@ -310,11 +310,11 @@ const content = {
     faqs: [
       {
         q: '定期購読はどうやって解約しますか？',
-        a: 'iOS では「設定」→ ご自身の Apple ID →「サブスクリプション」から YomiPlay を選び、「サブスクリプションをキャンセル」をタップしてください。現在の請求期間の終了まで Premium はご利用いただけます。'
+        a: 'iOS では「設定」→ ご自身の Apple ID →「サブスクリプション」から YomiPlay を選び、「サブスクリプションをキャンセル」をタップしてください。Android では App を開き「設定」→「アカウント」→「サブスクリプション管理」から手順に従って解約できます。解約後も現在の請求期間の終了まで Premium をご利用いただけます。'
       },
       {
         q: '自動更新されますか？',
-        a: 'はい。月額・年額の Premium プランは、現在の期間が終了する24時間以上前に解約されない限り自動更新されます。自動更新は App Store のアカウント設定からいつでもオフにできます。'
+        a: 'はい。月額・年額の Premium プランは自動更新されます。iOS では現在の期間終了の24時間以上前に App Store のアカウント設定から解約してください。Android ではいつでも App 内のサブスクリプション管理ページから解約できます。'
       },
       {
         q: '買い切り（Lifetime）は永久に有効ですか？',

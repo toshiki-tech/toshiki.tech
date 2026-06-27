@@ -4,7 +4,7 @@ import { Locale } from "@/lib/get-dictionary";
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
-import { ChevronDown, FolderOpen, LogOut, Star, Shield } from 'lucide-react';
+import { ChevronDown, FolderOpen, LogOut, Star, Shield, CreditCard, Loader2 } from 'lucide-react';
 import Logo from '@/components/Logo';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { createClient } from '@/lib/supabase-browser';
@@ -19,6 +19,7 @@ function AuthNav({ lang }: { lang: Locale }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [pointsFeatureEnabled, setPointsFeatureEnabled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [portalLoading, setPortalLoading] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -70,9 +71,24 @@ function AuthNav({ lang }: { lang: Locale }) {
     return <div className="w-16 h-6 bg-[var(--muted)] rounded animate-pulse" />;
   }
 
+  async function openBillingPortal() {
+    setPortalLoading(true);
+    setMenuOpen(false);
+    try {
+      const res = await fetch('/api/yomiplay/billing/portal', { method: 'POST' });
+      const json = await res.json();
+      if (json?.data?.url) {
+        window.location.href = json.data.url;
+      }
+    } finally {
+      setPortalLoading(false);
+    }
+  }
+
   if (user) {
     const displayName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
     const myUploadsLabel = lang === 'zh' ? '我的上传' : lang === 'zh-tw' ? '我的上傳' : lang === 'ja' ? 'マイ投稿' : 'My Uploads';
+    const manageSubLabel = lang === 'zh' ? '管理订阅' : lang === 'zh-tw' ? '管理訂閱' : lang === 'ja' ? 'サブスク管理' : 'Manage Subscription';
     const adminLabel = lang === 'zh' ? '管理后台' : lang === 'zh-tw' ? '管理後台' : lang === 'ja' ? '管理画面' : 'Admin Panel';
     const signOutLabel = lang === 'zh' ? '退出' : lang === 'zh-tw' ? '登出' : lang === 'ja' ? 'ログアウト' : 'Sign Out';
 
@@ -112,6 +128,16 @@ function AuthNav({ lang }: { lang: Locale }) {
               <FolderOpen size={14} />
               {myUploadsLabel}
             </Link>
+            {isPro && (
+              <button
+                onClick={openBillingPortal}
+                disabled={portalLoading}
+                className="flex w-full items-center gap-2 px-3 py-2 text-xs text-[var(--foreground-rgb)] hover:bg-[var(--muted)] transition-colors border-t border-[var(--border)] disabled:opacity-50"
+              >
+                {portalLoading ? <Loader2 size={14} className="animate-spin" /> : <CreditCard size={14} />}
+                {manageSubLabel}
+              </button>
+            )}
             {isAdmin && (
               <Link
                 href={`/${lang}/admin`}
