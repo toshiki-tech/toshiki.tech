@@ -130,12 +130,13 @@ function UserNav({ lang, dict }: { lang: Locale; dict: any }) {
             <Link
               href={`/${lang}/admin`}
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-[rgb(var(--accent))] hover:bg-[var(--muted)] transition-colors border-t border-[var(--border)]"
+              className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-[rgb(var(--accent))] hover:bg-[var(--muted)] transition-colors"
             >
               <ShieldCheck size={14} />
               {labels.admin}
             </Link>
           )}
+          <div className="h-px bg-[var(--border)] my-1" />
           <button
             onClick={signOut}
             className="flex w-full items-center gap-2 px-3 py-2 text-xs text-red-500 hover:bg-[var(--muted)] transition-colors"

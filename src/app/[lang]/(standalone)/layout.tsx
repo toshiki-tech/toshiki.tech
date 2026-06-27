@@ -4,7 +4,7 @@ import { Locale } from "@/lib/get-dictionary";
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
-import { ChevronDown, FolderOpen, LogOut, Star, Shield, CreditCard, Loader2 } from 'lucide-react';
+import { ChevronDown, FolderOpen, LogOut, Shield, CreditCard, Loader2 } from 'lucide-react';
 import Logo from '@/components/Logo';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { createClient } from '@/lib/supabase-browser';
@@ -14,10 +14,8 @@ function AuthNav({ lang }: { lang: Locale }) {
   const { user, isLoading, signOut } = useAuth();
   const pathname = usePathname();
   const isCommunityPage = pathname?.includes('/yomiplay/community') || pathname?.includes('/yomiplay/admin');
-  const [points, setPoints] = useState<number | null>(null);
   const [isPro, setIsPro] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [pointsFeatureEnabled, setPointsFeatureEnabled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [portalLoading, setPortalLoading] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -28,33 +26,27 @@ function AuthNav({ lang }: { lang: Locale }) {
     // Fetch points and pro status
     supabase
       .from('toshiki_tech_yomi_profiles')
-      .select('points, is_pro, role')
+      .select('is_pro, role')
       .eq('id', user.id)
       .single()
       .then(({ data }) => {
         if (data) {
-          setPoints(data.points || 0);
           setIsPro(data.is_pro || false);
           setIsAdmin(data.role === 'admin');
         }
       });
-    // Resolve feature flags from the public endpoint, then conditionally fire
-    // the daily-login bonus once per session.
+    // Trigger daily-login bonus if points feature is enabled
     fetch('/api/yomiplay/feature-flags')
       .then((r) => r.json())
       .then((data) => {
-        const enabled = !!data?.points_feature_enabled;
-        setPointsFeatureEnabled(enabled);
-        if (!enabled) return;
+        if (!data?.points_feature_enabled) return;
         const key = `daily_login_${user.id}_${new Date().toISOString().split('T')[0]}`;
         if (!sessionStorage.getItem(key)) {
           sessionStorage.setItem(key, '1');
           fetch('/api/yomi/points/daily-login', { method: 'POST' });
         }
       })
-      .catch(() => {
-        // ignore — leave pointsFeatureEnabled false
-      });
+      .catch(() => {});
   }, [user]);
 
   useEffect(() => {
@@ -101,17 +93,6 @@ function AuthNav({ lang }: { lang: Locale }) {
           <span className="text-xs font-bold text-[var(--foreground-rgb)] hidden sm:inline">
             {displayName}
           </span>
-          {isPro && (
-            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-500/20 text-purple-400">
-              PRO
-            </span>
-          )}
-          {pointsFeatureEnabled && points !== null && (
-            <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-600">
-              <Star size={10} />
-              {points}
-            </span>
-          )}
           <ChevronDown size={12} className="text-[var(--muted-foreground)]" />
         </button>
 
@@ -132,7 +113,7 @@ function AuthNav({ lang }: { lang: Locale }) {
               <button
                 onClick={openBillingPortal}
                 disabled={portalLoading}
-                className="flex w-full items-center gap-2 px-3 py-2 text-xs text-[var(--foreground-rgb)] hover:bg-[var(--muted)] transition-colors border-t border-[var(--border)] disabled:opacity-50"
+                className="flex w-full items-center gap-2 px-3 py-2 text-xs text-[var(--foreground-rgb)] hover:bg-[var(--muted)] transition-colors disabled:opacity-50"
               >
                 {portalLoading ? <Loader2 size={14} className="animate-spin" /> : <CreditCard size={14} />}
                 {manageSubLabel}
@@ -142,12 +123,13 @@ function AuthNav({ lang }: { lang: Locale }) {
               <Link
                 href={`/${lang}/admin`}
                 onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-[rgb(var(--accent))] hover:bg-[var(--muted)] transition-colors border-t border-[var(--border)]"
+                className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-[rgb(var(--accent))] hover:bg-[var(--muted)] transition-colors"
               >
                 <Shield size={14} />
                 {adminLabel}
               </Link>
             )}
+            <div className="h-px bg-[var(--border)] my-1" />
             <button
               onClick={() => { setMenuOpen(false); signOut(); }}
               className="flex w-full items-center gap-2 px-3 py-2 text-xs text-red-500 hover:bg-[var(--muted)] transition-colors"
