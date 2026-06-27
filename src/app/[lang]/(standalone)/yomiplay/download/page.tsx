@@ -24,7 +24,7 @@ const content = {
     ios: {
       label: 'iOS',
       devices: 'iPhone · iPad',
-      req: 'Requires iOS 16.0 or later',
+      req: 'Requires iOS 21 or later',
       desc: 'Available now. Download from the App Store and start your first lesson in minutes.',
       cta: 'Download on the App Store',
     },
@@ -74,7 +74,7 @@ const content = {
     ios: {
       label: 'iOS',
       devices: 'iPhone · iPad',
-      req: '需要 iOS 16.0 或更高版本',
+      req: '需要 iOS 21 或更高版本',
       desc: '现已上线，在 App Store 下载后几分钟内即可开始第一堂精听课。',
       cta: '在 App Store 下载',
     },
@@ -124,7 +124,7 @@ const content = {
     ios: {
       label: 'iOS',
       devices: 'iPhone · iPad',
-      req: '需要 iOS 16.0 或更高版本',
+      req: '需要 iOS 21 或更高版本',
       desc: '現已上線，在 App Store 下載後幾分鐘內即可開始第一堂精聽課。',
       cta: '在 App Store 下載',
     },
@@ -174,7 +174,7 @@ const content = {
     ios: {
       label: 'iOS',
       devices: 'iPhone · iPad',
-      req: 'iOS 16.0 以降が必要',
+      req: 'iOS 21 以降が必要',
       desc: 'App Store にて公開中。ダウンロード後すぐに最初の精聴レッスンを始められます。',
       cta: 'App Store でダウンロード',
     },
