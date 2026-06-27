@@ -61,7 +61,7 @@ const content = {
       },
       {
         title: '10. Copyright & Content Policy',
-        content: 'YomiPlay is an AI-powered learning tool that processes audio and video content provided by the user. Users may only upload or process content that they own or are authorized to use. YomiPlay does not host, distribute, or provide copyrighted media content. The app does not store or reproduce third-party media — it processes user-provided files locally on-device or transiently on the server solely to generate subtitle data. Users are solely responsible for ensuring they have the right to process any content they submit to the service.'
+        content: 'YomiPlay is an AI-powered learning tool that processes audio and video content provided by the user. Users may only upload or process content that they own or are authorized to use. YomiPlay does not host, distribute, or provide copyrighted media content. Users are solely responsible for ensuring they have the right to process any content they submit to the service.'
       },
       {
         title: '11. Governing Law & Jurisdiction',
@@ -144,7 +144,7 @@ const content = {
       },
       {
         title: '10. 版权与内容政策',
-        content: 'YomiPlay 是一款由 AI 驱动的学习工具，仅处理用户自行提供的音视频内容。用户只能上传或处理其本人拥有版权或已获得授权使用的内容。YomiPlay 不托管、分发或提供任何受版权保护的媒体内容。本应用不存储或复制第三方媒体——仅在用户设备本地或服务器端短暂处理用户提供的文件以生成字幕数据。用户自行承担确保其提交内容合法合规的全部责任。'
+        content: 'YomiPlay 是一款由 AI 驱动的学习工具，仅处理用户自行提供的音视频内容。用户只能上传或处理其本人拥有版权或已获得授权使用的内容。YomiPlay 不托管、分发或提供任何受版权保护的媒体内容。用户自行承担确保其提交内容合法合规的全部责任。'
       },
       {
         title: '11. 准据法与管辖',
@@ -227,7 +227,7 @@ const content = {
       },
       {
         title: '10. 著作權與內容政策',
-        content: 'YomiPlay 是一款由 AI 驅動的學習工具，僅處理用戶自行提供的影音內容。用戶只能上傳或處理其本人擁有著作權或已獲得授權使用的內容。YomiPlay 不托管、分發或提供任何受著作權保護的媒體內容。本應用不儲存或複製第三方媒體——僅在用戶裝置本地或伺服器端短暫處理用戶提供的檔案以生成字幕資料。用戶自行承擔確保其提交內容合法合規的全部責任。'
+        content: 'YomiPlay 是一款由 AI 驅動的學習工具，僅處理用戶自行提供的影音內容。用戶只能上傳或處理其本人擁有著作權或已獲得授權使用的內容。YomiPlay 不托管、分發或提供任何受著作權保護的媒體內容。用戶自行承擔確保其提交內容合法合規的全部責任。'
       },
       {
         title: '11. 準據法與管轄',
@@ -310,7 +310,7 @@ const content = {
       },
       {
         title: '10. 著作権・コンテンツポリシー',
-        content: 'YomiPlayは、ユーザーが提供した音声・動画コンテンツを処理するAI学習ツールです。ユーザーは、自身が所有または使用を許諾された コンテンツのみをアップロードまたは処理することができます。YomiPlayは、著作権で保護されたメディアコンテンツのホスト、配布、または提供を行いません。本アプリは第三者のメディアを保存・複製せず、字幕データを生成するためにユーザーが提供したファイルをデバイス上でローカルに、またはサーバー上で一時的に処理するのみです。ユーザーは、サービスに提出するコンテンツの適法な利用権を確保する責任を単独で負います。'
+        content: 'YomiPlayは、ユーザーが提供した音声・動画コンテンツを処理するAI学習ツールです。ユーザーは、自身が所有または使用を許諾されたコンテンツのみをアップロードまたは処理することができます。YomiPlayは、著作権で保護されたメディアコンテンツのホスト、配布、または提供を行いません。ユーザーは、サービスに提出するコンテンツの適法な利用権を確保する責任を単独で負います。'
       },
       {
         title: '11. 準拠法・管轄',
