@@ -100,6 +100,33 @@ async function handleCheckoutCompleted(svc: SupabaseClient, session: Stripe.Chec
   }
 }
 
+async function handleChargeRefunded(svc: SupabaseClient, charge: Stripe.Charge) {
+  // Only act on full refunds — partial refunds don't necessarily mean access should end
+  if (!charge.refunded) return;
+
+  const stripeCustomerId = typeof charge.customer === 'string' ? charge.customer : charge.customer?.id;
+  if (!stripeCustomerId) return;
+
+  // Find all active subscriptions for this Stripe customer
+  const { data: rows } = await svc
+    .from('toshiki_tech_subscriptions')
+    .select('user_id, product, is_lifetime')
+    .eq('stripe_customer_id', stripeCustomerId)
+    .eq('status', 'active');
+
+  if (!rows || rows.length === 0) return;
+
+  for (const row of rows) {
+    await svc
+      .from('toshiki_tech_subscriptions')
+      .update({ status: 'canceled', updated_at: new Date().toISOString() })
+      .eq('user_id', row.user_id)
+      .eq('product', row.product);
+
+    await syncProStatus(svc, row.user_id, row.product, false);
+  }
+}
+
 async function handleSubscriptionChange(svc: SupabaseClient, sub: Stripe.Subscription) {
   // Look up our record via stripe_subscription_id (more reliable than metadata)
   const { data: dbSub } = await svc
@@ -158,6 +185,10 @@ export async function POST(request: Request) {
       case 'customer.subscription.updated':
       case 'customer.subscription.deleted':
         await handleSubscriptionChange(svc, event.data.object as Stripe.Subscription);
+        break;
+
+      case 'charge.refunded':
+        await handleChargeRefunded(svc, event.data.object as Stripe.Charge);
         break;
 
       // invoice.payment_succeeded: current_period_end is already updated by
