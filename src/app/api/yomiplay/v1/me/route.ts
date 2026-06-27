@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { extractBearerToken, getUserFromBearer, getAnonClient } from '@/lib/supabase-bearer';
+import { createClient } from '@supabase/supabase-js';
+import { extractBearerToken, getUserFromBearer } from '@/lib/supabase-bearer';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -18,7 +19,11 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers: CORS });
   }
 
-  const supabase = getAnonClient();
+  // Use service role to bypass RLS — user identity is already verified above
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
 
   // Query the unified subscriptions table for this user + product
   const { data: sub } = await supabase
