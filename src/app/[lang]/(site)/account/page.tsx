@@ -12,7 +12,7 @@ const t = {
     email: 'Email',
     joinedAt: 'Joined',
     products: 'My Products',
-    yomiplayPro: 'YomiPlay Pro',
+    yomiplayPro: 'YomiPlay Pro (Android)',
     status: 'Status',
     active: 'Active',
     cancelPending: 'Active (cancels on',
@@ -25,7 +25,7 @@ const t = {
     goToCommunity: 'Community',
     devices: 'Linked Devices',
     manageDevices: 'Manage',
-    subscribe: 'Subscribe to Pro',
+    viewProduct: 'View Product',
     security: 'Account Security',
     resetPassword: 'Send Password Reset Email',
     resetSent: 'Reset email sent. Check your inbox.',
@@ -37,7 +37,7 @@ const t = {
     email: '邮箱',
     joinedAt: '注册于',
     products: '我的产品',
-    yomiplayPro: 'YomiPlay Pro',
+    yomiplayPro: 'YomiPlay Pro（安卓版）',
     status: '状态',
     active: '订阅中',
     cancelPending: '有效（将于',
@@ -50,7 +50,7 @@ const t = {
     goToCommunity: '进入社区',
     devices: '已绑定设备',
     manageDevices: '管理',
-    subscribe: '订阅 Pro',
+    viewProduct: '查看产品动态',
     security: '账号安全',
     resetPassword: '发送密码重置邮件',
     resetSent: '重置邮件已发送，请查看邮箱。',
@@ -62,7 +62,7 @@ const t = {
     email: '電子郵件',
     joinedAt: '註冊於',
     products: '我的產品',
-    yomiplayPro: 'YomiPlay Pro',
+    yomiplayPro: 'YomiPlay Pro（安卓版）',
     status: '狀態',
     active: '訂閱中',
     cancelPending: '有效（將於',
@@ -75,7 +75,7 @@ const t = {
     goToCommunity: '進入社區',
     devices: '已綁定裝置',
     manageDevices: '管理',
-    subscribe: '訂閱 Pro',
+    viewProduct: '查看產品動態',
     security: '帳號安全',
     resetPassword: '發送密碼重設郵件',
     resetSent: '重設郵件已發送，請查看電子郵件。',
@@ -87,7 +87,7 @@ const t = {
     email: 'メールアドレス',
     joinedAt: '登録日',
     products: '購入済みプロダクト',
-    yomiplayPro: 'YomiPlay Pro',
+    yomiplayPro: 'YomiPlay Pro（Android版）',
     status: 'ステータス',
     active: 'サブスク中',
     cancelPending: '有効（',
@@ -100,7 +100,7 @@ const t = {
     goToCommunity: 'コミュニティ',
     devices: '登録デバイス',
     manageDevices: '管理',
-    subscribe: 'Proに登録',
+    viewProduct: '製品ページを見る',
     security: 'アカウントセキュリティ',
     resetPassword: 'パスワードリセットメールを送信',
     resetSent: 'リセットメールを送信しました。',
@@ -236,7 +236,7 @@ export default function AccountPage({ params: { lang } }: { params: { lang: Loca
             )}
           </div>
 
-          {sub?.is_pro ? (
+          {sub?.is_pro !== undefined ? (
             <div className="space-y-1">
               <div className="flex gap-6">
                 <div>
@@ -285,10 +285,11 @@ export default function AccountPage({ params: { lang } }: { params: { lang: Loca
             <div className="flex items-center justify-between">
               <p className="text-sm text-[var(--muted-foreground)]">{c.noPro}</p>
               <a
-                href={`/${lang}/yomiplay/pricing`}
-                className="text-sm px-3 py-1.5 rounded-lg bg-[rgb(var(--accent))] text-white font-bold hover:opacity-90 transition-opacity"
+                href={`/${lang}/p/yomiplay`}
+                className="text-sm px-3 py-1.5 rounded-lg border border-[var(--border)] hover:bg-[var(--muted)] transition-colors flex items-center gap-1.5"
               >
-                {c.subscribe}
+                <ExternalLink size={13} />
+                {c.viewProduct}
               </a>
             </div>
           )}
