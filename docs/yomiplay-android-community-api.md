@@ -28,6 +28,58 @@ Authorization: Bearer <supabase_access_token>
 
 ## 接口列表
 
+### 0. GET /api/yomiplay/v1/filters — 获取筛选元数据
+
+返回语言列表、分类列表、排序选项、来源平台列表。App 启动时调用一次并缓存，用于渲染筛选 UI，无需在客户端硬编码这些选项。
+
+**请求**
+
+```
+GET https://www.toshiki.tech/api/yomiplay/v1/filters
+```
+
+无需 Token，无 Query 参数。
+
+**响应示例**
+
+```json
+{
+  "data": {
+    "languages": [
+      { "id": "ja", "label": "日本語" },
+      { "id": "en", "label": "English" },
+      { "id": "zh", "label": "中文" }
+    ],
+    "categories": [
+      { "id": "podcast",       "labels": { "en": "Podcast",        "zh": "播客",    "zh-tw": "播客",    "ja": "ポッドキャスト" } },
+      { "id": "news_video",    "labels": { "en": "News / Video",   "zh": "新闻·视频","zh-tw": "新聞·影片","ja": "ニュース・動画" } },
+      { "id": "music",         "labels": { "en": "Music & Lyrics", "zh": "音乐歌词", "zh-tw": "音樂歌詞", "ja": "音楽・歌詞" } },
+      { "id": "book_companion","labels": { "en": "Book Companion", "zh": "书籍配套", "zh-tw": "書籍配套", "ja": "書籍付属" } },
+      { "id": "other",         "labels": { "en": "Other",          "zh": "其他",    "zh-tw": "其他",    "ja": "その他" } }
+    ],
+    "sort_options": [
+      { "id": "newest",    "labels": { "en": "Newest",            "zh": "最新",     "zh-tw": "最新",     "ja": "新着順" } },
+      { "id": "downloads", "labels": { "en": "Most downloaded",   "zh": "下载最多", "zh-tw": "下載最多", "ja": "ダウンロード順" } },
+      { "id": "updated",   "labels": { "en": "Recently updated",  "zh": "最近更新", "zh-tw": "最近更新", "ja": "更新順" } }
+    ],
+    "source_platforms": [
+      { "id": "apple_podcasts", "name": "Apple Podcasts", "domain": "podcasts.apple.com" },
+      { "id": "youtube",        "name": "YouTube",        "domain": "youtube.com" },
+      { "id": "spotify",        "name": "Spotify",        "domain": "open.spotify.com" },
+      { "id": "nhk",            "name": "NHK",            "domain": "nhk.or.jp" },
+      { "id": "ted",            "name": "TED",            "domain": "ted.com" },
+      { "id": "bbc",            "name": "BBC",            "domain": "bbc.co.uk" },
+      { "id": "audible",        "name": "Audible",        "domain": "audible.co.jp" },
+      { "id": "other",          "name": "Other",          "domain": null }
+    ]
+  }
+}
+```
+
+`languages[].id` 即 subtitles 接口 `?lang=` 参数的合法值；`categories[].id` 对应 `?category=`；`sort_options[].id` 对应 `?sort=`；`source_platforms[].id` 对应 `?platform=`。
+
+---
+
 ### 1. GET /api/yomiplay/v1/subtitles — 获取字幕列表
 
 **请求**

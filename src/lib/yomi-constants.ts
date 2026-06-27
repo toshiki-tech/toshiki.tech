@@ -30,11 +30,6 @@ export const CONTENT_LANGUAGES = [
   { id: 'ja', label: '日本語' },
   { id: 'en', label: 'English' },
   { id: 'zh', label: '中文' },
-  { id: 'ko', label: '한국어' },
-  { id: 'fr', label: 'Français' },
-  { id: 'de', label: 'Deutsch' },
-  { id: 'es', label: 'Español' },
-  { id: 'other', label: 'Other' },
 ] as const;
 
 export const ALLOWED_MEDIA_EXTENSIONS = ['.mp3', '.m4a', '.wav', '.mp4'] as const;
