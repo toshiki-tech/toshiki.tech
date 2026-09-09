@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
+import { serializeTranslationLanguages } from '@/lib/yomi-constants';
 
 function getSupabase() {
   const cookieStore = cookies();
@@ -96,6 +97,14 @@ export async function POST(request: Request) {
   const hasBundledMedia = isZip || !!audioStoragePath;
   const status = contentType === 'third_party' || !hasBundledMedia ? 'approved' : 'pending';
 
+  // Translation languages arrive as a comma-separated string (primary first)
+  // or as an array; store them normalized in the single text column.
+  const normalizedTranslationLanguages = serializeTranslationLanguages(
+    Array.isArray(translationLanguage)
+      ? translationLanguage
+      : String(translationLanguage || '').split(',')
+  );
+
   // Insert database record
   const { data: upload, error: dbError } = await supabase
     .from('toshiki_tech_yomi_uploads')
@@ -117,7 +126,7 @@ export async function POST(request: Request) {
       yomi_file_name: fileName,
       audio_file_name: audioFileName || null,
       language,
-      translation_language: translationLanguage || null,
+      translation_language: normalizedTranslationLanguages,
     })
     .select()
     .single();

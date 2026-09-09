@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Locale } from '@/lib/get-dictionary';
-import { SOURCE_PLATFORMS, CONTENT_LANGUAGES, CONTENT_CATEGORIES, MAX_YOMI_FILE_SIZE, MAX_ZIP_FILE_SIZE, MAX_AUDIO_FILE_SIZE, ALLOWED_MEDIA_EXTENSIONS } from '@/lib/yomi-constants';
+import { SOURCE_PLATFORMS, CONTENT_LANGUAGES, CONTENT_CATEGORIES, MAX_YOMI_FILE_SIZE, MAX_ZIP_FILE_SIZE, MAX_AUDIO_FILE_SIZE, ALLOWED_MEDIA_EXTENSIONS, serializeTranslationLanguages } from '@/lib/yomi-constants';
 import { Upload, FileText, Music, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 const content = {
@@ -20,7 +20,8 @@ const content = {
     categoryLabel: 'Category',
     selectCategory: 'Select category',
     languageLabel: 'Content Language',
-    translationLanguageLabel: 'Translation Language',
+    translationLanguageLabel: 'Primary Translation Language',
+    secondaryTranslationLanguageLabel: 'Secondary Translation Language (optional)',
     selectLanguage: 'Select language',
     noTranslation: 'None (no translation)',
     sourcePlatformLabel: 'Source Platform',
@@ -70,7 +71,8 @@ const content = {
     categoryLabel: '内容分类',
     selectCategory: '选择分类',
     languageLabel: '内容语言',
-    translationLanguageLabel: '翻译语言',
+    translationLanguageLabel: '主翻译语言',
+    secondaryTranslationLanguageLabel: '副翻译语言（可选）',
     selectLanguage: '选择语言',
     noTranslation: '无（无翻译）',
     sourcePlatformLabel: '来源平台',
@@ -120,7 +122,8 @@ const content = {
     categoryLabel: '內容分類',
     selectCategory: '選擇分類',
     languageLabel: '內容語言',
-    translationLanguageLabel: '翻譯語言',
+    translationLanguageLabel: '主翻譯語言',
+    secondaryTranslationLanguageLabel: '副翻譯語言（選填）',
     selectLanguage: '選擇語言',
     noTranslation: '無（無翻譯）',
     sourcePlatformLabel: '來源平台',
@@ -170,7 +173,8 @@ const content = {
     categoryLabel: 'カテゴリ',
     selectCategory: 'カテゴリを選択',
     languageLabel: 'コンテンツの言語',
-    translationLanguageLabel: '翻訳言語',
+    translationLanguageLabel: '主翻訳言語',
+    secondaryTranslationLanguageLabel: '副翻訳言語（任意）',
     selectLanguage: '言語を選択',
     noTranslation: 'なし（翻訳なし）',
     sourcePlatformLabel: 'ソースプラットフォーム',
@@ -221,6 +225,7 @@ export default function UploadForm({ lang }: { lang: Locale }) {
   const [category, setCategory] = useState('');
   const [language, setLanguage] = useState('');
   const [translationLanguage, setTranslationLanguage] = useState('');
+  const [secondaryTranslationLanguage, setSecondaryTranslationLanguage] = useState('');
   const [sourcePlatform, setSourcePlatform] = useState('');
   const [sourceShow, setSourceShow] = useState('');
   const [sourceEpisode, setSourceEpisode] = useState('');
@@ -371,7 +376,9 @@ export default function UploadForm({ lang }: { lang: Locale }) {
           visibility,
           category: category || undefined,
           language,
-          translationLanguage: translationLanguage || undefined,
+          translationLanguage:
+            serializeTranslationLanguages([translationLanguage, secondaryTranslationLanguage]) ||
+            undefined,
           sourcePlatform: sourcePlatform || undefined,
           sourceShow: sourceShow || undefined,
           sourceEpisode: sourceEpisode || undefined,
@@ -508,12 +515,19 @@ export default function UploadForm({ lang }: { lang: Locale }) {
         </select>
       </div>
 
-      {/* Translation Language */}
+      {/* Translation languages (primary + optional secondary) */}
       <div>
         <label className={labelClass}>{t.translationLanguageLabel}</label>
         <select
           value={translationLanguage}
-          onChange={(e) => setTranslationLanguage(e.target.value)}
+          onChange={(e) => {
+            setTranslationLanguage(e.target.value);
+            // Clearing the primary drops the secondary; picking the same
+            // language for both is not allowed.
+            if (!e.target.value || e.target.value === secondaryTranslationLanguage) {
+              setSecondaryTranslationLanguage('');
+            }
+          }}
           className={inputClass}
         >
           <option value="">{t.noTranslation}</option>
@@ -522,6 +536,22 @@ export default function UploadForm({ lang }: { lang: Locale }) {
           ))}
         </select>
       </div>
+
+      {translationLanguage && (
+        <div>
+          <label className={labelClass}>{t.secondaryTranslationLanguageLabel}</label>
+          <select
+            value={secondaryTranslationLanguage}
+            onChange={(e) => setSecondaryTranslationLanguage(e.target.value)}
+            className={inputClass}
+          >
+            <option value="">{t.noTranslation}</option>
+            {CONTENT_LANGUAGES.filter((l) => l.id !== translationLanguage).map((l) => (
+              <option key={l.id} value={l.id}>{l.label}</option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {/* Source info (third_party only) */}
       {contentTypeChoice === 'third_party' && (

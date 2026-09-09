@@ -45,3 +45,25 @@ export const MAX_ZIP_FILE_SIZE = 524_288_000; // 500MB
 
 export type SourcePlatformId = typeof SOURCE_PLATFORMS[number]['id'];
 export type ContentLanguageId = typeof CONTENT_LANGUAGES[number]['id'];
+
+// Translation languages are stored in the single `translation_language` column
+// as a comma-separated list, ordered primary first (e.g. "zh,en"). Legacy rows
+// hold a single id, which parses to a one-element list.
+export function parseTranslationLanguages(value: string | null | undefined): ContentLanguageId[] {
+  if (!value) return [];
+  const valid = CONTENT_LANGUAGES.map((l) => l.id) as readonly string[];
+  const seen = new Set<string>();
+  return value
+    .split(',')
+    .map((id) => id.trim())
+    .filter((id) => valid.includes(id) && !seen.has(id) && seen.add(id)) as ContentLanguageId[];
+}
+
+export function serializeTranslationLanguages(ids: (string | null | undefined)[]): string | null {
+  const valid = CONTENT_LANGUAGES.map((l) => l.id) as readonly string[];
+  const seen = new Set<string>();
+  const list = ids
+    .map((id) => (id || '').trim())
+    .filter((id) => valid.includes(id) && !seen.has(id) && seen.add(id));
+  return list.length > 0 ? list.join(',') : null;
+}

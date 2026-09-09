@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Pencil, X, Save } from 'lucide-react';
-import { SOURCE_PLATFORMS, CONTENT_LANGUAGES, CONTENT_CATEGORIES } from '@/lib/yomi-constants';
+import { SOURCE_PLATFORMS, CONTENT_LANGUAGES, CONTENT_CATEGORIES, parseTranslationLanguages, serializeTranslationLanguages } from '@/lib/yomi-constants';
 
 interface UploadData {
   id: string;
@@ -22,6 +22,9 @@ interface UploadData {
 export default function EditUpload({ upload }: { upload: UploadData }) {
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [primaryTranslation, secondaryTranslation] = parseTranslationLanguages(
+    upload.translation_language
+  ) as string[];
   const [form, setForm] = useState({
     title: upload.title || '',
     description: upload.description || '',
@@ -31,7 +34,8 @@ export default function EditUpload({ upload }: { upload: UploadData }) {
     source_show: upload.source_show || '',
     source_episode: upload.source_episode || '',
     language: upload.language || '',
-    translation_language: upload.translation_language || '',
+    translation_language: primaryTranslation || '',
+    secondary_translation_language: secondaryTranslation || '',
     category: upload.category || '',
     tagsInput: (upload.tags || []).join(', '),
   });
@@ -42,9 +46,16 @@ export default function EditUpload({ upload }: { upload: UploadData }) {
       .split(',')
       .map((t) => t.trim())
       .filter(Boolean);
-    const { tagsInput, ...rest } = form;
+    const { tagsInput, secondary_translation_language, ...rest } = form;
     void tagsInput;
-    const updates = { ...rest, tags };
+    const updates = {
+      ...rest,
+      tags,
+      translation_language: serializeTranslationLanguages([
+        form.translation_language,
+        secondary_translation_language,
+      ]),
+    };
     const res = await fetch('/api/yomi/admin/edit-upload', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -183,10 +194,19 @@ export default function EditUpload({ upload }: { upload: UploadData }) {
                   </select>
                 </div>
                 <div>
-                  <label className={label}>Translation Language</label>
+                  <label className={label}>Translation Language (primary)</label>
                   <select
                     value={form.translation_language}
-                    onChange={(e) => setForm({ ...form, translation_language: e.target.value })}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        translation_language: e.target.value,
+                        secondary_translation_language:
+                          !e.target.value || e.target.value === form.secondary_translation_language
+                            ? ''
+                            : form.secondary_translation_language,
+                      })
+                    }
                     className={input}
                   >
                     <option value="">None</option>
@@ -196,6 +216,24 @@ export default function EditUpload({ upload }: { upload: UploadData }) {
                   </select>
                 </div>
               </div>
+
+              {form.translation_language && (
+                <div>
+                  <label className={label}>Translation Language (secondary)</label>
+                  <select
+                    value={form.secondary_translation_language}
+                    onChange={(e) =>
+                      setForm({ ...form, secondary_translation_language: e.target.value })
+                    }
+                    className={input}
+                  >
+                    <option value="">None</option>
+                    {CONTENT_LANGUAGES.filter((l) => l.id !== form.translation_language).map((l) => (
+                      <option key={l.id} value={l.id}>{l.label}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               <div>
                 <label className={label}>Source Platform</label>

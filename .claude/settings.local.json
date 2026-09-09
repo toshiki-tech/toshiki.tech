@@ -10,7 +10,10 @@
       "Bash(git push:*)",
       "Bash(curl -s http://localhost:3002/zh/writing/hello-writing)",
       "Bash(curl -s http://localhost:3002/en/writing)",
-      "Bash(curl -s http://localhost:3002/zh)"
+      "Bash(curl -s http://localhost:3002/zh)",
+      "Bash(node *)",
+      "Bash(git commit -m ' *)",
+      "Bash(npx tsc *)"
     ]
   }
 }
