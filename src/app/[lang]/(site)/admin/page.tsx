@@ -11,7 +11,7 @@ import ReportActions from './ReportActions';
 import PointsConfig from './PointsConfig';
 import ProRequests from './ProRequests';
 import EditUpload from './EditUpload';
-import HidePinControls from './HidePinControls';
+import UploadAdminControls from './UploadAdminControls';
 import FeatureFlagsPanel from './FeatureFlagsPanel';
 import ApkReleasePanel from './ApkReleasePanel';
 import SubscriptionsPanel from './SubscriptionsPanel';
@@ -23,6 +23,7 @@ interface AdminUpload {
   title: string;
   description: string | null;
   content_type: string;
+  file_kind: string | null;
   visibility: string;
   status: string;
   source_platform: string | null;
@@ -35,6 +36,7 @@ interface AdminUpload {
   tags: string[] | null;
   is_hidden: boolean;
   sort_order: number;
+  is_free_import: boolean;
   created_at: string;
   toshiki_tech_yomi_profiles: { display_name: string } | null;
 }
@@ -267,6 +269,11 @@ export default async function AdminPage({ params: { lang } }: { params: { lang: 
                           {upload.title}
                         </Link>
                         {upload.audio_storage_path && <Music size={14} className="text-green-600 shrink-0" />}
+                        {upload.file_kind === 'yomibook' && (
+                          <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600">
+                            Deck
+                          </span>
+                        )}
                         <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-[rgb(var(--accent))]/10 text-[rgb(var(--accent))]">
                           {upload.content_type}
                         </span>
@@ -295,7 +302,7 @@ export default async function AdminPage({ params: { lang } }: { params: { lang: 
                       )}
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <HidePinControls uploadId={upload.id} isHidden={upload.is_hidden} sortOrder={upload.sort_order} />
+                      <UploadAdminControls uploadId={upload.id} isHidden={upload.is_hidden} sortOrder={upload.sort_order} isFreeImport={upload.is_free_import} />
                       <EditUpload upload={upload} />
                       <AdminActions uploadId={upload.id} />
                     </div>
@@ -343,6 +350,11 @@ export default async function AdminPage({ params: { lang } }: { params: { lang: 
                           {upload.title}
                         </Link>
                         {upload.audio_storage_path && <Music size={14} className="text-green-600 shrink-0" />}
+                        {upload.file_kind === 'yomibook' && (
+                          <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600">
+                            Deck
+                          </span>
+                        )}
                         <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${statusColors[upload.status] || ''}`}>
                           {upload.status}
                         </span>
@@ -371,7 +383,7 @@ export default async function AdminPage({ params: { lang } }: { params: { lang: 
                       )}
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <HidePinControls uploadId={upload.id} isHidden={upload.is_hidden} sortOrder={upload.sort_order} />
+                      <UploadAdminControls uploadId={upload.id} isHidden={upload.is_hidden} sortOrder={upload.sort_order} isFreeImport={upload.is_free_import} />
                       <EditUpload upload={upload} />
                       <AdminActions uploadId={upload.id} />
                     </div>

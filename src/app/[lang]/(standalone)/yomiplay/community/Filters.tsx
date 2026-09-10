@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { SOURCE_PLATFORMS, CONTENT_LANGUAGES, CONTENT_CATEGORIES, CONTENT_SORT_OPTIONS } from '@/lib/yomi-constants';
+import { SOURCE_PLATFORMS, CONTENT_LANGUAGES, CONTENT_CATEGORIES, CONTENT_SORT_OPTIONS, FILE_KINDS } from '@/lib/yomi-constants';
 import type { Locale } from '@/lib/get-dictionary';
 
 interface FiltersProps {
@@ -9,12 +9,14 @@ interface FiltersProps {
   currentLanguage?: string;
   currentPlatform?: string;
   currentCategory?: string;
+  currentKind?: string;
   currentSort?: string;
   currentQuery?: string;
   currentTag?: string;
   allLanguagesLabel: string;
   allPlatformsLabel: string;
   allCategoriesLabel: string;
+  allKindsLabel: string;
   sortLabel: string;
 }
 
@@ -23,12 +25,14 @@ export default function Filters({
   currentLanguage,
   currentPlatform,
   currentCategory,
+  currentKind,
   currentSort,
   currentQuery,
   currentTag,
   allLanguagesLabel,
   allPlatformsLabel,
   allCategoriesLabel,
+  allKindsLabel,
   sortLabel,
 }: FiltersProps) {
   const router = useRouter();
@@ -39,6 +43,7 @@ export default function Filters({
     if (currentLanguage) sp.set('language', currentLanguage);
     if (currentPlatform) sp.set('platform', currentPlatform);
     if (currentCategory) sp.set('category', currentCategory);
+    if (currentKind) sp.set('kind', currentKind);
     if (currentSort) sp.set('sort', currentSort);
     if (currentTag) sp.set('tag', currentTag);
     Object.entries(params).forEach(([k, v]) => {
@@ -53,6 +58,16 @@ export default function Filters({
 
   return (
     <div className="flex flex-wrap gap-3">
+      <select
+        value={currentKind || ''}
+        onChange={(e) => router.push(buildUrl({ kind: e.target.value }))}
+        className={selectClass}
+      >
+        <option value="">{allKindsLabel}</option>
+        {FILE_KINDS.map((k) => (
+          <option key={k.id} value={k.id}>{k.labels[lang] || k.labels.en}</option>
+        ))}
+      </select>
       <select
         value={currentCategory || ''}
         onChange={(e) => router.push(buildUrl({ category: e.target.value }))}

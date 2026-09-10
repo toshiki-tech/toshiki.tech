@@ -36,7 +36,7 @@ Authorization: Bearer <supabase_access_token>
 
 ### 0. GET /api/yomiplay/v1/filters — 获取筛选元数据
 
-返回语言列表、分类列表、排序选项、来源平台列表。App 启动时调用一次并缓存，用于渲染筛选 UI，无需在客户端硬编码这些选项。
+返回语言列表、分类列表、排序选项、来源平台列表、文件类型列表。App 启动时调用一次并缓存，用于渲染筛选 UI，无需在客户端硬编码这些选项。
 
 **请求**
 
@@ -77,12 +77,16 @@ GET https://www.toshiki.tech/api/yomiplay/v1/filters
       { "id": "bbc",            "name": "BBC",            "domain": "bbc.co.uk" },
       { "id": "audible",        "name": "Audible",        "domain": "audible.co.jp" },
       { "id": "other",          "name": "Other",          "domain": null }
+    ],
+    "file_kinds": [
+      { "id": "yomi",     "labels": { "en": "Subtitles", "zh": "字幕",    "zh-tw": "字幕",    "ja": "字幕" } },
+      { "id": "yomibook", "labels": { "en": "Deck",      "zh": "暗记本",  "zh-tw": "暗記本",  "ja": "暗記帳" } }
     ]
   }
 }
 ```
 
-`languages[].id` 即 subtitles 接口 `?lang=` 参数的合法值；`categories[].id` 对应 `?category=`；`sort_options[].id` 对应 `?sort=`；`source_platforms[].id` 对应 `?platform=`。
+`languages[].id` 即 subtitles 接口 `?lang=` 参数的合法值；`categories[].id` 对应 `?category=`；`sort_options[].id` 对应 `?sort=`；`source_platforms[].id` 对应 `?platform=`；`file_kinds[].id` 对应 `?file_kind=`。
 
 ---
 
@@ -104,6 +108,7 @@ GET https://www.toshiki.tech/api/yomiplay/v1/subtitles
 | `category` | string | — | 分类筛选，如 `anime`、`podcast` |
 | `platform` | string | — | 来源平台筛选，如 `spotify`、`youtube` |
 | `q` | string | — | 标题关键词搜索（模糊匹配） |
+| `file_kind` | string | — | 文件类型筛选：`yomi`（字幕素材）/ `yomibook`（暗记本）。不传则两者都返回 |
 | `sort` | string | `newest` | 排序方式：`newest`（最新）/ `downloads`（下载量） |
 
 **请求示例**
@@ -128,6 +133,8 @@ GET /api/yomiplay/v1/subtitles?lang=ja&category=anime&page=1&per_page=20&sort=do
       "source_episode": "S01E01",
       "source_url": "https://www.youtube.com/watch?v=xxxxxx",
       "content_type": "subtitle",
+      "file_kind": "yomi",
+      "free_import": false,
       "has_media": false,
       "download_count": 128,
       "uploaded_by": "toshiki",
@@ -151,6 +158,8 @@ GET /api/yomiplay/v1/subtitles?lang=ja&category=anime&page=1&per_page=20&sort=do
 | `language` | 字幕内容语言，取值见 `/v1/filters` 的 `languages` 列表（`ja` / `en` / `zh`） |
 | `category` | 内容分类，取值见 `/v1/filters` 的 `categories` 列表 |
 | `content_type` | 内容类型：`subtitle` / `transcript` 等 |
+| `file_kind` | 文件类型：`yomi` 为字幕素材（`.yomi` 或打包音频的 `.zip`），`yomibook` 为暗记本（`.yomibook`）。历史数据缺失时按 `yomi` 处理 |
+| `free_import` | 管理员标记的试用素材：为 `true` 时非 Pro 用户也能导入，客户端不应弹付费墙。为 `false` 时导入仍是 Pro 功能 |
 | `source_platform` | 来源平台 ID（如 `youtube`、`spotify`），取值见 `/v1/filters` 的 `source_platforms` 列表，可能为 `null`。结合 `source_platforms[].domain` 可判断平台类型，用于选择对应播放器或 Intent |
 | `source_url` | 来源视频/音频直链（如 YouTube URL），可直接传入播放器实现一键导入，可能为 `null` |
 | `has_media` | 是否附带音频/视频媒体文件 |
@@ -182,6 +191,8 @@ GET https://www.toshiki.tech/api/yomiplay/v1/subtitles/{id}
     "source_episode": "S01E01",
     "source_url": "https://www.youtube.com/watch?v=xxxxxx",
     "content_type": "subtitle",
+    "file_kind": "yomi",
+    "free_import": false,
     "file_name": "aot_s1e01.yomi",
     "media_file_name": "aot_s1e01.mp3",
     "has_media": true,
@@ -197,7 +208,9 @@ GET https://www.toshiki.tech/api/yomiplay/v1/subtitles/{id}
 
 | 字段 | 说明 |
 |------|------|
-| `file_name` | 字幕文件名（`.yomi`） |
+| `file_kind` | 文件类型：`yomi` / `yomibook`，决定下载后该走哪条导入路径 |
+| `free_import` | 是否为免 Pro 的试用素材，与列表接口一致 |
+| `file_name` | 内容文件名（`.yomi` / `.zip` / `.yomibook`） |
 | `media_file_name` | 媒体文件名（`.mp3` / `.mp4` 等），`has_media` 为 `true` 时有效 |
 | `source_platform` | 来源平台 ID，与列表接口一致，可能为 `null` |
 | `source_url` | 来源视频/音频链接（如 YouTube URL），可用于播放器直接导入，可能为 `null` |
@@ -220,7 +233,7 @@ Authorization: Bearer <token>   （可选，登录后下载可获得积分）
 
 | 参数 | 说明 |
 |------|------|
-| `type` | `subtitle`（默认，下载 `.yomi` 字幕文件）/ `media`（下载音频/视频文件） |
+| `type` | `subtitle`（默认，下载内容主文件：`.yomi` / `.zip` / `.yomibook`）/ `media`（下载音频/视频文件） |
 
 **请求示例**
 
@@ -617,6 +630,29 @@ GET /api/yomiplay/v1/subtitles/{id}/download
       ↓
 在 YomiPlay App 内打开字幕
 ```
+
+### 暗记本（`.yomibook`）
+
+社区列表里混排了两种资源，靠 `file_kind` 区分：`yomi` 是字幕素材，`yomibook` 是从 App 导出的暗记本。
+下载流程与字幕完全一致，区别只在下载完成后的处理：
+
+```
+GET /api/yomiplay/v1/subtitles?file_kind=yomibook   （只看暗记本）
+      ↓
+GET /api/yomiplay/v1/subtitles/{id}/download
+      ↓
+下载得到 .yomibook（内部是 zip：book.json + Audio/）
+      ↓
+交给 App 的暗记本导入流程（Pro 功能），而不是字幕导入
+```
+
+要点：
+
+- 暗记本一律经管理员审核后才会出现在列表里，接口只返回已通过的条目。
+- `.yomibook` 不带 `has_media`，音频封装在包内，不存在 `?type=media` 的第二个文件。
+- 导入是 Pro 功能，非 Pro 用户应在下载前就看到升级提示，而不是下载完才被拦下。
+- 例外是 `free_import` 为 `true` 的素材：管理员挑出来给新用户试用，非 Pro 也能导入。
+  下载接口本身从不校验 Pro，这个标记只决定客户端要不要弹付费墙。
 
 ---
 

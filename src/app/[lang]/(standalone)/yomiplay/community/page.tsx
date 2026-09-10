@@ -3,7 +3,7 @@ import { Metadata } from 'next';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
-import { Download, Upload, Search, FileText, Music, Crown, FolderOpen, Apple, Megaphone } from 'lucide-react';
+import { Download, Upload, Search, FileText, Music, Crown, FolderOpen, Apple, Megaphone, BookMarked, Gift } from 'lucide-react';
 import { SOURCE_PLATFORMS, CONTENT_LANGUAGES, CONTENT_CATEGORIES } from '@/lib/yomi-constants';
 import { getFeatureFlags } from '@/lib/yomi-feature-flags';
 import { localizeAppStoreUrl } from '@/data/products';
@@ -18,6 +18,8 @@ interface YomiUpload {
   title: string;
   description: string | null;
   content_type: string;
+  file_kind: string | null;
+  is_free_import: boolean | null;
   visibility: string;
   status: string;
   source_platform: string | null;
@@ -36,12 +38,15 @@ interface YomiUpload {
 const content = {
   en: {
     title: 'YomiPlay Community',
-    subtitle: 'Browse and download .yomi subtitle files shared by the community.',
+    subtitle: 'Browse and download .yomi subtitle files and .yomibook decks shared by the community.',
     upload: 'Upload',
     searchPlaceholder: 'Search subtitles...',
     allLanguages: 'All Languages',
     allPlatforms: 'All Platforms',
     allCategories: 'All Categories',
+    allKinds: 'All Types',
+    deck: 'Deck',
+    freeImport: 'Free to try',
     sortLabel: 'Sort',
     tagFilterLabel: 'Filtered by tag',
     clearFilter: 'Clear',
@@ -71,6 +76,7 @@ const content = {
     pointsRules: {
       upload_yomi: 'Upload a .yomi file (once approved)',
       upload_zip: 'Upload a ZIP bundle (once approved)',
+      upload_yomibook: 'Upload a .yomibook deck (once approved)',
       download_received: 'Each time someone downloads your content',
       daily_login: 'Daily login bonus',
       pro_threshold: 'Points needed to apply for Pro membership',
@@ -90,12 +96,15 @@ const content = {
   },
   zh: {
     title: 'YomiPlay 社区',
-    subtitle: '浏览和下载社区分享的 .yomi 字幕文件。',
+    subtitle: '浏览和下载社区分享的 .yomi 字幕文件与 .yomibook 暗记本。',
     upload: '上传',
     searchPlaceholder: '搜索字幕...',
     allLanguages: '全部语言',
     allPlatforms: '全部平台',
     allCategories: '全部分类',
+    allKinds: '全部类型',
+    deck: '暗记本',
+    freeImport: '免费体验',
     sortLabel: '排序',
     tagFilterLabel: '按标签筛选',
     clearFilter: '清除',
@@ -125,6 +134,7 @@ const content = {
     pointsRules: {
       upload_yomi: '上传 .yomi 文件（审核通过后）',
       upload_zip: '上传 ZIP 压缩包（审核通过后）',
+      upload_yomibook: '上传 .yomibook 暗记本（审核通过后）',
       download_received: '你的内容每被下载一次',
       daily_login: '每日登录奖励',
       pro_threshold: '申请 Pro 会员所需积分',
@@ -144,12 +154,15 @@ const content = {
   },
   'zh-tw': {
     title: 'YomiPlay 社區',
-    subtitle: '瀏覽和下載社區分享的 .yomi 字幕檔案。',
+    subtitle: '瀏覽和下載社區分享的 .yomi 字幕檔案與 .yomibook 暗記本。',
     upload: '上傳',
     searchPlaceholder: '搜尋字幕...',
     allLanguages: '全部語言',
     allPlatforms: '全部平台',
     allCategories: '全部分類',
+    allKinds: '全部類型',
+    deck: '暗記本',
+    freeImport: '免費體驗',
     sortLabel: '排序',
     tagFilterLabel: '依標籤篩選',
     clearFilter: '清除',
@@ -179,6 +192,7 @@ const content = {
     pointsRules: {
       upload_yomi: '上傳 .yomi 檔案（審核通過後）',
       upload_zip: '上傳 ZIP 壓縮包（審核通過後）',
+      upload_yomibook: '上傳 .yomibook 暗記本（審核通過後）',
       download_received: '你的內容每被下載一次',
       daily_login: '每日登入獎勵',
       pro_threshold: '申請 Pro 會員所需積分',
@@ -198,12 +212,15 @@ const content = {
   },
   ja: {
     title: 'YomiPlay コミュニティ',
-    subtitle: 'コミュニティで共有された .yomi 字幕ファイルを閲覧・ダウンロード。',
+    subtitle: 'コミュニティで共有された .yomi 字幕ファイルと .yomibook 暗記帳を閲覧・ダウンロード。',
     upload: 'アップロード',
     searchPlaceholder: '字幕を検索...',
     allLanguages: 'すべての言語',
     allPlatforms: 'すべてのプラットフォーム',
     allCategories: 'すべてのカテゴリ',
+    allKinds: 'すべての種類',
+    deck: '暗記帳',
+    freeImport: '無料でお試し',
     sortLabel: '並び替え',
     tagFilterLabel: 'タグで絞り込み',
     clearFilter: 'クリア',
@@ -233,6 +250,7 @@ const content = {
     pointsRules: {
       upload_yomi: '.yomi ファイルのアップロード（審査通過後）',
       upload_zip: 'ZIP バンドルのアップロード（審査通過後）',
+      upload_yomibook: '.yomibook 暗記帳のアップロード（審査通過後）',
       download_received: 'あなたの投稿がダウンロードされるたびに',
       daily_login: '毎日ログインボーナス',
       pro_threshold: 'Pro メンバーシップ申請に必要なポイント',
@@ -262,7 +280,7 @@ export default async function CommunityPage({
   searchParams,
 }: {
   params: { lang: Locale };
-  searchParams: { q?: string; language?: string; platform?: string; category?: string; sort?: string; tag?: string; page?: string };
+  searchParams: { q?: string; language?: string; platform?: string; category?: string; kind?: string; sort?: string; tag?: string; page?: string };
 }) {
   const t = content[lang] || content.en;
   const sort = searchParams.sort || 'newest';
@@ -320,6 +338,9 @@ export default async function CommunityPage({
   if (searchParams.category) {
     query = query.eq('category', searchParams.category);
   }
+  if (searchParams.kind) {
+    query = query.eq('file_kind', searchParams.kind);
+  }
   if (searchParams.tag) {
     query = query.contains('tags', [searchParams.tag]);
   }
@@ -342,6 +363,7 @@ export default async function CommunityPage({
     if (searchParams.language) sp.set('language', searchParams.language);
     if (searchParams.platform) sp.set('platform', searchParams.platform);
     if (searchParams.category) sp.set('category', searchParams.category);
+    if (searchParams.kind) sp.set('kind', searchParams.kind);
     if (searchParams.tag) sp.set('tag', searchParams.tag);
     if (searchParams.sort) sp.set('sort', searchParams.sort);
     Object.entries(params).forEach(([k, v]) => {
@@ -391,6 +413,7 @@ export default async function CommunityPage({
           {searchParams.language && <input type="hidden" name="language" value={searchParams.language} />}
           {searchParams.platform && <input type="hidden" name="platform" value={searchParams.platform} />}
           {searchParams.category && <input type="hidden" name="category" value={searchParams.category} />}
+          {searchParams.kind && <input type="hidden" name="kind" value={searchParams.kind} />}
           {searchParams.sort && <input type="hidden" name="sort" value={searchParams.sort} />}
           {searchParams.tag && <input type="hidden" name="tag" value={searchParams.tag} />}
         </form>
@@ -399,12 +422,14 @@ export default async function CommunityPage({
           currentLanguage={searchParams.language}
           currentPlatform={searchParams.platform}
           currentCategory={searchParams.category}
+          currentKind={searchParams.kind}
           currentSort={sort}
           currentQuery={searchParams.q}
           currentTag={searchParams.tag}
           allLanguagesLabel={t.allLanguages}
           allPlatformsLabel={t.allPlatforms}
           allCategoriesLabel={t.allCategories}
+          allKindsLabel={t.allKinds}
           sortLabel={t.sortLabel}
         />
       </div>
@@ -447,7 +472,8 @@ export default async function CommunityPage({
                   <h3 className="font-bold text-lg group-hover:text-[rgb(var(--accent))] transition-colors line-clamp-1">
                     {upload.title}
                   </h3>
-                  {(upload.audio_storage_path || upload.yomi_storage_path?.startsWith('zip/')) && (
+                  {upload.file_kind !== 'yomibook' &&
+                    (upload.audio_storage_path || upload.yomi_storage_path?.startsWith('zip/')) && (
                     <span className="shrink-0 ml-2 inline-flex items-center gap-1 text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-green-500/10 text-green-600">
                       <Music size={10} />
                       Bundle
@@ -468,7 +494,19 @@ export default async function CommunityPage({
                       {categoryLabel}
                     </span>
                   )}
-                  {upload.content_type === 'original' && (
+                  {upload.is_free_import && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-green-500/10 text-green-600">
+                      <Gift size={10} />
+                      {t.freeImport}
+                    </span>
+                  )}
+                  {upload.file_kind === 'yomibook' && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600">
+                      <BookMarked size={10} />
+                      {t.deck}
+                    </span>
+                  )}
+                  {upload.file_kind !== 'yomibook' && upload.content_type === 'original' && (
                     <span className="inline-block text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-600">
                       {t.original}
                     </span>

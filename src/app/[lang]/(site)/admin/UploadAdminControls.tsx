@@ -1,19 +1,21 @@
 'use client';
 
 import { useState } from 'react';
-import { Eye, EyeOff, Pin, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Pin, Loader2, Gift } from 'lucide-react';
 
 interface Props {
   uploadId: string;
   isHidden: boolean;
   sortOrder: number;
+  isFreeImport: boolean;
 }
 
-export default function HidePinControls({ uploadId, isHidden, sortOrder }: Props) {
+export default function UploadAdminControls({ uploadId, isHidden, sortOrder, isFreeImport }: Props) {
   const [hidden, setHidden] = useState(isHidden);
   const [order, setOrder] = useState<number>(sortOrder);
   const [orderInput, setOrderInput] = useState<string>(String(sortOrder));
-  const [busy, setBusy] = useState<'hide' | 'pin' | null>(null);
+  const [freeImport, setFreeImport] = useState(isFreeImport);
+  const [busy, setBusy] = useState<'hide' | 'pin' | 'free' | null>(null);
 
   async function patch(updates: Record<string, unknown>) {
     const res = await fetch('/api/yomi/admin/edit-upload', {
@@ -33,6 +35,15 @@ export default function HidePinControls({ uploadId, isHidden, sortOrder }: Props
     setBusy('hide');
     const next = !hidden;
     if (await patch({ is_hidden: next })) setHidden(next);
+    setBusy(null);
+  }
+
+  // Marks the upload as importable without a Pro subscription — the sample
+  // material new users get to try before paying.
+  async function toggleFreeImport() {
+    setBusy('free');
+    const next = !freeImport;
+    if (await patch({ is_free_import: next })) setFreeImport(next);
     setBusy(null);
   }
 
@@ -64,6 +75,24 @@ export default function HidePinControls({ uploadId, isHidden, sortOrder }: Props
       >
         {busy === 'hide' ? <Loader2 size={14} className="animate-spin" /> : hidden ? <EyeOff size={14} /> : <Eye size={14} />}
         {hidden ? 'Hidden' : 'Hide'}
+      </button>
+
+      <button
+        onClick={toggleFreeImport}
+        disabled={busy !== null}
+        className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors disabled:opacity-50 ${
+          freeImport
+            ? 'bg-green-500/20 text-green-600 hover:bg-green-500/30'
+            : 'bg-[var(--muted)] text-[var(--muted-foreground)] hover:bg-[var(--border)]'
+        }`}
+        title={
+          freeImport
+            ? 'Free to import — non-Pro users can import this. Click to require Pro again.'
+            : 'Requires Pro to import. Click to offer it as free sample material.'
+        }
+      >
+        {busy === 'free' ? <Loader2 size={14} className="animate-spin" /> : <Gift size={14} />}
+        {freeImport ? 'Free' : 'Pro only'}
       </button>
 
       <div className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-[var(--muted)] border border-[var(--border)]">

@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Locale } from '@/lib/get-dictionary';
-import { SOURCE_PLATFORMS, CONTENT_LANGUAGES, CONTENT_CATEGORIES, MAX_YOMI_FILE_SIZE, MAX_ZIP_FILE_SIZE, MAX_AUDIO_FILE_SIZE, ALLOWED_MEDIA_EXTENSIONS, serializeTranslationLanguages } from '@/lib/yomi-constants';
-import { Upload, FileText, Music, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { SOURCE_PLATFORMS, CONTENT_LANGUAGES, CONTENT_CATEGORIES, MAX_YOMI_FILE_SIZE, MAX_ZIP_FILE_SIZE, MAX_AUDIO_FILE_SIZE, MAX_YOMIBOOK_FILE_SIZE, ALLOWED_MEDIA_EXTENSIONS, YOMIBOOK_EXTENSION, serializeTranslationLanguages } from '@/lib/yomi-constants';
+import { Upload, FileText, Music, AlertCircle, CheckCircle2, BookMarked } from 'lucide-react';
 
 const content = {
   en: {
@@ -20,6 +20,14 @@ const content = {
     categoryLabel: 'Category',
     selectCategory: 'Select category',
     languageLabel: 'Content Language',
+    uploadKindLabel: 'What are you sharing?',
+    kindSubtitle: 'Subtitles',
+    kindSubtitleDesc: 'A .yomi transcript, optionally bundled with its audio.',
+    kindDeck: 'Deck',
+    kindDeckDesc: 'A .yomibook memorization deck exported from the app.',
+    deckFileLabel: 'Deck File',
+    deckFileHint: 'Choose a .yomibook file (max 200MB)',
+    deckNotice: 'Export a deck from the YomiPlay app, then share it here. Every deck is reviewed by an admin before it appears in the community.',
     translationLanguageLabel: 'Primary Translation Language',
     secondaryTranslationLanguageLabel: 'Secondary Translation Language (optional)',
     selectLanguage: 'Select language',
@@ -71,6 +79,14 @@ const content = {
     categoryLabel: '内容分类',
     selectCategory: '选择分类',
     languageLabel: '内容语言',
+    uploadKindLabel: '你要分享什么？',
+    kindSubtitle: '字幕',
+    kindSubtitleDesc: '.yomi 文稿，可选择连同音频一起打包。',
+    kindDeck: '暗记本',
+    kindDeckDesc: '从 App 导出的 .yomibook 暗记本文件。',
+    deckFileLabel: '暗记本文件',
+    deckFileHint: '选择 .yomibook 文件（最大 200MB）',
+    deckNotice: '在 YomiPlay App 里导出暗记本后上传到这里。所有暗记本都需管理员审核通过，才会出现在社区。',
     translationLanguageLabel: '主翻译语言',
     secondaryTranslationLanguageLabel: '副翻译语言（可选）',
     selectLanguage: '选择语言',
@@ -122,6 +138,14 @@ const content = {
     categoryLabel: '內容分類',
     selectCategory: '選擇分類',
     languageLabel: '內容語言',
+    uploadKindLabel: '你要分享什麼？',
+    kindSubtitle: '字幕',
+    kindSubtitleDesc: '.yomi 文稿，可選擇連同音訊一起打包。',
+    kindDeck: '暗記本',
+    kindDeckDesc: '從 App 匯出的 .yomibook 暗記本檔案。',
+    deckFileLabel: '暗記本檔案',
+    deckFileHint: '選擇 .yomibook 檔案（最大 200MB）',
+    deckNotice: '在 YomiPlay App 匯出暗記本後上傳到這裡。所有暗記本都需管理員審核通過，才會出現在社區。',
     translationLanguageLabel: '主翻譯語言',
     secondaryTranslationLanguageLabel: '副翻譯語言（選填）',
     selectLanguage: '選擇語言',
@@ -173,6 +197,14 @@ const content = {
     categoryLabel: 'カテゴリ',
     selectCategory: 'カテゴリを選択',
     languageLabel: 'コンテンツの言語',
+    uploadKindLabel: '何を共有しますか？',
+    kindSubtitle: '字幕',
+    kindSubtitleDesc: '.yomi の文字起こし。音声を同梱することもできます。',
+    kindDeck: '暗記帳',
+    kindDeckDesc: 'アプリから書き出した .yomibook の暗記帳。',
+    deckFileLabel: '暗記帳ファイル',
+    deckFileHint: '.yomibook ファイルを選択（最大 200MB）',
+    deckNotice: 'YomiPlay アプリで暗記帳を書き出してからアップロードしてください。暗記帳はすべて管理者の審査を通過してからコミュニティに表示されます。',
     translationLanguageLabel: '主翻訳言語',
     secondaryTranslationLanguageLabel: '副翻訳言語（任意）',
     selectLanguage: '言語を選択',
@@ -217,6 +249,7 @@ export default function UploadForm({ lang }: { lang: Locale }) {
   const t = content[lang] || content.en;
   const { user, isLoading } = useAuth();
 
+  const [uploadKind, setUploadKind] = useState<'yomi' | 'yomibook'>('yomi');
   const [contentTypeChoice, setContentTypeChoice] = useState<'original' | 'third_party'>('third_party');
   const [originalMode, setOriginalMode] = useState<'bundle' | 'separate'>('bundle');
   const [mediaFile, setMediaFile] = useState<File | null>(null);
@@ -252,11 +285,14 @@ export default function UploadForm({ lang }: { lang: Locale }) {
     );
   }
 
-  const useSeparate = contentTypeChoice === 'original' && originalMode === 'separate';
+  // A deck is always the uploader's own export, so the third-party / bundled-media
+  // branches below never apply to it.
+  const isDeck = uploadKind === 'yomibook';
+  const useSeparate = !isDeck && contentTypeChoice === 'original' && originalMode === 'separate';
 
   async function uploadOne(
     f: File,
-    kind: 'yomi' | 'zip' | 'media'
+    kind: 'yomi' | 'zip' | 'media' | 'yomibook'
   ): Promise<{ uploadId: string; storagePath: string }> {
     const urlRes = await fetch('/api/yomi/upload-url', {
       method: 'POST',
@@ -293,9 +329,20 @@ export default function UploadForm({ lang }: { lang: Locale }) {
 
     // Client-side validation
     const fileName = file.name.toLowerCase();
-    const isZip = !useSeparate && fileName.endsWith('.zip');
+    const isZip = !isDeck && !useSeparate && fileName.endsWith('.zip');
 
-    if (useSeparate) {
+    if (isDeck) {
+      if (!fileName.endsWith(YOMIBOOK_EXTENSION)) {
+        setErrorMessage(`Deck file must be a ${YOMIBOOK_EXTENSION}`);
+        setStatus('error');
+        return;
+      }
+      if (file.size > MAX_YOMIBOOK_FILE_SIZE) {
+        setErrorMessage(`.yomibook file too large (max ${MAX_YOMIBOOK_FILE_SIZE / 1024 / 1024}MB)`);
+        setStatus('error');
+        return;
+      }
+    } else if (useSeparate) {
       if (!fileName.endsWith('.yomi')) {
         setErrorMessage('Subtitle file must be a .yomi');
         setStatus('error');
@@ -345,8 +392,12 @@ export default function UploadForm({ lang }: { lang: Locale }) {
     setErrorMessage('');
 
     try {
-      // 1. Upload primary file (.yomi or .zip). Its uploadId becomes the DB record id.
-      const { uploadId, storagePath } = await uploadOne(file, isZip ? 'zip' : 'yomi');
+      // 1. Upload primary file (.yomi, .zip or .yomibook). Its uploadId becomes
+      //    the DB record id.
+      const { uploadId, storagePath } = await uploadOne(
+        file,
+        isDeck ? 'yomibook' : isZip ? 'zip' : 'yomi'
+      );
 
       // 2. If separate mode, upload the media file too
       let audioStoragePath: string | undefined;
@@ -368,13 +419,14 @@ export default function UploadForm({ lang }: { lang: Locale }) {
           storagePath,
           fileName: file.name,
           isZip,
+          fileKind: uploadKind,
           audioStoragePath,
           audioFileName,
           title,
           description: description || undefined,
-          contentType: contentTypeChoice,
+          contentType: isDeck ? 'original' : contentTypeChoice,
           visibility,
-          category: category || undefined,
+          category: isDeck ? undefined : category || undefined,
           language,
           translationLanguage:
             serializeTranslationLanguages([translationLanguage, secondaryTranslationLanguage]) ||
@@ -421,42 +473,87 @@ export default function UploadForm({ lang }: { lang: Locale }) {
 
   return (
     <form onSubmit={handleSubmit} className="max-w-2xl mx-auto space-y-8">
-      {/* Content Type Selection */}
+      {/* Upload kind — subtitles vs. memorization deck */}
       <div>
-        <label className={labelClass}>{t.contentTypeLabel}</label>
+        <label className={labelClass}>{t.uploadKindLabel}</label>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <button
             type="button"
-            onClick={() => setContentTypeChoice('original')}
+            onClick={() => { setUploadKind('yomi'); setFile(null); }}
             className={`p-4 rounded-xl border text-left transition-all ${
-              contentTypeChoice === 'original'
+              uploadKind === 'yomi'
                 ? 'border-[rgb(var(--accent))] bg-[rgb(var(--accent))]/5'
                 : 'border-[var(--border)] hover:border-[var(--muted-foreground)]'
             }`}
           >
             <div className="flex items-center gap-2 mb-1">
-              <Music size={16} className={contentTypeChoice === 'original' ? 'text-[rgb(var(--accent))]' : ''} />
-              <span className="font-bold text-sm">{t.original}</span>
+              <FileText size={16} className={uploadKind === 'yomi' ? 'text-[rgb(var(--accent))]' : ''} />
+              <span className="font-bold text-sm">{t.kindSubtitle}</span>
             </div>
-            <p className="text-xs text-[var(--muted-foreground)]">{t.originalDesc}</p>
+            <p className="text-xs text-[var(--muted-foreground)]">{t.kindSubtitleDesc}</p>
           </button>
           <button
             type="button"
-            onClick={() => setContentTypeChoice('third_party')}
+            onClick={() => { setUploadKind('yomibook'); setFile(null); setMediaFile(null); }}
             className={`p-4 rounded-xl border text-left transition-all ${
-              contentTypeChoice === 'third_party'
+              uploadKind === 'yomibook'
                 ? 'border-[rgb(var(--accent))] bg-[rgb(var(--accent))]/5'
                 : 'border-[var(--border)] hover:border-[var(--muted-foreground)]'
             }`}
           >
             <div className="flex items-center gap-2 mb-1">
-              <FileText size={16} className={contentTypeChoice === 'third_party' ? 'text-[rgb(var(--accent))]' : ''} />
-              <span className="font-bold text-sm">{t.thirdParty}</span>
+              <BookMarked size={16} className={uploadKind === 'yomibook' ? 'text-[rgb(var(--accent))]' : ''} />
+              <span className="font-bold text-sm">{t.kindDeck}</span>
             </div>
-            <p className="text-xs text-[var(--muted-foreground)]">{t.thirdPartyDesc}</p>
+            <p className="text-xs text-[var(--muted-foreground)]">{t.kindDeckDesc}</p>
           </button>
         </div>
       </div>
+
+      {isDeck && (
+        <div className="p-4 rounded-xl bg-[rgb(var(--accent))]/5 border border-[rgb(var(--accent))]/20 text-sm text-[var(--muted-foreground)] leading-relaxed">
+          {t.deckNotice}
+        </div>
+      )}
+
+      {/* Content Type Selection */}
+      {!isDeck && (
+        <div>
+          <label className={labelClass}>{t.contentTypeLabel}</label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => setContentTypeChoice('original')}
+              className={`p-4 rounded-xl border text-left transition-all ${
+                contentTypeChoice === 'original'
+                  ? 'border-[rgb(var(--accent))] bg-[rgb(var(--accent))]/5'
+                  : 'border-[var(--border)] hover:border-[var(--muted-foreground)]'
+              }`}
+            >
+              <div className="flex items-center gap-2 mb-1">
+                <Music size={16} className={contentTypeChoice === 'original' ? 'text-[rgb(var(--accent))]' : ''} />
+                <span className="font-bold text-sm">{t.original}</span>
+              </div>
+              <p className="text-xs text-[var(--muted-foreground)]">{t.originalDesc}</p>
+            </button>
+            <button
+              type="button"
+              onClick={() => setContentTypeChoice('third_party')}
+              className={`p-4 rounded-xl border text-left transition-all ${
+                contentTypeChoice === 'third_party'
+                  ? 'border-[rgb(var(--accent))] bg-[rgb(var(--accent))]/5'
+                  : 'border-[var(--border)] hover:border-[var(--muted-foreground)]'
+              }`}
+            >
+              <div className="flex items-center gap-2 mb-1">
+                <FileText size={16} className={contentTypeChoice === 'third_party' ? 'text-[rgb(var(--accent))]' : ''} />
+                <span className="font-bold text-sm">{t.thirdParty}</span>
+              </div>
+              <p className="text-xs text-[var(--muted-foreground)]">{t.thirdPartyDesc}</p>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Title */}
       <div>
@@ -484,20 +581,22 @@ export default function UploadForm({ lang }: { lang: Locale }) {
       </div>
 
       {/* Category */}
-      <div>
-        <label className={labelClass}>{t.categoryLabel}</label>
-        <select
-          required
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          className={inputClass}
-        >
-          <option value="">{t.selectCategory}</option>
-          {CONTENT_CATEGORIES.map((c) => (
-            <option key={c.id} value={c.id}>{c.labels[lang] || c.labels.en}</option>
-          ))}
-        </select>
-      </div>
+      {!isDeck && (
+        <div>
+          <label className={labelClass}>{t.categoryLabel}</label>
+          <select
+            required
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className={inputClass}
+          >
+            <option value="">{t.selectCategory}</option>
+            {CONTENT_CATEGORIES.map((c) => (
+              <option key={c.id} value={c.id}>{c.labels[lang] || c.labels.en}</option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {/* Language */}
       <div>
@@ -554,7 +653,7 @@ export default function UploadForm({ lang }: { lang: Locale }) {
       )}
 
       {/* Source info (third_party only) */}
-      {contentTypeChoice === 'third_party' && (
+      {!isDeck && contentTypeChoice === 'third_party' && (
         <>
           <div>
             <label className={labelClass}>{t.sourcePlatformLabel}</label>
@@ -636,7 +735,7 @@ export default function UploadForm({ lang }: { lang: Locale }) {
       </div>
 
       {/* Original upload mode sub-toggle */}
-      {contentTypeChoice === 'original' && (
+      {!isDeck && contentTypeChoice === 'original' && (
         <div>
           <label className={labelClass}>{t.originalModeLabel}</label>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -674,8 +773,33 @@ export default function UploadForm({ lang }: { lang: Locale }) {
         </div>
       )}
 
-      {/* File Upload — single input for bundle/third_party, two inputs for separate mode */}
-      {useSeparate ? (
+      {/* File Upload — one input for a deck or a bundle/third_party upload, two
+          inputs when the media travels separately */}
+      {isDeck ? (
+        <div>
+          <label className={labelClass}>{t.deckFileLabel}</label>
+          <div className="relative">
+            <input
+              type="file"
+              required
+              accept={YOMIBOOK_EXTENSION}
+              onChange={(e) => setFile(e.target.files?.[0] || null)}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            />
+            <div className="flex items-center gap-3 p-6 rounded-xl border-2 border-dashed border-[var(--border)] hover:border-[rgb(var(--accent))] transition-colors text-center">
+              <BookMarked size={24} className="text-[var(--muted-foreground)] mx-auto" />
+              <div className="text-left">
+                <p className="text-sm font-medium">{file ? file.name : t.deckFileHint}</p>
+                {file && (
+                  <p className="text-xs text-[var(--muted-foreground)]">
+                    {(file.size / 1024 / 1024).toFixed(1)} MB
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : useSeparate ? (
         <>
           <div>
             <label className={labelClass}>{t.yomiFileLabel}</label>

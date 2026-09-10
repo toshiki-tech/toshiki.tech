@@ -4,7 +4,7 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { Upload, FileText, Music, Clock, CheckCircle2, XCircle, ArrowLeft } from 'lucide-react';
+import { Upload, FileText, Music, Clock, CheckCircle2, XCircle, ArrowLeft, BookMarked } from 'lucide-react';
 import { SOURCE_PLATFORMS, CONTENT_LANGUAGES } from '@/lib/yomi-constants';
 import { getFeatureFlags } from '@/lib/yomi-feature-flags';
 import DeleteButton from './DeleteButton';
@@ -70,6 +70,7 @@ interface MyUpload {
   id: string;
   title: string;
   content_type: string;
+  file_kind: string | null;
   visibility: string;
   status: string;
   source_platform: string | null;
@@ -184,6 +185,9 @@ export default async function MyUploadsPage({ params: { lang } }: { params: { la
                     </Link>
                     {upload.audio_storage_path && (
                       <Music size={14} className="shrink-0 text-green-600" />
+                    )}
+                    {upload.file_kind === 'yomibook' && (
+                      <BookMarked size={14} className="shrink-0 text-blue-600" />
                     )}
                   </div>
                   <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--muted-foreground)]">

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Star, Crown, Upload, Download, Calendar, ShieldCheck } from 'lucide-react';
+import { Star, Crown, Upload, Download, Calendar, ShieldCheck, BookMarked } from 'lucide-react';
 
 interface Props {
   config: Record<string, number>;
@@ -8,6 +8,7 @@ interface Props {
   rules: {
     upload_yomi: string;
     upload_zip: string;
+    upload_yomibook: string;
     download_received: string;
     daily_login: string;
     pro_threshold: string;
@@ -21,6 +22,8 @@ export default function PointsRules({ config, title, subtitle, rules, unit, poli
   const items = [
     { key: 'upload_yomi', label: rules.upload_yomi, icon: Upload },
     { key: 'upload_zip', label: rules.upload_zip, icon: Upload },
+    // Skipped automatically until the points config row exists.
+    { key: 'upload_yomibook', label: rules.upload_yomibook, icon: BookMarked },
     { key: 'download_received', label: rules.download_received, icon: Download },
     { key: 'daily_login', label: rules.daily_login, icon: Calendar },
   ];

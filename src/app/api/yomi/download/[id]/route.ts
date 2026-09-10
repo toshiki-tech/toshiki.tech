@@ -15,7 +15,6 @@ export async function GET(
     .from('toshiki_tech_yomi_uploads')
     .select('*')
     .eq('id', params.id)
-    .eq('status', 'approved')
     .eq('is_removed', false)
     .single();
 
@@ -23,9 +22,12 @@ export async function GET(
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
 
-  // Hidden uploads can only be downloaded by the uploader or an admin.
   const { data: { user: currentUser } } = await supabase.auth.getUser();
-  if (upload.is_hidden) {
+
+  // Hidden uploads, and anything still awaiting review, can only be downloaded
+  // by the uploader or an admin — the reviewer has to open the file to judge it.
+  const isRestricted = upload.is_hidden || upload.status !== 'approved';
+  if (isRestricted) {
     let allowed = false;
     if (currentUser) {
       if (currentUser.id === upload.user_id) {
@@ -45,13 +47,16 @@ export async function GET(
   }
 
   // Record download + award points atomically via SECURITY DEFINER function
-  // (Works for both anonymous and authenticated users, bypassing RLS safely)
-  const { error: rpcError } = await supabase.rpc('record_yomi_download', {
-    upload_id: params.id,
-    downloader_id: currentUser?.id || null,
-  });
-  if (rpcError) {
-    console.error('record_yomi_download error:', rpcError);
+  // (Works for both anonymous and authenticated users, bypassing RLS safely).
+  // A review fetch is not a real download, so it neither counts nor pays out.
+  if (upload.status === 'approved') {
+    const { error: rpcError } = await supabase.rpc('record_yomi_download', {
+      upload_id: params.id,
+      downloader_id: currentUser?.id || null,
+    });
+    if (rpcError) {
+      console.error('record_yomi_download error:', rpcError);
+    }
   }
 
   // Resolve which file to serve. Default = subtitle/zip; ?type=media = media file.
@@ -65,8 +70,14 @@ export async function GET(
     originalName = upload.audio_file_name || 'media';
   } else {
     storagePath = upload.yomi_storage_path;
-    const isZip = upload.yomi_storage_path.startsWith('zip/');
-    originalName = upload.yomi_file_name || (isZip ? 'download.zip' : 'download.yomi');
+    const path: string = upload.yomi_storage_path;
+    originalName =
+      upload.yomi_file_name ||
+      (path.startsWith('zip/')
+        ? 'download.zip'
+        : path.startsWith('yomibook/')
+          ? 'download.yomibook'
+          : 'download.yomi');
   }
 
   try {

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { CONTENT_LANGUAGES, CONTENT_CATEGORIES, CONTENT_SORT_OPTIONS, SOURCE_PLATFORMS } from '@/lib/yomi-constants';
+import { CONTENT_LANGUAGES, CONTENT_CATEGORIES, CONTENT_SORT_OPTIONS, SOURCE_PLATFORMS, FILE_KINDS } from '@/lib/yomi-constants';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -25,6 +25,10 @@ export async function GET() {
           labels: { en: s.labels.en, zh: s.labels.zh, 'zh-tw': s.labels['zh-tw'], ja: s.labels.ja },
         })),
         source_platforms: SOURCE_PLATFORMS.map((p) => ({ id: p.id, name: p.name, domain: p.domain ?? null })),
+        file_kinds: FILE_KINDS.map((k) => ({
+          id: k.id,
+          labels: { en: k.labels.en, zh: k.labels.zh, 'zh-tw': k.labels['zh-tw'], ja: k.labels.ja },
+        })),
       },
     },
     { headers: CORS }

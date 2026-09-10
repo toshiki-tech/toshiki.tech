@@ -34,9 +34,24 @@ export const CONTENT_LANGUAGES = [
 
 export const ALLOWED_MEDIA_EXTENSIONS = ['.mp3', '.m4a', '.wav', '.mp4'] as const;
 
+// An upload is either subtitle material (.yomi, or a .zip bundling media) or a
+// memorization deck (.yomibook) exported from the app. Stored in the
+// `file_kind` column; rows created before decks existed default to 'yomi'.
+export const FILE_KINDS = [
+  { id: 'yomi', labels: { en: 'Subtitles', zh: '字幕', 'zh-tw': '字幕', ja: '字幕' } },
+  { id: 'yomibook', labels: { en: 'Deck', zh: '暗记本', 'zh-tw': '暗記本', ja: '暗記帳' } },
+] as const;
+
+export type FileKindId = typeof FILE_KINDS[number]['id'];
+
+export const YOMIBOOK_EXTENSION = '.yomibook';
+
 export const MAX_YOMI_FILE_SIZE = 10_485_760; // 10MB
 export const MAX_AUDIO_FILE_SIZE = 157_286_400; // 150MB
 export const MAX_ZIP_FILE_SIZE = 524_288_000; // 500MB
+// A .yomibook is a zip of book.json + per-item audio. Full exports carry TTS
+// audio for every entry, so it needs more headroom than a .yomi file.
+export const MAX_YOMIBOOK_FILE_SIZE = 209_715_200; // 200MB
 
 // Runtime feature flags (points_feature, pro_redemption, community_download)
 // have moved to the database table toshiki_tech_yomi_feature_flags. Use

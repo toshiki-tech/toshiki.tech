@@ -5,7 +5,9 @@ import {
   MAX_YOMI_FILE_SIZE,
   MAX_ZIP_FILE_SIZE,
   MAX_AUDIO_FILE_SIZE,
+  MAX_YOMIBOOK_FILE_SIZE,
   ALLOWED_MEDIA_EXTENSIONS,
+  YOMIBOOK_EXTENSION,
 } from '@/lib/yomi-constants';
 
 const MEDIA_CONTENT_TYPES: Record<string, string> = {
@@ -22,9 +24,9 @@ export async function POST(request: Request) {
 
   const body = await request.json();
   const { fileName, fileSize, isZip } = body;
-  // `kind` is optional for backwards compatibility: 'yomi' | 'zip' | 'media'.
-  // Falls back to inferring from `isZip` when omitted.
-  const kind: 'yomi' | 'zip' | 'media' = body.kind ?? (isZip ? 'zip' : 'yomi');
+  // `kind` is optional for backwards compatibility: 'yomi' | 'zip' | 'media' |
+  // 'yomibook'. Falls back to inferring from `isZip` when omitted.
+  const kind: 'yomi' | 'zip' | 'media' | 'yomibook' = body.kind ?? (isZip ? 'zip' : 'yomi');
 
   if (!fileName || typeof fileSize !== 'number') {
     return NextResponse.json({ error: 'Missing fileName or fileSize' }, { status: 400 });
@@ -46,6 +48,19 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
+  } else if (kind === 'yomibook') {
+    if (!fileName.toLowerCase().endsWith(YOMIBOOK_EXTENSION)) {
+      return NextResponse.json(
+        { error: `Deck file must be a ${YOMIBOOK_EXTENSION}` },
+        { status: 400 }
+      );
+    }
+    if (fileSize > MAX_YOMIBOOK_FILE_SIZE) {
+      return NextResponse.json(
+        { error: `.yomibook file too large (max ${MAX_YOMIBOOK_FILE_SIZE / 1024 / 1024}MB)` },
+        { status: 400 }
+      );
+    }
   } else if (kind === 'zip') {
     if (fileSize > MAX_ZIP_FILE_SIZE) {
       return NextResponse.json({ error: `ZIP file too large (max ${MAX_ZIP_FILE_SIZE / 1024 / 1024}MB)` }, { status: 400 });
@@ -57,11 +72,13 @@ export async function POST(request: Request) {
   }
 
   const uploadId = crypto.randomUUID();
-  const safeExt = ext || (kind === 'zip' ? 'zip' : kind === 'media' ? 'mp3' : 'yomi');
-  const prefix = kind === 'zip' ? 'zip' : kind === 'media' ? 'media' : 'yomi';
+  const safeExt =
+    ext || (kind === 'zip' ? 'zip' : kind === 'media' ? 'mp3' : kind === 'yomibook' ? 'yomibook' : 'yomi');
+  const prefix = kind === 'zip' ? 'zip' : kind === 'media' ? 'media' : kind === 'yomibook' ? 'yomibook' : 'yomi';
   const key = `${prefix}/${uploadId}/file.${safeExt}`;
+  // A .yomibook is a zip underneath, so it is stored and served as one.
   const contentType =
-    kind === 'zip' ? 'application/zip'
+    kind === 'zip' || kind === 'yomibook' ? 'application/zip'
     : kind === 'media' ? (MEDIA_CONTENT_TYPES[safeExt] || 'application/octet-stream')
     : 'text/plain';
 

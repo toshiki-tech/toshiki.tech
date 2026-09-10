@@ -14,7 +14,7 @@ export async function POST(request: Request) {
   // Get upload info before updating
   const { data: upload } = await supabase
     .from('toshiki_tech_yomi_uploads')
-    .select('user_id, yomi_storage_path')
+    .select('user_id, yomi_storage_path, file_kind')
     .eq('id', uploadId)
     .single();
 
@@ -29,8 +29,9 @@ export async function POST(request: Request) {
 
   // Award points on approval
   if (action === 'approved' && upload) {
+    const isDeck = upload.file_kind === 'yomibook';
     const isZip = upload.yomi_storage_path?.startsWith('zip/');
-    const configKey = isZip ? 'upload_zip' : 'upload_yomi';
+    const configKey = isDeck ? 'upload_yomibook' : isZip ? 'upload_zip' : 'upload_yomi';
 
     const { data: config } = await supabase
       .from('toshiki_tech_yomi_points_config')
@@ -38,7 +39,7 @@ export async function POST(request: Request) {
       .eq('key', configKey)
       .single();
 
-    const points = config?.value || (isZip ? 20 : 10);
+    const points = config?.value || (isDeck || isZip ? 20 : 10);
     await awardPoints(supabase, upload.user_id, configKey, points, `Upload approved: ${uploadId}`);
   }
 

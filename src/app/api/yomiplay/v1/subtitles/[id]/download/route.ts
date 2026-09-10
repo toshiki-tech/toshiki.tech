@@ -13,6 +13,13 @@ export async function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: CORS });
 }
 
+/** Fallback name for rows uploaded before file names were recorded. */
+function defaultFileName(storagePath: string | null): string {
+  if (storagePath?.startsWith('zip/')) return 'download.zip';
+  if (storagePath?.startsWith('yomibook/')) return 'download.yomibook';
+  return 'download.yomi';
+}
+
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
@@ -74,7 +81,7 @@ export async function GET(
   const storagePath: string = useMedia ? u.audio_storage_path : u.yomi_storage_path;
   const fileName: string = useMedia
     ? (u.audio_file_name || 'media')
-    : (u.yomi_file_name || (u.yomi_storage_path?.startsWith('zip/') ? 'download.zip' : 'download.yomi'));
+    : (u.yomi_file_name || defaultFileName(u.yomi_storage_path));
 
   // Record download + award points atomically.
   // record_yomi_download is SECURITY DEFINER — works with anon key.

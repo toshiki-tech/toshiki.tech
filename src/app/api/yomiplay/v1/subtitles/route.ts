@@ -19,6 +19,8 @@ export async function GET(request: Request) {
   const category = url.searchParams.get('category') || null;
   const platform = url.searchParams.get('platform') || null;
   const q        = url.searchParams.get('q')        || null;
+  // 'yomi' (subtitle material) | 'yomibook' (memorization deck); omit for both
+  const fileKind = url.searchParams.get('file_kind') || null;
   const sort     = url.searchParams.get('sort')     || 'newest';
 
   const supabase = getAnonClient();
@@ -29,7 +31,7 @@ export async function GET(request: Request) {
     .select(
       `id, title, description, language, category,
        source_platform, source_show, source_episode, source_url,
-       content_type, audio_storage_path,
+       content_type, file_kind, is_free_import, audio_storage_path,
        download_count, created_at,
        toshiki_tech_yomi_profiles(display_name)`,
       { count: 'exact' }
@@ -43,6 +45,7 @@ export async function GET(request: Request) {
   if (category) query = query.eq('category', category);
   if (platform) query = query.eq('source_platform', platform);
   if (q)        query = query.ilike('title', `%${q}%`);
+  if (fileKind) query = query.eq('file_kind', fileKind);
 
   query = sort === 'downloads'
     ? query.order('download_count', { ascending: false })
@@ -69,6 +72,8 @@ export async function GET(request: Request) {
     source_episode:  row.source_episode ?? null,
     source_url:      row.source_url ?? null,
     content_type:    row.content_type,
+    file_kind:       row.file_kind ?? 'yomi',
+    free_import:     row.is_free_import === true,
     has_media:       !!row.audio_storage_path,
     download_count:  row.download_count ?? 0,
     uploaded_by:     row.toshiki_tech_yomi_profiles?.display_name ?? null,

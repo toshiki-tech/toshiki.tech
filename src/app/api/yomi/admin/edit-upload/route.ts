@@ -15,6 +15,7 @@ const ALLOWED_FIELDS = [
   'tags',
   'is_hidden',
   'sort_order',
+  'is_free_import',
 ] as const;
 
 export async function PATCH(request: Request) {

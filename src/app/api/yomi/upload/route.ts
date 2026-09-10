@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
-import { serializeTranslationLanguages } from '@/lib/yomi-constants';
+import { serializeTranslationLanguages, type FileKindId } from '@/lib/yomi-constants';
 
 function getSupabase() {
   const cookieStore = cookies();
@@ -60,6 +60,7 @@ export async function POST(request: Request) {
     storagePath,
     fileName,
     isZip,
+    fileKind: rawFileKind,
     audioStoragePath,
     audioFileName,
     title,
@@ -75,8 +76,25 @@ export async function POST(request: Request) {
     sourceUrl,
   } = body;
 
+  // Uploads predating memorization decks send no fileKind at all.
+  const fileKind: FileKindId = rawFileKind === 'yomibook' ? 'yomibook' : 'yomi';
+  const isDeck = fileKind === 'yomibook';
+
   if (!uploadId || !storagePath || !fileName || !title || !contentType || !language) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+  }
+
+  // A deck is always the uploader's own work: it is exported from their own
+  // library, so third-party sourcing does not apply to it.
+  if (isDeck && contentType !== 'original') {
+    return NextResponse.json(
+      { error: 'Decks must be uploaded as original content' },
+      { status: 400 }
+    );
+  }
+
+  if (isDeck && !storagePath.startsWith('yomibook/')) {
+    return NextResponse.json({ error: 'Deck file was not uploaded as a deck' }, { status: 400 });
   }
 
   if (contentType === 'third_party' && (!sourcePlatform || !sourceShow)) {
@@ -92,10 +110,15 @@ export async function POST(request: Request) {
     );
   }
 
-  // Determine status: third_party auto-approved; anything bundling media
-  // (zip or .yomi + separate media file) goes to pending review.
+  // Determine status: decks always wait for a human, since their contents are
+  // opaque here. Otherwise third_party is auto-approved, and anything bundling
+  // media (zip or .yomi + separate media file) goes to pending review.
   const hasBundledMedia = isZip || !!audioStoragePath;
-  const status = contentType === 'third_party' || !hasBundledMedia ? 'approved' : 'pending';
+  const status = isDeck
+    ? 'pending'
+    : contentType === 'third_party' || !hasBundledMedia
+      ? 'approved'
+      : 'pending';
 
   // Translation languages arrive as a comma-separated string (primary first)
   // or as an array; store them normalized in the single text column.
@@ -127,6 +150,7 @@ export async function POST(request: Request) {
       audio_file_name: audioFileName || null,
       language,
       translation_language: normalizedTranslationLanguages,
+      file_kind: fileKind,
     })
     .select()
     .single();

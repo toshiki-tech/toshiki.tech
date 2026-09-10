@@ -3,7 +3,7 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Download, Music, FileText, Calendar, User, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Download, Music, FileText, Calendar, User, ExternalLink, BookMarked, Gift } from 'lucide-react';
 import { SOURCE_PLATFORMS, CONTENT_LANGUAGES, CONTENT_CATEGORIES } from '@/lib/yomi-constants';
 import ReportForm from './ReportForm';
 
@@ -12,6 +12,11 @@ const content = {
     back: 'Back to Community',
     download: 'Download .yomi',
     downloadBundle: 'Download Bundle',
+    downloadDeck: 'Download .yomibook',
+    deck: 'Deck',
+    freeImport: 'Free to try',
+    freeImportHint: 'This one imports without a Pro subscription — try it before you subscribe.',
+    deckHint: 'Import this file into the YomiPlay app to add the deck to your library.',
     downloadMedia: 'Download Media',
     source: 'Source',
     language: 'Language',
@@ -29,6 +34,11 @@ const content = {
     back: '返回社区',
     download: '下载 .yomi',
     downloadBundle: '下载完整包',
+    downloadDeck: '下载 .yomibook',
+    deck: '暗记本',
+    freeImport: '免费体验',
+    freeImportHint: '这份资源无需 Pro 会员即可导入，先体验再决定是否订阅。',
+    deckHint: '在 YomiPlay App 中导入此文件，即可把这本暗记本加入你的词库。',
     downloadMedia: '下载媒体',
     source: '来源',
     language: '语言',
@@ -46,6 +56,11 @@ const content = {
     back: '返回社區',
     download: '下載 .yomi',
     downloadBundle: '下載完整包',
+    downloadDeck: '下載 .yomibook',
+    deck: '暗記本',
+    freeImport: '免費體驗',
+    freeImportHint: '這份資源無需 Pro 會員即可匯入，先體驗再決定是否訂閱。',
+    deckHint: '在 YomiPlay App 中匯入此檔案，即可把這本暗記本加入你的詞庫。',
     downloadMedia: '下載媒體',
     source: '來源',
     language: '語言',
@@ -63,6 +78,11 @@ const content = {
     back: 'コミュニティに戻る',
     download: '.yomi をダウンロード',
     downloadBundle: 'バンドルをダウンロード',
+    downloadDeck: '.yomibook をダウンロード',
+    deck: '暗記帳',
+    freeImport: '無料でお試し',
+    freeImportHint: 'この素材は Pro なしで読み込めます。購読前にお試しください。',
+    deckHint: 'YomiPlay アプリでこのファイルを読み込むと、暗記帳がライブラリに追加されます。',
     downloadMedia: 'メディアをダウンロード',
     source: 'ソース',
     language: '言語',
@@ -111,24 +131,24 @@ export default async function SubtitleDetailPage({
     notFound();
   }
 
-  // Hidden uploads are visible only to the uploader and admins.
-  if (upload.is_hidden) {
-    const { data: { user: viewer } } = await supabase.auth.getUser();
-    let allowed = false;
-    if (viewer) {
-      if (viewer.id === upload.user_id) {
-        allowed = true;
-      } else {
-        const { data: viewerProfile } = await supabase
-          .from('toshiki_tech_yomi_profiles')
-          .select('role')
-          .eq('id', viewer.id)
-          .single();
-        if (viewerProfile?.role === 'admin') allowed = true;
-      }
+  // The uploader and admins see two things the public does not: hidden uploads,
+  // and the download button while the upload is still awaiting review — a
+  // reviewer has to open the file before approving it.
+  const { data: { user: viewer } } = await supabase.auth.getUser();
+  let canManage = false;
+  if (viewer) {
+    if (viewer.id === upload.user_id) {
+      canManage = true;
+    } else {
+      const { data: viewerProfile } = await supabase
+        .from('toshiki_tech_yomi_profiles')
+        .select('role')
+        .eq('id', viewer.id)
+        .single();
+      if (viewerProfile?.role === 'admin') canManage = true;
     }
-    if (!allowed) notFound();
   }
+  if (upload.is_hidden && !canManage) notFound();
 
   const profile = upload.toshiki_tech_yomi_profiles as Record<string, string> | null;
   const platform = SOURCE_PLATFORMS.find(p => p.id === upload.source_platform);
@@ -175,13 +195,26 @@ export default async function SubtitleDetailPage({
               {categoryLabel}
             </Link>
           )}
-          {upload.content_type === 'original' && (
+          {upload.is_free_import && (
+            <span className="inline-flex items-center gap-1 text-xs font-bold uppercase px-3 py-1 rounded-full bg-green-500/10 text-green-600">
+              <Gift size={12} />
+              {t.freeImport}
+            </span>
+          )}
+          {upload.file_kind === 'yomibook' && (
+            <span className="inline-flex items-center gap-1 text-xs font-bold uppercase px-3 py-1 rounded-full bg-blue-500/10 text-blue-600">
+              <BookMarked size={12} />
+              {t.deck}
+            </span>
+          )}
+          {upload.file_kind !== 'yomibook' && upload.content_type === 'original' && (
             <span className="inline-flex items-center gap-1 text-xs font-bold uppercase px-3 py-1 rounded-full bg-purple-500/10 text-purple-600">
               <FileText size={12} />
               {t.original}
             </span>
           )}
-          {(upload.audio_storage_path || upload.yomi_storage_path?.startsWith('zip/')) && (
+          {upload.file_kind !== 'yomibook' &&
+            (upload.audio_storage_path || upload.yomi_storage_path?.startsWith('zip/')) && (
             <span className="inline-flex items-center gap-1 text-xs font-bold uppercase px-3 py-1 rounded-full bg-green-500/10 text-green-600">
               <Music size={12} />
               {t.hasAudio}
@@ -255,28 +288,37 @@ export default async function SubtitleDetailPage({
       )}
 
       {/* Download buttons */}
-      {upload.status === 'approved' && (() => {
-        const isZip = upload.yomi_storage_path?.startsWith('zip/');
-        const hasSeparateMedia = !isZip && !!upload.audio_storage_path;
-        const primaryLabel = isZip ? t.downloadBundle : t.download;
+      {(upload.status === 'approved' || canManage) && (() => {
+        const isDeck = upload.file_kind === 'yomibook';
+        const isZip = !isDeck && upload.yomi_storage_path?.startsWith('zip/');
+        const hasSeparateMedia = !isDeck && !isZip && !!upload.audio_storage_path;
+        const primaryLabel = isDeck ? t.downloadDeck : isZip ? t.downloadBundle : t.download;
         return (
-          <div className="mb-8 flex flex-wrap gap-3">
-            <a
-              href={`/api/yomi/download/${upload.id}`}
-              className="btn-primary px-6 py-3 rounded-xl font-bold inline-flex items-center gap-2"
-            >
-              <Download size={18} />
-              {primaryLabel}
-            </a>
-            {hasSeparateMedia && (
-              <a
-                href={`/api/yomi/download/${upload.id}?type=media`}
-                className="px-6 py-3 rounded-xl font-bold inline-flex items-center gap-2 border border-[var(--border)] hover:border-[rgb(var(--accent))]/50 transition-colors"
-              >
-                <Music size={18} />
-                {t.downloadMedia}
-              </a>
+          <div className="mb-8 space-y-3">
+            {isDeck && (
+              <p className="text-sm text-[var(--muted-foreground)]">{t.deckHint}</p>
             )}
+            {upload.is_free_import && (
+              <p className="text-sm text-green-600">{t.freeImportHint}</p>
+            )}
+            <div className="flex flex-wrap gap-3">
+              <a
+                href={`/api/yomi/download/${upload.id}`}
+                className="btn-primary px-6 py-3 rounded-xl font-bold inline-flex items-center gap-2"
+              >
+                <Download size={18} />
+                {primaryLabel}
+              </a>
+              {hasSeparateMedia && (
+                <a
+                  href={`/api/yomi/download/${upload.id}?type=media`}
+                  className="px-6 py-3 rounded-xl font-bold inline-flex items-center gap-2 border border-[var(--border)] hover:border-[rgb(var(--accent))]/50 transition-colors"
+                >
+                  <Music size={18} />
+                  {t.downloadMedia}
+                </a>
+              )}
+            </div>
           </div>
         );
       })()}
