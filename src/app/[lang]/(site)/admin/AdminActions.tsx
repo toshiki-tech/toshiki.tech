@@ -3,7 +3,9 @@
 import { useState } from 'react';
 import { CheckCircle2, XCircle, Trash2 } from 'lucide-react';
 
-export default function AdminActions({ uploadId }: { uploadId: string }) {
+// Approve and reject are only offered when they change something: re-approving an
+// approved upload would pay its points out again.
+export default function AdminActions({ uploadId, status }: { uploadId: string; status?: string }) {
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState<string | null>(null);
 
@@ -49,22 +51,26 @@ export default function AdminActions({ uploadId }: { uploadId: string }) {
 
   return (
     <div className="flex items-center gap-2">
-      <button
-        onClick={() => handleAction('approved')}
-        disabled={loading}
-        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-green-500/10 text-green-600 text-xs font-bold hover:bg-green-500/20 transition-colors disabled:opacity-50"
-      >
-        <CheckCircle2 size={14} />
-        Approve
-      </button>
-      <button
-        onClick={() => handleAction('rejected')}
-        disabled={loading}
-        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-500 text-xs font-bold hover:bg-red-500/20 transition-colors disabled:opacity-50"
-      >
-        <XCircle size={14} />
-        Reject
-      </button>
+      {status !== 'approved' && (
+        <button
+          onClick={() => handleAction('approved')}
+          disabled={loading}
+          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-green-500/10 text-green-600 text-xs font-bold hover:bg-green-500/20 transition-colors disabled:opacity-50"
+        >
+          <CheckCircle2 size={14} />
+          Approve
+        </button>
+      )}
+      {status !== 'rejected' && (
+        <button
+          onClick={() => handleAction('rejected')}
+          disabled={loading}
+          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-500 text-xs font-bold hover:bg-red-500/20 transition-colors disabled:opacity-50"
+        >
+          <XCircle size={14} />
+          Reject
+        </button>
+      )}
       <button
         onClick={handleRemove}
         disabled={loading}

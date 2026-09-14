@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
-import { getSupabase, requireAdmin } from '@/lib/supabase-server-api';
 import { deleteObjects } from '@/lib/r2';
-import { getServiceClient, FILE_UPDATE_COLUMNS, type FileUpdateRow } from '@/lib/yomi-file-updates';
+import { getServiceClient, loadAdmin, FILE_UPDATE_COLUMNS, type FileUpdateRow } from '@/lib/yomi-file-updates';
 
 /**
  * Approve or reject a new version an uploader submitted for an approved upload.
@@ -10,8 +9,8 @@ import { getServiceClient, FILE_UPDATE_COLUMNS, type FileUpdateRow } from '@/lib
  * decision is refused rather than applied to a file nobody reviewed.
  */
 export async function POST(request: Request) {
-  const admin = await requireAdmin(getSupabase());
-  if (!admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  const admin = await loadAdmin();
+  if (!admin.ok) return NextResponse.json({ error: admin.error }, { status: admin.status });
 
   const { uploadId, action, submittedAt } = await request.json();
   if (!uploadId || !submittedAt || !['approved', 'rejected'].includes(action)) {

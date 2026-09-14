@@ -36,6 +36,24 @@ export interface FileUpdateRow {
   pending_submitted_at: string | null;
 }
 
+/**
+ * The signed-in admin, or an error response. The session only identifies the
+ * user; the role is read with the service role so row-level security on profiles
+ * cannot hide it.
+ */
+export async function loadAdmin(): Promise<{ ok: true; userId: string } | { ok: false; status: number; error: string }> {
+  const user = await getAuthUser(getSupabase());
+  if (!user) return { ok: false, status: 401, error: 'Not signed in (session expired?). Reload the page and try again.' };
+
+  const { data: profile } = await getServiceClient()
+    .from('toshiki_tech_yomi_profiles')
+    .select('role')
+    .eq('id', user.id)
+    .maybeSingle();
+  if (profile?.role !== 'admin') return { ok: false, status: 403, error: 'Forbidden' };
+  return { ok: true, userId: user.id };
+}
+
 export type ManageResult =
   | { ok: true; upload: FileUpdateRow; isAdmin: boolean }
   | { ok: false; status: number; error: string };

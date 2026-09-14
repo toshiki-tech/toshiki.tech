@@ -281,12 +281,12 @@ export default async function AdminPage({ params: { lang } }: { params: { lang: 
 
               return (
                 <div key={upload.id} className="p-5 border border-[var(--border)] rounded-2xl bg-[var(--card)]">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
+                  <div className="flex flex-col gap-4">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2 mb-1">
                         <Link
                           href={`/${lang}/yomiplay/community/${upload.id}`}
-                          className="font-bold hover:text-[rgb(var(--accent))] transition-colors"
+                          className="font-bold break-words hover:text-[rgb(var(--accent))] transition-colors"
                         >
                           {upload.title}
                         </Link>
@@ -323,10 +323,12 @@ export default async function AdminPage({ params: { lang } }: { params: { lang: 
                         </div>
                       )}
                     </div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <UploadAdminControls uploadId={upload.id} isHidden={upload.is_hidden} sortOrder={upload.sort_order} isFreeImport={upload.is_free_import} />
-                      <EditUpload upload={upload} />
-                      <AdminActions uploadId={upload.id} />
+                    <div className="flex flex-wrap items-center justify-between gap-2 pt-4 border-t border-[var(--border)]">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <UploadAdminControls uploadId={upload.id} isHidden={upload.is_hidden} sortOrder={upload.sort_order} isFreeImport={upload.is_free_import} />
+                        <EditUpload upload={upload} />
+                      </div>
+                      <AdminActions uploadId={upload.id} status={upload.status} />
                     </div>
                   </div>
                 </div>
@@ -337,7 +339,7 @@ export default async function AdminPage({ params: { lang } }: { params: { lang: 
       </section>
 
       {/* Pending File Updates */}
-      <section className="mb-12">
+      <section id="pending-file-updates" className="mb-12 scroll-mt-24">
         <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
           <RefreshCw size={18} />
           Pending File Updates ({(pendingFileUpdates || []).length})
@@ -356,12 +358,12 @@ export default async function AdminPage({ params: { lang } }: { params: { lang: 
 
               return (
                 <div key={upload.id} className="p-5 border border-[var(--border)] rounded-2xl bg-[var(--card)]">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
+                  <div className="flex flex-col gap-4">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2 mb-1">
                         <Link
                           href={`/${lang}/yomiplay/community/${upload.id}`}
-                          className="font-bold hover:text-[rgb(var(--accent))] transition-colors"
+                          className="font-bold break-words hover:text-[rgb(var(--accent))] transition-colors"
                         >
                           {upload.title}
                         </Link>
@@ -404,7 +406,9 @@ export default async function AdminPage({ params: { lang } }: { params: { lang: 
                         )}
                       </div>
                     </div>
-                    <FileUpdateActions uploadId={upload.id} submittedAt={upload.pending_submitted_at!} />
+                    <div className="flex justify-end pt-4 border-t border-[var(--border)]">
+                      <FileUpdateActions uploadId={upload.id} submittedAt={upload.pending_submitted_at!} />
+                    </div>
                   </div>
                 </div>
               );
@@ -439,12 +443,12 @@ export default async function AdminPage({ params: { lang } }: { params: { lang: 
 
               return (
                 <div key={upload.id} className="p-5 border border-[var(--border)] rounded-2xl bg-[var(--card)]">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
+                  <div className="flex flex-col gap-4">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2 mb-1">
                         <Link
                           href={`/${lang}/yomiplay/community/${upload.id}`}
-                          className="font-bold hover:text-[rgb(var(--accent))] transition-colors"
+                          className="font-bold break-words hover:text-[rgb(var(--accent))] transition-colors"
                         >
                           {upload.title}
                         </Link>
@@ -463,9 +467,12 @@ export default async function AdminPage({ params: { lang } }: { params: { lang: 
                           </span>
                         )}
                         {upload.pending_submitted_at && (
-                          <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-600">
+                          <a
+                            href="#pending-file-updates"
+                            className="text-[10px] font-bold uppercase whitespace-nowrap px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-600 hover:bg-yellow-500/20"
+                          >
                             Update pending
-                          </span>
+                          </a>
                         )}
                       </div>
                       <div className="text-xs text-[var(--muted-foreground)] flex flex-wrap gap-2 items-center">
@@ -491,17 +498,19 @@ export default async function AdminPage({ params: { lang } }: { params: { lang: 
                         </div>
                       )}
                     </div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <UploadAdminControls uploadId={upload.id} isHidden={upload.is_hidden} sortOrder={upload.sort_order} isFreeImport={upload.is_free_import} />
-                      <EditUpload upload={upload} />
-                      <ReplaceUploadFile
-                        lang="en"
-                        uploadId={upload.id}
-                        primaryKind={primaryFileKind(upload)}
-                        hasSeparateMedia={!!upload.audio_storage_path}
-                        outcome="admin"
-                      />
-                      <AdminActions uploadId={upload.id} />
+                    <div className="flex flex-wrap items-center justify-between gap-2 pt-4 border-t border-[var(--border)]">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <UploadAdminControls uploadId={upload.id} isHidden={upload.is_hidden} sortOrder={upload.sort_order} isFreeImport={upload.is_free_import} />
+                        <EditUpload upload={upload} />
+                        <ReplaceUploadFile
+                          lang="en"
+                          uploadId={upload.id}
+                          primaryKind={primaryFileKind(upload)}
+                          hasSeparateMedia={!!upload.audio_storage_path}
+                          outcome="admin"
+                        />
+                      </div>
+                      <AdminActions uploadId={upload.id} status={upload.status} />
                     </div>
                   </div>
                 </div>
