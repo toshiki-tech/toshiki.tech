@@ -135,6 +135,8 @@ GET /api/yomiplay/v1/subtitles?lang=ja&category=anime&page=1&per_page=20&sort=do
       "content_type": "subtitle",
       "file_kind": "yomi",
       "free_import": false,
+      "file_version": 1,
+      "file_updated_at": null,
       "has_media": false,
       "download_count": 128,
       "uploaded_by": "toshiki",
@@ -162,6 +164,8 @@ GET /api/yomiplay/v1/subtitles?lang=ja&category=anime&page=1&per_page=20&sort=do
 | `free_import` | 管理员标记的试用素材：为 `true` 时非 Pro 用户也能导入，客户端不应弹付费墙。为 `false` 时导入仍是 Pro 功能 |
 | `source_platform` | 来源平台 ID（如 `youtube`、`spotify`），取值见 `/v1/filters` 的 `source_platforms` 列表，可能为 `null`。结合 `source_platforms[].domain` 可判断平台类型，用于选择对应播放器或 Intent |
 | `source_url` | 来源视频/音频直链（如 YouTube URL），可直接传入播放器实现一键导入，可能为 `null` |
+| `file_version` | 文件版本号，从 `1` 开始。上传者发布的新版本上线后加 1，只改标题等信息时不变 |
+| `file_updated_at` | 当前版本文件的上线时间，从未更新过文件时为 `null` |
 | `has_media` | 是否附带音频/视频媒体文件 |
 | `download_count` | 累计下载次数 |
 | `uploaded_by` | 上传者昵称 |
@@ -193,6 +197,8 @@ GET https://www.toshiki.tech/api/yomiplay/v1/subtitles/{id}
     "content_type": "subtitle",
     "file_kind": "yomi",
     "free_import": false,
+    "file_version": 2,
+    "file_updated_at": "2026-05-02T08:00:00Z",
     "file_name": "aot_s1e01.yomi",
     "media_file_name": "aot_s1e01.mp3",
     "has_media": true,
@@ -214,7 +220,7 @@ GET https://www.toshiki.tech/api/yomiplay/v1/subtitles/{id}
 | `media_file_name` | 媒体文件名（`.mp3` / `.mp4` 等），`has_media` 为 `true` 时有效 |
 | `source_platform` | 来源平台 ID，与列表接口一致，可能为 `null` |
 | `source_url` | 来源视频/音频链接（如 YouTube URL），可用于播放器直接导入，可能为 `null` |
-| `updated_at` | 最后更新时间 |
+| `updated_at` | 记录最后修改时间（标题、标签等信息变更也会刷新），判断文件是否有新版本请用 `file_version` |
 
 ---
 
@@ -653,6 +659,17 @@ GET /api/yomiplay/v1/subtitles/{id}/download
 - 导入是 Pro 功能，非 Pro 用户应在下载前就看到升级提示，而不是下载完才被拦下。
 - 例外是 `free_import` 为 `true` 的素材：管理员挑出来给新用户试用，非 Pro 也能导入。
   下载接口本身从不校验 Pro，这个标记只决定客户端要不要弹付费墙。
+
+### 文件新版本
+
+上传者可以为已发布的资源上传新版本，资源 `id` 不变。需要审核的类型（暗记本、打包音频的原创内容）在新版本审核通过前，接口继续返回旧文件；
+审核通过或无需审核时，新文件立即替换旧文件，同时 `file_version` 加 1、`file_updated_at` 刷新。
+
+客户端建议：
+
+- 导入时记录资源的 `id` 和 `file_version`。
+- 之后在列表或详情里看到同一 `id` 的 `file_version` 变大，就提示「有新版本」，由用户决定是否重新下载导入。
+- 下载链接始终指向当前版本，不需要额外参数。
 
 ---
 

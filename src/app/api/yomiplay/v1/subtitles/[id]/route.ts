@@ -22,7 +22,7 @@ export async function GET(
     .select(
       `id, title, description, language, category,
        source_platform, source_show, source_episode, source_url,
-       content_type, file_kind, is_free_import, yomi_file_name, audio_file_name,
+       content_type, file_kind, is_free_import, file_version, file_updated_at, yomi_file_name, audio_file_name,
        audio_storage_path, download_count, created_at, updated_at,
        toshiki_tech_yomi_profiles(display_name)`
     )
@@ -55,6 +55,8 @@ export async function GET(
         content_type:    r.content_type,
         file_kind:       r.file_kind ?? 'yomi',
         free_import:     r.is_free_import === true,
+        file_version:    r.file_version ?? 1,
+        file_updated_at: r.file_updated_at ?? null,
         file_name:       r.yomi_file_name ?? null,
         media_file_name: r.audio_file_name ?? null,
         has_media:       !!r.audio_storage_path,

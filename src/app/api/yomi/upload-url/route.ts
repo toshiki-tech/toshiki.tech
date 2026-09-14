@@ -2,20 +2,11 @@ import { NextResponse } from 'next/server';
 import { getSupabase, getAuthUser } from '@/lib/supabase-server-api';
 import { getUploadPresignedUrl } from '@/lib/r2';
 import {
-  MAX_YOMI_FILE_SIZE,
-  MAX_ZIP_FILE_SIZE,
-  MAX_AUDIO_FILE_SIZE,
-  MAX_YOMIBOOK_FILE_SIZE,
-  ALLOWED_MEDIA_EXTENSIONS,
-  YOMIBOOK_EXTENSION,
-} from '@/lib/yomi-constants';
-
-const MEDIA_CONTENT_TYPES: Record<string, string> = {
-  mp3: 'audio/mpeg',
-  m4a: 'audio/mp4',
-  wav: 'audio/wav',
-  mp4: 'video/mp4',
-};
+  validateStoredFile,
+  storedFileExtension,
+  storedFileContentType,
+  type StoredFileKind,
+} from '@/lib/yomi-upload-files';
 
 export async function POST(request: Request) {
   const supabase = getSupabase();
@@ -26,61 +17,22 @@ export async function POST(request: Request) {
   const { fileName, fileSize, isZip } = body;
   // `kind` is optional for backwards compatibility: 'yomi' | 'zip' | 'media' |
   // 'yomibook'. Falls back to inferring from `isZip` when omitted.
-  const kind: 'yomi' | 'zip' | 'media' | 'yomibook' = body.kind ?? (isZip ? 'zip' : 'yomi');
+  const requestedKind = body.kind ?? (isZip ? 'zip' : 'yomi');
+  const kind: StoredFileKind = ['zip', 'media', 'yomibook'].includes(requestedKind) ? requestedKind : 'yomi';
 
   if (!fileName || typeof fileSize !== 'number') {
     return NextResponse.json({ error: 'Missing fileName or fileSize' }, { status: 400 });
   }
 
-  const ext = (fileName.split('.').pop() || '').toLowerCase();
-
-  if (kind === 'media') {
-    const dotted = `.${ext}` as typeof ALLOWED_MEDIA_EXTENSIONS[number];
-    if (!ALLOWED_MEDIA_EXTENSIONS.includes(dotted)) {
-      return NextResponse.json(
-        { error: `Unsupported media type. Allowed: ${ALLOWED_MEDIA_EXTENSIONS.join(', ')}` },
-        { status: 400 }
-      );
-    }
-    if (fileSize > MAX_AUDIO_FILE_SIZE) {
-      return NextResponse.json(
-        { error: `Media file too large (max ${MAX_AUDIO_FILE_SIZE / 1024 / 1024}MB)` },
-        { status: 400 }
-      );
-    }
-  } else if (kind === 'yomibook') {
-    if (!fileName.toLowerCase().endsWith(YOMIBOOK_EXTENSION)) {
-      return NextResponse.json(
-        { error: `Deck file must be a ${YOMIBOOK_EXTENSION}` },
-        { status: 400 }
-      );
-    }
-    if (fileSize > MAX_YOMIBOOK_FILE_SIZE) {
-      return NextResponse.json(
-        { error: `.yomibook file too large (max ${MAX_YOMIBOOK_FILE_SIZE / 1024 / 1024}MB)` },
-        { status: 400 }
-      );
-    }
-  } else if (kind === 'zip') {
-    if (fileSize > MAX_ZIP_FILE_SIZE) {
-      return NextResponse.json({ error: `ZIP file too large (max ${MAX_ZIP_FILE_SIZE / 1024 / 1024}MB)` }, { status: 400 });
-    }
-  } else {
-    if (fileSize > MAX_YOMI_FILE_SIZE) {
-      return NextResponse.json({ error: `.yomi file too large (max ${MAX_YOMI_FILE_SIZE / 1024 / 1024}MB)` }, { status: 400 });
-    }
+  const invalid = validateStoredFile(kind, fileName, fileSize);
+  if (invalid) {
+    return NextResponse.json({ error: invalid }, { status: 400 });
   }
 
   const uploadId = crypto.randomUUID();
-  const safeExt =
-    ext || (kind === 'zip' ? 'zip' : kind === 'media' ? 'mp3' : kind === 'yomibook' ? 'yomibook' : 'yomi');
-  const prefix = kind === 'zip' ? 'zip' : kind === 'media' ? 'media' : kind === 'yomibook' ? 'yomibook' : 'yomi';
-  const key = `${prefix}/${uploadId}/file.${safeExt}`;
-  // A .yomibook is a zip underneath, so it is stored and served as one.
-  const contentType =
-    kind === 'zip' || kind === 'yomibook' ? 'application/zip'
-    : kind === 'media' ? (MEDIA_CONTENT_TYPES[safeExt] || 'application/octet-stream')
-    : 'text/plain';
+  const safeExt = storedFileExtension(kind, fileName);
+  const key = `${kind}/${uploadId}/file.${safeExt}`;
+  const contentType = storedFileContentType(kind, safeExt);
 
   const presignedUrl = await getUploadPresignedUrl(key, contentType);
 

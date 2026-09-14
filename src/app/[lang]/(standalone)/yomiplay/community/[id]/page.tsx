@@ -3,7 +3,7 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Download, Music, FileText, Calendar, User, ExternalLink, BookMarked, Gift } from 'lucide-react';
+import { ArrowLeft, Download, Music, FileText, Calendar, User, ExternalLink, BookMarked, Gift, RefreshCw } from 'lucide-react';
 import { SOURCE_PLATFORMS, CONTENT_LANGUAGES, CONTENT_CATEGORIES } from '@/lib/yomi-constants';
 import ReportForm from './ReportForm';
 
@@ -22,6 +22,7 @@ const content = {
     language: 'Language',
     uploadedBy: 'Uploaded by',
     uploadedOn: 'Uploaded on',
+    updatedOn: 'Updated on',
     downloads: 'downloads',
     description: 'Description',
     original: 'Original Content',
@@ -29,6 +30,7 @@ const content = {
     listenAt: 'Listen at',
     pending: 'This content is pending review.',
     hiddenNotice: 'This content is currently hidden by an administrator. Only you and admins can see this page.',
+    versionInReview: 'A new version of this file is waiting for review. The current version stays available until it is approved.',
   },
   zh: {
     back: '返回社区',
@@ -44,6 +46,7 @@ const content = {
     language: '语言',
     uploadedBy: '上传者',
     uploadedOn: '上传时间',
+    updatedOn: '更新时间',
     downloads: '次下载',
     description: '描述',
     original: '原创内容',
@@ -51,6 +54,7 @@ const content = {
     listenAt: '收听来源',
     pending: '此内容正在等待审核。',
     hiddenNotice: '此内容当前被管理员隐藏，仅你本人和管理员可见。',
+    versionInReview: '此文件的新版本正在等待审核，审核通过前仍提供当前版本下载。',
   },
   'zh-tw': {
     back: '返回社區',
@@ -66,6 +70,7 @@ const content = {
     language: '語言',
     uploadedBy: '上傳者',
     uploadedOn: '上傳時間',
+    updatedOn: '更新時間',
     downloads: '次下載',
     description: '描述',
     original: '原創內容',
@@ -73,6 +78,7 @@ const content = {
     listenAt: '收聽來源',
     pending: '此內容正在等待審核。',
     hiddenNotice: '此內容目前被管理員隱藏，僅你本人和管理員可見。',
+    versionInReview: '此檔案的新版本正在等待審核，審核通過前仍提供目前版本下載。',
   },
   ja: {
     back: 'コミュニティに戻る',
@@ -88,6 +94,7 @@ const content = {
     language: '言語',
     uploadedBy: '投稿者',
     uploadedOn: '投稿日',
+    updatedOn: '更新日',
     downloads: 'ダウンロード',
     description: '説明',
     original: 'オリジナルコンテンツ',
@@ -95,6 +102,7 @@ const content = {
     listenAt: '配信元',
     pending: 'このコンテンツは審査待ちです。',
     hiddenNotice: 'このコンテンツは現在管理者により非表示にされています。投稿者本人と管理者のみが閲覧できます。',
+    versionInReview: 'このファイルの新しいバージョンが審査待ちです。承認されるまでは現在のバージョンをダウンロードできます。',
   },
 };
 
@@ -156,10 +164,12 @@ export default async function SubtitleDetailPage({
   const categoryDef = CONTENT_CATEGORIES.find(c => c.id === upload.category);
   const categoryLabel = categoryDef ? (categoryDef.labels[lang] || categoryDef.labels.en) : null;
   const tagList: string[] = Array.isArray(upload.tags) ? upload.tags : [];
-  const createdDate = new Date(upload.created_at).toLocaleDateString(
-    lang === 'ja' ? 'ja-JP' : lang === 'zh' ? 'zh-CN' : lang === 'zh-tw' ? 'zh-TW' : 'en-US',
-    { year: 'numeric', month: 'long', day: 'numeric' }
-  );
+  const dateLocale = lang === 'ja' ? 'ja-JP' : lang === 'zh' ? 'zh-CN' : lang === 'zh-tw' ? 'zh-TW' : 'en-US';
+  const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' } as const;
+  const createdDate = new Date(upload.created_at).toLocaleDateString(dateLocale, dateOptions);
+  const fileUpdatedDate = upload.file_updated_at
+    ? new Date(upload.file_updated_at).toLocaleDateString(dateLocale, dateOptions)
+    : null;
 
   return (
     <div className="container-custom py-12 max-w-3xl">
@@ -175,6 +185,11 @@ export default async function SubtitleDetailPage({
       {upload.status === 'pending' && (
         <div className="mb-6 p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/20 text-yellow-600 text-sm font-medium">
           {t.pending}
+        </div>
+      )}
+      {canManage && upload.pending_submitted_at && (
+        <div className="mb-6 p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/20 text-yellow-600 text-sm font-medium">
+          {t.versionInReview}
         </div>
       )}
       {upload.is_hidden && (
@@ -251,6 +266,12 @@ export default async function SubtitleDetailPage({
           <Calendar size={16} />
           <span>{t.uploadedOn}: {createdDate}</span>
         </div>
+        {fileUpdatedDate && (
+          <div className="flex items-center gap-3 text-sm text-[var(--muted-foreground)]">
+            <RefreshCw size={16} />
+            <span>{t.updatedOn}: {fileUpdatedDate} (v{upload.file_version})</span>
+          </div>
+        )}
         <div className="flex items-center gap-3 text-sm text-[var(--muted-foreground)]">
           <Download size={16} />
           <span>{upload.download_count} {t.downloads}</span>

@@ -31,7 +31,7 @@ export async function GET(request: Request) {
     .select(
       `id, title, description, language, category,
        source_platform, source_show, source_episode, source_url,
-       content_type, file_kind, is_free_import, audio_storage_path,
+       content_type, file_kind, is_free_import, file_version, file_updated_at, audio_storage_path,
        download_count, created_at,
        toshiki_tech_yomi_profiles(display_name)`,
       { count: 'exact' }
@@ -74,6 +74,8 @@ export async function GET(request: Request) {
     content_type:    row.content_type,
     file_kind:       row.file_kind ?? 'yomi',
     free_import:     row.is_free_import === true,
+    file_version:    row.file_version ?? 1,
+    file_updated_at: row.file_updated_at ?? null,
     has_media:       !!row.audio_storage_path,
     download_count:  row.download_count ?? 0,
     uploaded_by:     row.toshiki_tech_yomi_profiles?.display_name ?? null,

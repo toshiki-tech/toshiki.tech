@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSupabase } from '@/lib/supabase-server-api';
 import { getDownloadPresignedUrl } from '@/lib/r2';
+import { defaultDownloadName } from '@/lib/yomi-upload-files';
 
 export async function GET(
   request: Request,
@@ -9,6 +10,8 @@ export async function GET(
   const supabase = getSupabase();
   const url = new URL(request.url);
   const downloadType = url.searchParams.get('type'); // 'media' or null
+  // ?pending=1 serves a new version still waiting for review, not the live file.
+  const wantsPending = url.searchParams.get('pending') === '1';
 
   // Fetch upload record
   const { data: upload, error } = await supabase
@@ -24,9 +27,10 @@ export async function GET(
 
   const { data: { user: currentUser } } = await supabase.auth.getUser();
 
-  // Hidden uploads, and anything still awaiting review, can only be downloaded
-  // by the uploader or an admin — the reviewer has to open the file to judge it.
-  const isRestricted = upload.is_hidden || upload.status !== 'approved';
+  // Hidden uploads, and anything still awaiting review (a first upload or a new
+  // version of an approved one), can only be downloaded by the uploader or an
+  // admin — the reviewer has to open the file to judge it.
+  const isRestricted = upload.is_hidden || upload.status !== 'approved' || wantsPending;
   if (isRestricted) {
     let allowed = false;
     if (currentUser) {
@@ -49,7 +53,7 @@ export async function GET(
   // Record download + award points atomically via SECURITY DEFINER function
   // (Works for both anonymous and authenticated users, bypassing RLS safely).
   // A review fetch is not a real download, so it neither counts nor pays out.
-  if (upload.status === 'approved') {
+  if (upload.status === 'approved' && !wantsPending) {
     const { error: rpcError } = await supabase.rpc('record_yomi_download', {
       upload_id: params.id,
       downloader_id: currentUser?.id || null,
@@ -62,7 +66,16 @@ export async function GET(
   // Resolve which file to serve. Default = subtitle/zip; ?type=media = media file.
   let storagePath: string;
   let originalName: string;
-  if (downloadType === 'media') {
+  if (wantsPending) {
+    const pendingPath = downloadType === 'media' ? upload.pending_audio_storage_path : upload.pending_storage_path;
+    if (!pendingPath) {
+      return NextResponse.json({ error: 'No new version of this file is waiting for review' }, { status: 404 });
+    }
+    storagePath = pendingPath;
+    originalName =
+      (downloadType === 'media' ? upload.pending_audio_file_name : upload.pending_file_name) ||
+      (downloadType === 'media' ? 'media' : defaultDownloadName(pendingPath));
+  } else if (downloadType === 'media') {
     if (!upload.audio_storage_path) {
       return NextResponse.json({ error: 'No media file for this upload' }, { status: 404 });
     }
@@ -70,14 +83,7 @@ export async function GET(
     originalName = upload.audio_file_name || 'media';
   } else {
     storagePath = upload.yomi_storage_path;
-    const path: string = upload.yomi_storage_path;
-    originalName =
-      upload.yomi_file_name ||
-      (path.startsWith('zip/')
-        ? 'download.zip'
-        : path.startsWith('yomibook/')
-          ? 'download.yomibook'
-          : 'download.yomi');
+    originalName = upload.yomi_file_name || defaultDownloadName(upload.yomi_storage_path);
   }
 
   try {

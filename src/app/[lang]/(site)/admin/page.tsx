@@ -4,7 +4,7 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { Shield, Music, FileText, AlertTriangle, List, Settings, Crown } from 'lucide-react';
+import { Shield, Music, FileText, AlertTriangle, List, Settings, Crown, RefreshCw, Download } from 'lucide-react';
 import { SOURCE_PLATFORMS, CONTENT_LANGUAGES } from '@/lib/yomi-constants';
 import AdminActions from './AdminActions';
 import ReportActions from './ReportActions';
@@ -15,6 +15,9 @@ import UploadAdminControls from './UploadAdminControls';
 import FeatureFlagsPanel from './FeatureFlagsPanel';
 import ApkReleasePanel from './ApkReleasePanel';
 import SubscriptionsPanel from './SubscriptionsPanel';
+import FileUpdateActions from './FileUpdateActions';
+import ReplaceUploadFile from '@/components/ReplaceUploadFile';
+import { primaryFileKind } from '@/lib/yomi-upload-files';
 import { getFeatureFlags } from '@/lib/yomi-feature-flags';
 import { createClient } from '@supabase/supabase-js';
 
@@ -29,7 +32,10 @@ interface AdminUpload {
   source_platform: string | null;
   source_show: string | null;
   source_episode: string | null;
+  yomi_storage_path: string | null;
+  yomi_file_name: string | null;
   audio_storage_path: string | null;
+  audio_file_name: string | null;
   language: string;
   translation_language: string | null;
   category: string | null;
@@ -37,6 +43,14 @@ interface AdminUpload {
   is_hidden: boolean;
   sort_order: number;
   is_free_import: boolean;
+  file_version: number | null;
+  file_updated_at: string | null;
+  pending_file_name: string | null;
+  pending_storage_path: string | null;
+  pending_audio_storage_path: string | null;
+  pending_audio_file_name: string | null;
+  pending_note: string | null;
+  pending_submitted_at: string | null;
   created_at: string;
   toshiki_tech_yomi_profiles: { display_name: string } | null;
 }
@@ -96,6 +110,14 @@ export default async function AdminPage({ params: { lang } }: { params: { lang: 
     .eq('status', 'pending')
     .eq('is_removed', false)
     .order('created_at', { ascending: true });
+
+  // Fetch new versions of approved uploads waiting for review
+  const { data: pendingFileUpdates } = await supabase
+    .from('toshiki_tech_yomi_uploads')
+    .select('*, toshiki_tech_yomi_profiles!inner(display_name)')
+    .not('pending_submitted_at', 'is', null)
+    .eq('is_removed', false)
+    .order('pending_submitted_at', { ascending: true });
 
   // Fetch recent reports
   const { data: reports } = await supabase
@@ -314,6 +336,83 @@ export default async function AdminPage({ params: { lang } }: { params: { lang: 
         )}
       </section>
 
+      {/* Pending File Updates */}
+      <section className="mb-12">
+        <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+          <RefreshCw size={18} />
+          Pending File Updates ({(pendingFileUpdates || []).length})
+        </h2>
+
+        {!pendingFileUpdates || pendingFileUpdates.length === 0 ? (
+          <p className="text-[var(--muted-foreground)] py-8 text-center">No new versions waiting for review.</p>
+        ) : (
+          <div className="space-y-3">
+            {(pendingFileUpdates as AdminUpload[]).map((upload) => {
+              const submitted = new Date(upload.pending_submitted_at!).toLocaleDateString('en-US', {
+                month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
+              });
+              const downloadClass =
+                'inline-flex items-center gap-1 text-xs font-bold text-[rgb(var(--accent))] hover:underline';
+
+              return (
+                <div key={upload.id} className="p-5 border border-[var(--border)] rounded-2xl bg-[var(--card)]">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Link
+                          href={`/${lang}/yomiplay/community/${upload.id}`}
+                          className="font-bold hover:text-[rgb(var(--accent))] transition-colors"
+                        >
+                          {upload.title}
+                        </Link>
+                        {upload.file_kind === 'yomibook' && (
+                          <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600">
+                            Deck
+                          </span>
+                        )}
+                        <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-600">
+                          v{upload.file_version ?? 1} → v{(upload.file_version ?? 1) + 1}
+                        </span>
+                      </div>
+                      <div className="text-xs text-[var(--muted-foreground)] flex flex-wrap gap-2 items-center mb-2">
+                        <span>by {upload.toshiki_tech_yomi_profiles?.display_name || 'Unknown'}</span>
+                        <span>· submitted {submitted}</span>
+                      </div>
+                      {upload.pending_note && (
+                        <p className="text-sm mb-2 whitespace-pre-line">{upload.pending_note}</p>
+                      )}
+                      <div className="flex flex-wrap gap-x-4 gap-y-1">
+                        {upload.pending_storage_path && (
+                          <>
+                            <a href={`/api/yomi/download/${upload.id}?pending=1`} className={downloadClass}>
+                              <Download size={12} /> New: {upload.pending_file_name}
+                            </a>
+                            <a href={`/api/yomi/download/${upload.id}`} className={downloadClass}>
+                              <Download size={12} /> Current: {upload.yomi_file_name || 'file'}
+                            </a>
+                          </>
+                        )}
+                        {upload.pending_audio_storage_path && (
+                          <>
+                            <a href={`/api/yomi/download/${upload.id}?type=media&pending=1`} className={downloadClass}>
+                              <Music size={12} /> New media: {upload.pending_audio_file_name}
+                            </a>
+                            <a href={`/api/yomi/download/${upload.id}?type=media`} className={downloadClass}>
+                              <Music size={12} /> Current media: {upload.audio_file_name || 'media'}
+                            </a>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    <FileUpdateActions uploadId={upload.id} submittedAt={upload.pending_submitted_at!} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
       {/* All Uploads */}
       <section className="mb-12">
         <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
@@ -358,6 +457,16 @@ export default async function AdminPage({ params: { lang } }: { params: { lang: 
                         <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${statusColors[upload.status] || ''}`}>
                           {upload.status}
                         </span>
+                        {(upload.file_version ?? 1) > 1 && (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--muted)] text-[var(--muted-foreground)]">
+                            v{upload.file_version}
+                          </span>
+                        )}
+                        {upload.pending_submitted_at && (
+                          <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-600">
+                            Update pending
+                          </span>
+                        )}
                       </div>
                       <div className="text-xs text-[var(--muted-foreground)] flex flex-wrap gap-2 items-center">
                         <span>by {upload.toshiki_tech_yomi_profiles?.display_name || 'Unknown'}</span>
@@ -385,6 +494,13 @@ export default async function AdminPage({ params: { lang } }: { params: { lang: 
                     <div className="flex items-center gap-2 flex-wrap">
                       <UploadAdminControls uploadId={upload.id} isHidden={upload.is_hidden} sortOrder={upload.sort_order} isFreeImport={upload.is_free_import} />
                       <EditUpload upload={upload} />
+                      <ReplaceUploadFile
+                        lang="en"
+                        uploadId={upload.id}
+                        primaryKind={primaryFileKind(upload)}
+                        hasSeparateMedia={!!upload.audio_storage_path}
+                        outcome="admin"
+                      />
                       <AdminActions uploadId={upload.id} />
                     </div>
                   </div>

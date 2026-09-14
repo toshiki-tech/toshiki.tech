@@ -7,6 +7,8 @@ import Link from 'next/link';
 import { Upload, FileText, Music, Clock, CheckCircle2, XCircle, ArrowLeft, BookMarked } from 'lucide-react';
 import { SOURCE_PLATFORMS, CONTENT_LANGUAGES } from '@/lib/yomi-constants';
 import { getFeatureFlags } from '@/lib/yomi-feature-flags';
+import ReplaceUploadFile from '@/components/ReplaceUploadFile';
+import { primaryFileKind, replaceOutcome } from '@/lib/yomi-upload-files';
 import DeleteButton from './DeleteButton';
 import ShareButton from './ShareButton';
 import PointsPanel from './PointsPanel';
@@ -24,6 +26,8 @@ const content = {
     delete: 'Delete',
     community: 'Back to Community',
     hiddenByAdmin: 'Hidden by admin',
+    versionInReview: 'New version in review',
+    versionRejected: 'New version rejected',
   },
   zh: {
     title: '我的上传',
@@ -37,6 +41,8 @@ const content = {
     delete: '删除',
     community: '返回社区',
     hiddenByAdmin: '管理员已隐藏',
+    versionInReview: '新版本审核中',
+    versionRejected: '新版本未通过',
   },
   'zh-tw': {
     title: '我的上傳',
@@ -50,6 +56,8 @@ const content = {
     delete: '刪除',
     community: '返回社區',
     hiddenByAdmin: '管理員已隱藏',
+    versionInReview: '新版本審核中',
+    versionRejected: '新版本未通過',
   },
   ja: {
     title: 'マイアップロード',
@@ -63,6 +71,8 @@ const content = {
     delete: '削除',
     community: 'コミュニティに戻る',
     hiddenByAdmin: '管理者により非表示',
+    versionInReview: '新バージョン審査中',
+    versionRejected: '新バージョン却下',
   },
 };
 
@@ -75,12 +85,16 @@ interface MyUpload {
   status: string;
   source_platform: string | null;
   source_show: string | null;
+  yomi_storage_path: string | null;
   audio_storage_path: string | null;
   language: string;
   download_count: number;
   share_token: string;
   created_at: string;
   is_hidden: boolean;
+  file_version: number | null;
+  pending_submitted_at: string | null;
+  file_update_rejected_at: string | null;
 }
 
 export async function generateMetadata({ params: { lang } }: { params: { lang: Locale } }): Promise<Metadata> {
@@ -189,6 +203,9 @@ export default async function MyUploadsPage({ params: { lang } }: { params: { la
                     {upload.file_kind === 'yomibook' && (
                       <BookMarked size={14} className="shrink-0 text-blue-600" />
                     )}
+                    {(upload.file_version ?? 1) > 1 && (
+                      <span className="shrink-0 text-[10px] font-bold text-[var(--muted-foreground)]">v{upload.file_version}</span>
+                    )}
                   </div>
                   <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--muted-foreground)]">
                     {langLabel && <span className="px-2 py-0.5 rounded bg-[var(--muted)]">{langLabel.label}</span>}
@@ -197,7 +214,7 @@ export default async function MyUploadsPage({ params: { lang } }: { params: { la
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex flex-wrap items-center gap-2 shrink-0">
                   <span className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase px-2.5 py-1 rounded-full ${statusColors[upload.status] || ''}`}>
                     {statusIcons[upload.status]}
                     {t.status[statusKey] || upload.status}
@@ -210,9 +227,28 @@ export default async function MyUploadsPage({ params: { lang } }: { params: { la
                       {t.hiddenByAdmin}
                     </span>
                   )}
+                  {upload.pending_submitted_at && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase px-2.5 py-1 rounded-full bg-yellow-500/10 text-yellow-600">
+                      <Clock size={12} />
+                      {t.versionInReview}
+                    </span>
+                  )}
+                  {!upload.pending_submitted_at && upload.file_update_rejected_at && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase px-2.5 py-1 rounded-full bg-red-500/10 text-red-500">
+                      <XCircle size={12} />
+                      {t.versionRejected}
+                    </span>
+                  )}
                   {upload.visibility === 'unlisted' && (
                     <ShareButton lang={lang} uploadId={upload.id} />
                   )}
+                  <ReplaceUploadFile
+                    lang={lang}
+                    uploadId={upload.id}
+                    primaryKind={primaryFileKind(upload)}
+                    hasSeparateMedia={!!upload.audio_storage_path}
+                    outcome={replaceOutcome(upload, false)}
+                  />
                   <DeleteButton uploadId={upload.id} label={t.delete} />
                 </div>
               </div>
