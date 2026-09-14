@@ -104,17 +104,18 @@ GET https://www.toshiki.tech/api/yomiplay/v1/subtitles
 |------|------|--------|------|
 | `page` | int | `1` | 页码，从 1 开始 |
 | `per_page` | int | `20` | 每页条数，最大 50 |
-| `lang` | string | — | 语言筛选，如 `ja` |
+| `lang` | string | — | 内容语言筛选，如 `ja`（素材本身的语言） |
+| `ui_lang` | string | — | 标题和描述的显示语言：`en` / `zh` / `ja` / `zh-tw`（也接受 `zh-Hant`、`zh-TW`、`ja-JP` 等写法）。有该语言的翻译就返回译文，没有则返回原文。不传时返回原文 |
 | `category` | string | — | 分类筛选，如 `anime`、`podcast` |
 | `platform` | string | — | 来源平台筛选，如 `spotify`、`youtube` |
-| `q` | string | — | 标题关键词搜索（模糊匹配） |
+| `q` | string | — | 标题关键词搜索（模糊匹配），原文和各语言译文的标题都会被搜索 |
 | `file_kind` | string | — | 文件类型筛选：`yomi`（字幕素材）/ `yomibook`（暗记本）。不传则两者都返回 |
 | `sort` | string | `newest` | 排序方式：`newest`（最新）/ `downloads`（下载量） |
 
 **请求示例**
 
 ```
-GET /api/yomiplay/v1/subtitles?lang=ja&category=anime&page=1&per_page=20&sort=downloads
+GET /api/yomiplay/v1/subtitles?lang=ja&category=anime&page=1&per_page=20&sort=downloads&ui_lang=zh
 ```
 
 **响应**
@@ -126,6 +127,8 @@ GET /api/yomiplay/v1/subtitles?lang=ja&category=anime&page=1&per_page=20&sort=do
       "id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
       "title": "进击的巨人 S1E01",
       "description": "第一话字幕，含完整对白",
+      "original_title": "進撃の巨人 S1E01",
+      "original_description": "第1話の字幕、全セリフ収録",
       "language": "ja",
       "category": "anime",
       "source_platform": "netflix",
@@ -157,6 +160,8 @@ GET /api/yomiplay/v1/subtitles?lang=ja&category=anime&page=1&per_page=20&sort=do
 | 字段 | 说明 |
 |------|------|
 | `id` | 资源 ID，用于获取详情和下载 |
+| `title` / `description` | 按 `ui_lang` 返回的标题和描述；该语言没有翻译（或未传 `ui_lang`）时为上传者的原文 |
+| `original_title` / `original_description` | 上传者填写的原文，不受 `ui_lang` 影响 |
 | `language` | 字幕内容语言，取值见 `/v1/filters` 的 `languages` 列表（`ja` / `en` / `zh`） |
 | `category` | 内容分类，取值见 `/v1/filters` 的 `categories` 列表 |
 | `content_type` | 内容类型：`subtitle` / `transcript` 等 |
@@ -177,8 +182,10 @@ GET /api/yomiplay/v1/subtitles?lang=ja&category=anime&page=1&per_page=20&sort=do
 **请求**
 
 ```
-GET https://www.toshiki.tech/api/yomiplay/v1/subtitles/{id}
+GET https://www.toshiki.tech/api/yomiplay/v1/subtitles/{id}?ui_lang=zh
 ```
+
+`ui_lang` 与列表接口相同，可选。
 
 **响应**
 
@@ -188,6 +195,8 @@ GET https://www.toshiki.tech/api/yomiplay/v1/subtitles/{id}
     "id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
     "title": "进击的巨人 S1E01",
     "description": "第一话字幕，含完整对白",
+    "original_title": "進撃の巨人 S1E01",
+    "original_description": "第1話の字幕、全セリフ収録",
     "language": "ja",
     "category": "anime",
     "source_platform": "netflix",

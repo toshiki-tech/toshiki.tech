@@ -5,6 +5,7 @@ import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { Download, Upload, Search, FileText, Music, Crown, FolderOpen, Apple, Megaphone, BookMarked, Gift } from 'lucide-react';
 import { SOURCE_PLATFORMS, CONTENT_LANGUAGES, CONTENT_CATEGORIES } from '@/lib/yomi-constants';
+import { localizeUpload } from '@/lib/yomi-translations';
 import { getFeatureFlags } from '@/lib/yomi-feature-flags';
 import { localizeAppStoreUrl } from '@/data/products';
 import Filters from './Filters';
@@ -30,6 +31,7 @@ interface YomiUpload {
   language: string;
   category: string | null;
   tags: string[] | null;
+  translations: unknown;
   download_count: number;
   created_at: string;
   toshiki_tech_yomi_profiles: { display_name: string } | null;
@@ -327,7 +329,7 @@ export default async function CommunityPage({
   query = query.range(offset, offset + pageSize - 1);
 
   if (searchParams.q) {
-    query = query.ilike('title', `%${searchParams.q}%`);
+    query = query.ilike('search_title', `%${searchParams.q}%`);
   }
   if (searchParams.language) {
     query = query.eq('language', searchParams.language);
@@ -461,6 +463,7 @@ export default async function CommunityPage({
             const categoryDef = CONTENT_CATEGORIES.find(c => c.id === upload.category);
             const categoryLabel = categoryDef ? (categoryDef.labels[lang] || categoryDef.labels.en) : null;
             const tagList = (upload.tags || []).slice(0, 4);
+            const { title } = localizeUpload(upload, lang);
 
             return (
               <Link
@@ -470,7 +473,7 @@ export default async function CommunityPage({
               >
                 <div className="flex justify-between items-start mb-3">
                   <h3 className="font-bold text-lg group-hover:text-[rgb(var(--accent))] transition-colors line-clamp-1">
-                    {upload.title}
+                    {title}
                   </h3>
                   {upload.file_kind !== 'yomibook' &&
                     (upload.audio_storage_path || upload.yomi_storage_path?.startsWith('zip/')) && (

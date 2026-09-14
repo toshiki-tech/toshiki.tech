@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { Pencil, X, Save } from 'lucide-react';
+import { Pencil, X, Save, Languages, Loader2 } from 'lucide-react';
 import { SOURCE_PLATFORMS, CONTENT_LANGUAGES, CONTENT_CATEGORIES, parseTranslationLanguages, serializeTranslationLanguages } from '@/lib/yomi-constants';
+import TranslationFields, { toTranslationForm, hasAnyTranslation, type TranslationForm } from '@/components/TranslationFields';
 
 interface UploadData {
   id: string;
@@ -17,6 +18,7 @@ interface UploadData {
   translation_language: string | null;
   category: string | null;
   tags: string[] | null;
+  translations?: unknown;
 }
 
 export default function EditUpload({ upload }: { upload: UploadData }) {
@@ -39,6 +41,27 @@ export default function EditUpload({ upload }: { upload: UploadData }) {
     category: upload.category || '',
     tagsInput: (upload.tags || []).join(', '),
   });
+  const [translations, setTranslations] = useState<TranslationForm>(() => toTranslationForm(upload.translations));
+  const [translating, setTranslating] = useState(false);
+
+  // Drafts all four languages from the current (possibly unsaved) original text;
+  // nothing is stored until the admin saves the form.
+  const handleTranslate = async () => {
+    if (hasAnyTranslation(translations) && !confirm('Replace the existing translations with a new draft?')) return;
+    setTranslating(true);
+    const res = await fetch('/api/yomi/admin/translate-upload', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: form.title, description: form.description, language: form.language }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (res.ok) {
+      setTranslations(toTranslationForm(data.translations));
+    } else {
+      alert('Auto-translate failed: ' + (data.error || 'Unknown error'));
+    }
+    setTranslating(false);
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -51,6 +74,7 @@ export default function EditUpload({ upload }: { upload: UploadData }) {
     const updates = {
       ...rest,
       tags,
+      translations,
       translation_language: serializeTranslationLanguages([
         form.translation_language,
         secondary_translation_language,
@@ -125,6 +149,32 @@ export default function EditUpload({ upload }: { upload: UploadData }) {
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
                   className={input}
+                />
+              </div>
+
+              <div className="p-4 rounded-xl border border-[var(--border)] space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className={`${label} mb-0`}>Translations</span>
+                  <button
+                    type="button"
+                    onClick={handleTranslate}
+                    disabled={translating || saving || !form.title.trim()}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-purple-500/10 text-purple-500 text-xs font-bold hover:bg-purple-500/20 transition-colors disabled:opacity-50"
+                  >
+                    {translating ? <Loader2 size={14} className="animate-spin" /> : <Languages size={14} />}
+                    {translating ? 'Translating…' : 'Auto-translate'}
+                  </button>
+                </div>
+                <p className="text-xs text-[var(--muted-foreground)]">
+                  Empty fields fall back to the original title and description above. Review drafts before saving.
+                </p>
+                <TranslationFields
+                  value={translations}
+                  onChange={setTranslations}
+                  originalTitle={form.title || 'Title'}
+                  originalDescription={form.description || 'Description'}
+                  inputClass={input}
+                  disabled={translating}
                 />
               </div>
 
@@ -281,7 +331,7 @@ export default function EditUpload({ upload }: { upload: UploadData }) {
               </button>
               <button
                 onClick={handleSave}
-                disabled={saving}
+                disabled={saving || translating}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[rgb(var(--accent))] text-white text-sm font-bold hover:opacity-90 transition-opacity disabled:opacity-50"
               >
                 <Save size={14} />

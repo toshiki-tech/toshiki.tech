@@ -43,6 +43,7 @@ interface AdminUpload {
   is_hidden: boolean;
   sort_order: number;
   is_free_import: boolean;
+  translations: unknown;
   file_version: number | null;
   file_updated_at: string | null;
   pending_file_name: string | null;

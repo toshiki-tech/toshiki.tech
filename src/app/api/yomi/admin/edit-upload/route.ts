@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSupabase, requireAdmin } from '@/lib/supabase-server-api';
+import { sanitizeTranslations } from '@/lib/yomi-translations';
 
 const ALLOWED_FIELDS = [
   'title',
@@ -16,6 +17,7 @@ const ALLOWED_FIELDS = [
   'is_hidden',
   'sort_order',
   'is_free_import',
+  'translations',
 ] as const;
 
 export async function PATCH(request: Request) {
@@ -35,7 +37,7 @@ export async function PATCH(request: Request) {
   for (const key of ALLOWED_FIELDS) {
     if (key in updates) {
       const v = updates[key];
-      safeUpdates[key] = v === '' ? null : v;
+      safeUpdates[key] = key === 'translations' ? sanitizeTranslations(v) : v === '' ? null : v;
     }
   }
 

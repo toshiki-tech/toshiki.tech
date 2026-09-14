@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getAnonClient } from '@/lib/supabase-bearer';
+import { localizeUpload, parseUiLocale } from '@/lib/yomi-translations';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -12,9 +13,10 @@ export async function OPTIONS() {
 }
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: { id: string } }
 ) {
+  const uiLang = parseUiLocale(new URL(request.url).searchParams.get('ui_lang'));
   const supabase = getAnonClient();
 
   const { data: row, error } = await supabase
@@ -22,7 +24,7 @@ export async function GET(
     .select(
       `id, title, description, language, category,
        source_platform, source_show, source_episode, source_url,
-       content_type, file_kind, is_free_import, file_version, file_updated_at, yomi_file_name, audio_file_name,
+       content_type, file_kind, is_free_import, file_version, file_updated_at, translations, yomi_file_name, audio_file_name,
        audio_storage_path, download_count, created_at, updated_at,
        toshiki_tech_yomi_profiles(display_name)`
     )
@@ -39,13 +41,16 @@ export async function GET(
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const r = row as any;
+  const { title, description } = uiLang ? localizeUpload(r, uiLang) : r;
 
   return NextResponse.json(
     {
       data: {
         id:              r.id,
-        title:           r.title,
-        description:     r.description ?? null,
+        title,
+        description:     description ?? null,
+        original_title:       r.title,
+        original_description: r.description ?? null,
         language:        r.language,
         category:        r.category ?? null,
         source_platform: r.source_platform ?? null,

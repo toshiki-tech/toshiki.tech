@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { serializeTranslationLanguages, type FileKindId } from '@/lib/yomi-constants';
+import { sanitizeTranslations } from '@/lib/yomi-translations';
 
 function getSupabase() {
   const cookieStore = cookies();
@@ -65,6 +66,7 @@ export async function POST(request: Request) {
     audioFileName,
     title,
     description,
+    translations,
     contentType,
     visibility,
     category,
@@ -136,6 +138,7 @@ export async function POST(request: Request) {
       user_id: user.id,
       title,
       description: description || null,
+      translations: sanitizeTranslations(translations),
       content_type: contentType,
       visibility: visibility || 'public',
       status,

@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Download, Music, FileText, Calendar, User, ExternalLink, BookMarked, Gift, RefreshCw } from 'lucide-react';
 import { SOURCE_PLATFORMS, CONTENT_LANGUAGES, CONTENT_CATEGORIES } from '@/lib/yomi-constants';
+import { localizeUpload } from '@/lib/yomi-translations';
 import ReportForm from './ReportForm';
 
 const content = {
@@ -164,6 +165,7 @@ export default async function SubtitleDetailPage({
   const categoryDef = CONTENT_CATEGORIES.find(c => c.id === upload.category);
   const categoryLabel = categoryDef ? (categoryDef.labels[lang] || categoryDef.labels.en) : null;
   const tagList: string[] = Array.isArray(upload.tags) ? upload.tags : [];
+  const { title, description } = localizeUpload(upload, lang);
   const dateLocale = lang === 'ja' ? 'ja-JP' : lang === 'zh' ? 'zh-CN' : lang === 'zh-tw' ? 'zh-TW' : 'en-US';
   const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' } as const;
   const createdDate = new Date(upload.created_at).toLocaleDateString(dateLocale, dateOptions);
@@ -200,7 +202,7 @@ export default async function SubtitleDetailPage({
 
       {/* Title & badges */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-4">{upload.title}</h1>
+        <h1 className="text-3xl font-bold mb-4">{title}</h1>
         <div className="flex flex-wrap gap-2">
           {categoryLabel && (
             <Link
@@ -301,10 +303,10 @@ export default async function SubtitleDetailPage({
       )}
 
       {/* Description */}
-      {upload.description && (
+      {description && (
         <div className="mb-8">
           <h2 className="text-sm font-bold uppercase tracking-widest text-[var(--muted-foreground)] mb-3">{t.description}</h2>
-          <p className="text-[var(--muted-foreground)] whitespace-pre-wrap">{upload.description}</p>
+          <p className="text-[var(--muted-foreground)] whitespace-pre-wrap">{description}</p>
         </div>
       )}
 

@@ -8,6 +8,7 @@ import { Upload, FileText, Music, Clock, CheckCircle2, XCircle, ArrowLeft, BookM
 import { SOURCE_PLATFORMS, CONTENT_LANGUAGES } from '@/lib/yomi-constants';
 import { getFeatureFlags } from '@/lib/yomi-feature-flags';
 import ReplaceUploadFile from '@/components/ReplaceUploadFile';
+import { localizeUpload } from '@/lib/yomi-translations';
 import { primaryFileKind, replaceOutcome } from '@/lib/yomi-upload-files';
 import DeleteButton from './DeleteButton';
 import ShareButton from './ShareButton';
@@ -79,6 +80,8 @@ const content = {
 interface MyUpload {
   id: string;
   title: string;
+  description: string | null;
+  translations: unknown;
   content_type: string;
   file_kind: string | null;
   visibility: string;
@@ -195,7 +198,7 @@ export default async function MyUploadsPage({ params: { lang } }: { params: { la
                       href={`/${lang}/yomiplay/community/${upload.id}`}
                       className="font-bold hover:text-[rgb(var(--accent))] transition-colors truncate"
                     >
-                      {upload.title}
+                      {localizeUpload(upload, lang).title}
                     </Link>
                     {upload.audio_storage_path && (
                       <Music size={14} className="shrink-0 text-green-600" />

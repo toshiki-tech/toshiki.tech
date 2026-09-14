@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Locale } from '@/lib/get-dictionary';
 import { SOURCE_PLATFORMS, CONTENT_LANGUAGES, CONTENT_CATEGORIES, MAX_YOMI_FILE_SIZE, MAX_ZIP_FILE_SIZE, MAX_AUDIO_FILE_SIZE, MAX_YOMIBOOK_FILE_SIZE, ALLOWED_MEDIA_EXTENSIONS, YOMIBOOK_EXTENSION, serializeTranslationLanguages } from '@/lib/yomi-constants';
-import { Upload, FileText, Music, AlertCircle, CheckCircle2, BookMarked } from 'lucide-react';
+import { Upload, FileText, Music, AlertCircle, CheckCircle2, BookMarked, Languages, ChevronDown } from 'lucide-react';
+import TranslationFields, { toTranslationForm, type TranslationForm } from '@/components/TranslationFields';
 
 const content = {
   en: {
@@ -17,6 +18,8 @@ const content = {
     titlePlaceholder: 'e.g., NHK News 2026-01-15',
     descriptionLabel: 'Description (optional)',
     descriptionPlaceholder: 'Brief description of the content...',
+    translationsToggle: 'Add title and description in other languages (optional)',
+    translationsHint: 'Visitors browsing in these languages see your translation; empty fields show the original above. Admins may polish translations later.',
     categoryLabel: 'Category',
     selectCategory: 'Select category',
     languageLabel: 'Content Language',
@@ -76,6 +79,8 @@ const content = {
     titlePlaceholder: '如：NHK 新闻 2026-01-15',
     descriptionLabel: '描述（可选）',
     descriptionPlaceholder: '简要描述内容...',
+    translationsToggle: '添加其他语言的标题和描述（可选）',
+    translationsHint: '用这些语言浏览的访客会看到你的译文，留空则显示上面的原文。管理员之后可能会润色译文。',
     categoryLabel: '内容分类',
     selectCategory: '选择分类',
     languageLabel: '内容语言',
@@ -135,6 +140,8 @@ const content = {
     titlePlaceholder: '如：NHK 新聞 2026-01-15',
     descriptionLabel: '描述（可選）',
     descriptionPlaceholder: '簡要描述內容...',
+    translationsToggle: '新增其他語言的標題和描述（選填）',
+    translationsHint: '以這些語言瀏覽的訪客會看到你的譯文，留空則顯示上面的原文。管理員之後可能會潤飾譯文。',
     categoryLabel: '內容分類',
     selectCategory: '選擇分類',
     languageLabel: '內容語言',
@@ -194,6 +201,8 @@ const content = {
     titlePlaceholder: '例：NHK ニュース 2026-01-15',
     descriptionLabel: '説明（任意）',
     descriptionPlaceholder: 'コンテンツの簡単な説明...',
+    translationsToggle: '他の言語のタイトルと説明を追加（任意）',
+    translationsHint: 'その言語で閲覧している人には翻訳が表示され、空欄の項目は上の原文が表示されます。翻訳は後で管理者が調整することがあります。',
     categoryLabel: 'カテゴリ',
     selectCategory: 'カテゴリを選択',
     languageLabel: 'コンテンツの言語',
@@ -255,6 +264,8 @@ export default function UploadForm({ lang }: { lang: Locale }) {
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [showTranslations, setShowTranslations] = useState(false);
+  const [translations, setTranslations] = useState<TranslationForm>(() => toTranslationForm(null));
   const [category, setCategory] = useState('');
   const [language, setLanguage] = useState('');
   const [translationLanguage, setTranslationLanguage] = useState('');
@@ -424,6 +435,7 @@ export default function UploadForm({ lang }: { lang: Locale }) {
           audioFileName,
           title,
           description: description || undefined,
+          translations,
           contentType: isDeck ? 'original' : contentTypeChoice,
           visibility,
           category: isDeck ? undefined : category || undefined,
@@ -578,6 +590,34 @@ export default function UploadForm({ lang }: { lang: Locale }) {
           placeholder={t.descriptionPlaceholder}
           className={inputClass}
         />
+      </div>
+
+      {/* Title and description in other languages */}
+      <div className="rounded-xl border border-[var(--border)]">
+        <button
+          type="button"
+          onClick={() => setShowTranslations(!showTranslations)}
+          aria-expanded={showTranslations}
+          className="w-full flex items-center justify-between gap-3 px-4 py-3 text-sm font-bold text-left"
+        >
+          <span className="inline-flex items-center gap-2">
+            <Languages size={16} className="shrink-0 text-[rgb(var(--accent))]" />
+            {t.translationsToggle}
+          </span>
+          <ChevronDown size={16} className={`shrink-0 transition-transform ${showTranslations ? 'rotate-180' : ''}`} />
+        </button>
+        {showTranslations && (
+          <div className="px-4 pb-4 space-y-3">
+            <p className="text-xs text-[var(--muted-foreground)]">{t.translationsHint}</p>
+            <TranslationFields
+              value={translations}
+              onChange={setTranslations}
+              originalTitle={title || t.titlePlaceholder}
+              originalDescription={description || t.descriptionPlaceholder}
+              inputClass={inputClass}
+            />
+          </div>
+        )}
       </div>
 
       {/* Category */}

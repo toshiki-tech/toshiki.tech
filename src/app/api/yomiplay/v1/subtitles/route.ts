@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getAnonClient } from '@/lib/supabase-bearer';
+import { localizeUpload, parseUiLocale } from '@/lib/yomi-translations';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -9,6 +10,18 @@ const CORS = {
 
 export async function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: CORS });
+}
+
+/** Title and description in the requested UI language, plus the uploader's originals */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function localized(row: any, uiLang: string | null) {
+  const { title, description } = uiLang ? localizeUpload(row, uiLang) : row;
+  return {
+    title,
+    description:          description ?? null,
+    original_title:       row.title,
+    original_description: row.description ?? null,
+  };
 }
 
 export async function GET(request: Request) {
@@ -22,6 +35,8 @@ export async function GET(request: Request) {
   // 'yomi' (subtitle material) | 'yomibook' (memorization deck); omit for both
   const fileKind = url.searchParams.get('file_kind') || null;
   const sort     = url.searchParams.get('sort')     || 'newest';
+  // Language the app shows titles and descriptions in; `lang` filters by content language.
+  const uiLang   = parseUiLocale(url.searchParams.get('ui_lang'));
 
   const supabase = getAnonClient();
 
@@ -31,7 +46,7 @@ export async function GET(request: Request) {
     .select(
       `id, title, description, language, category,
        source_platform, source_show, source_episode, source_url,
-       content_type, file_kind, is_free_import, file_version, file_updated_at, audio_storage_path,
+       content_type, file_kind, is_free_import, file_version, file_updated_at, translations, audio_storage_path,
        download_count, created_at,
        toshiki_tech_yomi_profiles(display_name)`,
       { count: 'exact' }
@@ -44,7 +59,7 @@ export async function GET(request: Request) {
   if (lang)     query = query.eq('language', lang);
   if (category) query = query.eq('category', category);
   if (platform) query = query.eq('source_platform', platform);
-  if (q)        query = query.ilike('title', `%${q}%`);
+  if (q)        query = query.ilike('search_title', `%${q}%`);
   if (fileKind) query = query.eq('file_kind', fileKind);
 
   query = sort === 'downloads'
@@ -63,8 +78,7 @@ export async function GET(request: Request) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const items = (data || []).map((row: any) => ({
     id:              row.id,
-    title:           row.title,
-    description:     row.description ?? null,
+    ...localized(row, uiLang),
     language:        row.language,
     category:        row.category ?? null,
     source_platform: row.source_platform ?? null,
