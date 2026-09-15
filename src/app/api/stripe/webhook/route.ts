@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { getStripe } from '@/lib/stripe';
+import { subscriptionIdForCharge } from '@/lib/stripe-subscriptions';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 // Raw body needed for Stripe signature verification — do not use Next.js body parser
@@ -15,6 +16,15 @@ function serviceClient() {
 
 // ─── DB helpers ──────────────────────────────────────────────────────────────
 
+/**
+ * Throws when a Supabase write failed. A handler that throws makes the route
+ * answer 500, so Stripe retries the event instead of it being lost silently.
+ */
+function must<T extends { error: { message: string } | null }>(result: T, context: string): T {
+  if (result.error) throw new Error(`${context}: ${result.error.message}`);
+  return result;
+}
+
 interface UpsertParams {
   userId: string;
   product: string;
@@ -28,7 +38,7 @@ interface UpsertParams {
 }
 
 async function upsertSubscription(svc: SupabaseClient, p: UpsertParams) {
-  await svc.from('toshiki_tech_subscriptions').upsert(
+  must(await svc.from('toshiki_tech_subscriptions').upsert(
     {
       user_id:                   p.userId,
       product:                   p.product,
@@ -42,7 +52,7 @@ async function upsertSubscription(svc: SupabaseClient, p: UpsertParams) {
       updated_at:                new Date().toISOString(),
     },
     { onConflict: 'user_id,product' }
-  );
+  ), 'upsert subscription');
 }
 
 /**
@@ -51,9 +61,12 @@ async function upsertSubscription(svc: SupabaseClient, p: UpsertParams) {
  */
 async function syncProStatus(svc: SupabaseClient, userId: string, product: string, isPro: boolean) {
   if (product === 'yomiplay') {
-    await svc
-      .from('toshiki_tech_yomi_profiles')
-      .upsert({ id: userId, is_pro: isPro }, { onConflict: 'id', ignoreDuplicates: false });
+    must(
+      await svc
+        .from('toshiki_tech_yomi_profiles')
+        .upsert({ id: userId, is_pro: isPro }, { onConflict: 'id', ignoreDuplicates: false }),
+      'sync yomiplay is_pro'
+    );
   }
   // yominote:
   // if (product === 'yominote') { ... }
@@ -104,36 +117,74 @@ async function handleChargeRefunded(svc: SupabaseClient, charge: Stripe.Charge) 
   // Only act on full refunds — partial refunds don't necessarily mean access should end
   if (!charge.refunded) return;
 
-  const stripeCustomerId = typeof charge.customer === 'string' ? charge.customer : charge.customer?.id;
-  if (!stripeCustomerId) return;
+  // Lifetime purchase: the charge's PaymentIntent is the one stored on the row
+  const paymentIntentId =
+    typeof charge.payment_intent === 'string' ? charge.payment_intent : charge.payment_intent?.id;
+  if (paymentIntentId) {
+    const { data: lifetime } = must(
+      await svc
+        .from('toshiki_tech_subscriptions')
+        .select('user_id, product')
+        .eq('stripe_payment_intent_id', paymentIntentId)
+        .maybeSingle(),
+      'find lifetime purchase'
+    );
+    if (lifetime) {
+      await cancelSubscriptionRow(svc, lifetime.user_id, lifetime.product);
+      return;
+    }
+  }
 
-  // Find all active subscriptions for this Stripe customer
-  const { data: rows } = await svc
-    .from('toshiki_tech_subscriptions')
-    .select('user_id, product, is_lifetime')
-    .eq('stripe_customer_id', stripeCustomerId)
-    .eq('status', 'active');
+  // Subscription invoice: only the subscription this charge paid for is affected.
+  // Other subscriptions of the same customer (another product, or a duplicate
+  // that is still billing) keep their state.
+  const subscriptionId = await subscriptionIdForCharge(charge);
+  if (!subscriptionId) return;
 
-  if (!rows || rows.length === 0) return;
+  // A fully refunded subscription gives no access, so it must stop billing too —
+  // otherwise the customer keeps paying every month without Pro. Stripe then
+  // sends customer.subscription.deleted, which also lands in the handler below.
+  const stripeSub = await getStripe().subscriptions.retrieve(subscriptionId);
+  if (stripeSub.status !== 'canceled' && stripeSub.status !== 'incomplete_expired') {
+    await getStripe().subscriptions.cancel(subscriptionId);
+  }
 
-  for (const row of rows) {
+  const { data: row } = must(
+    await svc
+      .from('toshiki_tech_subscriptions')
+      .select('user_id, product, is_lifetime')
+      .eq('stripe_subscription_id', subscriptionId)
+      .maybeSingle(),
+    'find refunded subscription'
+  );
+  // Never downgrade a lifetime user through a subscription refund
+  if (row && !row.is_lifetime) {
+    await cancelSubscriptionRow(svc, row.user_id, row.product);
+  }
+}
+
+async function cancelSubscriptionRow(svc: SupabaseClient, userId: string, product: string) {
+  must(
     await svc
       .from('toshiki_tech_subscriptions')
       .update({ status: 'canceled', updated_at: new Date().toISOString() })
-      .eq('user_id', row.user_id)
-      .eq('product', row.product);
-
-    await syncProStatus(svc, row.user_id, row.product, false);
-  }
+      .eq('user_id', userId)
+      .eq('product', product),
+    'cancel subscription row'
+  );
+  await syncProStatus(svc, userId, product, false);
 }
 
 async function handleSubscriptionChange(svc: SupabaseClient, sub: Stripe.Subscription) {
   // Look up our record via stripe_subscription_id (more reliable than metadata)
-  const { data: dbSub } = await svc
-    .from('toshiki_tech_subscriptions')
-    .select('user_id, product, is_lifetime')
-    .eq('stripe_subscription_id', sub.id)
-    .single();
+  const { data: dbSub } = must(
+    await svc
+      .from('toshiki_tech_subscriptions')
+      .select('user_id, product, is_lifetime')
+      .eq('stripe_subscription_id', sub.id)
+      .maybeSingle(),
+    'find subscription'
+  );
 
   if (!dbSub) return; // not ours
 
@@ -141,7 +192,7 @@ async function handleSubscriptionChange(svc: SupabaseClient, sub: Stripe.Subscri
   if (dbSub.is_lifetime) return;
 
   const active = isSubscriptionActive(sub.status);
-  await svc
+  must(await svc
     .from('toshiki_tech_subscriptions')
     .update({
       status:                sub.status,
@@ -151,7 +202,7 @@ async function handleSubscriptionChange(svc: SupabaseClient, sub: Stripe.Subscri
           : undefined,
       updated_at:            new Date().toISOString(),
     })
-    .eq('stripe_subscription_id', sub.id);
+    .eq('stripe_subscription_id', sub.id), 'update subscription');
 
   await syncProStatus(svc, dbSub.user_id, dbSub.product, active);
 }
@@ -199,9 +250,11 @@ export async function POST(request: Request) {
         break;
     }
   } catch (err) {
-    console.error(`[webhook] Error handling ${event.type}:`, err);
-    // Return 200 so Stripe doesn't keep retrying transient errors.
-    // Real idempotency bugs should be fixed in the handler above.
+    // Answer 500 so Stripe retries the event (with backoff, for up to three days).
+    // Swallowing errors here is how a paid subscription ended up without Pro.
+    // Every handler is safe to run again for the same event.
+    console.error(`[webhook] Error handling ${event.type} (${event.id}):`, err);
+    return NextResponse.json({ error: 'Webhook handler failed' }, { status: 500 });
   }
 
   return NextResponse.json({ received: true });

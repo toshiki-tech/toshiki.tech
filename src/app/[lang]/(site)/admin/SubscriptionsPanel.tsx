@@ -25,9 +25,12 @@ export default function SubscriptionsPanel({ subscriptions }: { subscriptions: S
   const [items, setItems] = useState(subscriptions);
   const [revoking, setRevoking] = useState<string | null>(null);
 
-  async function handleRevoke(userId: string, product: string) {
+  async function handleRevoke(userId: string, product: string, isLifetime: boolean) {
     const key = `${userId}:${product}`;
-    if (!confirm(`Revoke Pro for this user (${product})?`)) return;
+    const warning = isLifetime
+      ? `Revoke lifetime Pro for this user (${product})?\n\nThis does not refund the purchase — issue a refund in the Stripe Dashboard if needed.`
+      : `Revoke Pro for this user (${product})?\n\nThis also cancels their Stripe subscription immediately, so they are not billed again. It does not refund past payments.`;
+    if (!confirm(warning)) return;
     setRevoking(key);
 
     const res = await fetch('/api/yomiplay/admin/revoke-pro', {
@@ -36,7 +39,10 @@ export default function SubscriptionsPanel({ subscriptions }: { subscriptions: S
       body: JSON.stringify({ userId, product }),
     });
 
-    if (res.ok) {
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      alert('Failed: ' + (err.error || 'Unknown error'));
+    } else {
       setItems(prev =>
         prev.map(s =>
           s.user_id === userId && s.product === product
@@ -94,7 +100,7 @@ export default function SubscriptionsPanel({ subscriptions }: { subscriptions: S
                     <td className="px-4 py-3">
                       {sub.status === 'active' && (
                         <button
-                          onClick={() => handleRevoke(sub.user_id, sub.product)}
+                          onClick={() => handleRevoke(sub.user_id, sub.product, sub.is_lifetime)}
                           disabled={isRevoking}
                           className="flex items-center gap-1 text-xs text-red-500 hover:text-red-600 disabled:opacity-40 transition-colors"
                         >

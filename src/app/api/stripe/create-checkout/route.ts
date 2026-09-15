@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { getStripe } from '@/lib/stripe';
+import { listBillingSubscriptions } from '@/lib/stripe-subscriptions';
 import { getPriceId, getPlanMode, isValidProduct, isValidPlan, type ProductKey } from '@/lib/stripe-products';
 import { extractBearerToken, getUserFromBearer } from '@/lib/supabase-bearer';
 import { createClient } from '@supabase/supabase-js';
@@ -56,13 +57,27 @@ export async function POST(request: Request) {
 
   const svc = serviceClient();
 
-  // 3. Get or create Stripe Customer (one per user, shared across all products)
+  // 3. A lifetime owner has nothing left to buy for this product
+  const { data: currentSub } = await svc
+    .from('toshiki_tech_subscriptions')
+    .select('status, is_lifetime')
+    .eq('user_id', user.id)
+    .eq('product', product)
+    .maybeSingle();
+  if (currentSub?.is_lifetime && currentSub.status === 'active') {
+    return NextResponse.json(
+      { error: 'You already own lifetime access.', code: 'already_lifetime' },
+      { status: 409, headers: CORS }
+    );
+  }
+
+  // 4. Get or create Stripe Customer (one per user, shared across all products)
   let stripeCustomerId: string;
   const { data: existing } = await svc
     .from('toshiki_tech_stripe_customers')
     .select('stripe_customer_id')
     .eq('user_id', user.id)
-    .single();
+    .maybeSingle();
 
   if (existing?.stripe_customer_id) {
     stripeCustomerId = existing.stripe_customer_id;
@@ -71,14 +86,59 @@ export async function POST(request: Request) {
       email: user.email,
       metadata: { supabase_user_id: user.id },
     });
-    stripeCustomerId = customer.id;
-    await svc.from('toshiki_tech_stripe_customers').insert({
+    const { error: insertError } = await svc.from('toshiki_tech_stripe_customers').insert({
       user_id: user.id,
-      stripe_customer_id: stripeCustomerId,
+      stripe_customer_id: customer.id,
     });
+    if (insertError) {
+      // A concurrent request may have stored a customer first: use that one, so
+      // the user never ends up split across two Stripe customers.
+      const { data: stored } = await svc
+        .from('toshiki_tech_stripe_customers')
+        .select('stripe_customer_id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      if (!stored?.stripe_customer_id) {
+        console.error('[create-checkout] Failed to store Stripe customer:', insertError);
+        await getStripe().customers.del(customer.id).catch(() => {});
+        return NextResponse.json({ error: 'Failed to prepare checkout' }, { status: 500, headers: CORS });
+      }
+      await getStripe().customers.del(customer.id).catch(() => {});
+      stripeCustomerId = stored.stripe_customer_id;
+    } else {
+      stripeCustomerId = customer.id;
+    }
   }
 
-  // 4. Create Checkout Session
+  // 5. Refuse a second purchase while a subscription still bills this customer.
+  //    Stripe is checked rather than our table, which can lag behind or point at
+  //    a different subscription. The customer is shared across products, so only
+  //    this product's subscriptions count (ones without metadata are ours too).
+  const billing = (await listBillingSubscriptions(stripeCustomerId)).filter(
+    (sub) => !sub.metadata?.product || sub.metadata.product === product
+  );
+  if (billing.length > 0) {
+    return NextResponse.json(
+      {
+        error: 'You already have a subscription. Manage it from the subscription settings instead of buying again.',
+        code: 'already_subscribed',
+      },
+      { status: 409, headers: CORS }
+    );
+  }
+
+  // 6. Close checkout pages opened earlier but never paid, so two tabs (or a
+  //    double tap) cannot both complete into separate subscriptions.
+  const openSessions = await getStripe().checkout.sessions.list({
+    customer: stripeCustomerId,
+    status: 'open',
+    limit: 100,
+  });
+  await Promise.all(
+    openSessions.data.map((session) => getStripe().checkout.sessions.expire(session.id).catch(() => {}))
+  );
+
+  // 7. Create Checkout Session
   const mode = getPlanMode(product as ProductKey, plan);
   const priceId = getPriceId(product as ProductKey, plan);
   const metadata = { supabase_user_id: user.id, product, plan };

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
+import { getStripe } from '@/lib/stripe';
 
 function getSessionClient() {
   const cookieStore = cookies();
@@ -43,20 +44,59 @@ export async function POST(request: Request) {
 
   const svc = serviceClient();
 
-  // Cancel subscription record
-  await svc
+  const { data: sub, error: readError } = await svc
+    .from('toshiki_tech_subscriptions')
+    .select('stripe_subscription_id, is_lifetime')
+    .eq('user_id', userId)
+    .eq('product', product)
+    .maybeSingle();
+  if (readError) {
+    return NextResponse.json({ error: 'Failed to read subscription' }, { status: 500 });
+  }
+
+  // Stop the billing first. Revoking only in our table used to leave Stripe
+  // charging every month for a subscription that no longer gave Pro. If Stripe
+  // refuses, nothing is changed here, so the admin can retry.
+  // Lifetime purchases are one-off payments: there is nothing to cancel, and a
+  // refund has to be issued from the Stripe Dashboard.
+  let stripeCanceled = false;
+  if (sub?.stripe_subscription_id && !sub.is_lifetime) {
+    try {
+      const stripeSub = await getStripe().subscriptions.retrieve(sub.stripe_subscription_id);
+      if (stripeSub.status !== 'canceled' && stripeSub.status !== 'incomplete_expired') {
+        await getStripe().subscriptions.cancel(sub.stripe_subscription_id);
+        stripeCanceled = true;
+      }
+    } catch (err) {
+      console.error('[revoke-pro] Stripe cancel failed:', err);
+      return NextResponse.json(
+        { error: 'Could not cancel the Stripe subscription; Pro was not revoked.' },
+        { status: 502 }
+      );
+    }
+  }
+
+  const { error: updateError } = await svc
     .from('toshiki_tech_subscriptions')
     .update({ status: 'canceled', updated_at: new Date().toISOString() })
     .eq('user_id', userId)
     .eq('product', product);
 
-  // Sync is_pro = false in product profile table
-  if (product === 'yomiplay') {
-    await svc
-      .from('toshiki_tech_yomi_profiles')
-      .update({ is_pro: false })
-      .eq('id', userId);
+  const { error: profileError } = product === 'yomiplay'
+    ? await svc.from('toshiki_tech_yomi_profiles').update({ is_pro: false }).eq('id', userId)
+    : { error: null };
+
+  if (updateError || profileError) {
+    console.error('[revoke-pro] DB update failed:', updateError ?? profileError);
+    return NextResponse.json(
+      {
+        error: stripeCanceled
+          ? 'Stripe subscription was canceled, but updating the database failed. Reload and retry.'
+          : 'Failed to revoke Pro',
+      },
+      { status: 500 }
+    );
   }
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, stripeCanceled, isLifetime: sub?.is_lifetime === true });
 }
