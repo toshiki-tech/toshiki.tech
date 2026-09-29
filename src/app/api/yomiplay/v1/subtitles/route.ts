@@ -62,6 +62,9 @@ export async function GET(request: Request) {
   if (q)        query = query.ilike('search_title', `%${q}%`);
   if (fileKind) query = query.eq('file_kind', fileKind);
 
+  // Pinned items (sort_order > 0) always come first, matching the community page;
+  // remainder honours the requested sort.
+  query = query.order('sort_order', { ascending: false });
   query = sort === 'downloads'
     ? query.order('download_count', { ascending: false })
     : query.order('created_at',     { ascending: false });
