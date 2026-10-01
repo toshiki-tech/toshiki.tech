@@ -98,18 +98,38 @@ async function refundUnusedPeriod(sub: Stripe.Subscription, reason: string): Pro
 }
 
 /**
+ * Which subscription survives when several of this product bill the customer at once.
+ * Every checkout webhook must reach the same answer, or two racing checkouts each
+ * keep their own and cancel the other, leaving the customer with nothing: the oldest
+ * live (active / trialing) one wins. `current` is the subscription the webhook is
+ * handling, counted even if the list has not caught up with it yet.
+ */
+export async function subscriptionToKeep(
+  customerId: string,
+  product: string,
+  current: Stripe.Subscription
+): Promise<string | null> {
+  const isLive = (sub: Stripe.Subscription) => sub.status === 'active' || sub.status === 'trialing';
+  const live = (await listProductBillingSubscriptions(customerId, product)).filter(isLive);
+  if (isLive(current) && !live.some((sub) => sub.id === current.id)) live.push(current);
+  live.sort((a, b) => a.created - b.created || a.id.localeCompare(b.id));
+  return live[0]?.id ?? null;
+}
+
+/**
  * Last line of defence against double billing. Checkout refuses a second purchase
  * while a subscription is billing, so only a race (two checkouts opened at the same
  * moment) gets here. Keep the subscription just paid; cancel every other one of the
  * same product now and refund its unused time — the duplicate is our fault, not the
  * customer's choice. Call it only after the row points at `keepSubscriptionId`, so the
  * customer.subscription.deleted events of the duplicates find no row and change nothing.
+ * `keepSubscriptionId` null cancels them all (the user already owns lifetime).
  * Returns the ids it canceled.
  */
 export async function cancelDuplicateSubscriptions(
   customerId: string,
   product: string,
-  keepSubscriptionId: string
+  keepSubscriptionId: string | null
 ): Promise<string[]> {
   const duplicates = (await listProductBillingSubscriptions(customerId, product))
     .filter((sub) => sub.id !== keepSubscriptionId);
@@ -118,7 +138,7 @@ export async function cancelDuplicateSubscriptions(
     // refund, skips it, and only cancels
     const refunded = await refundUnusedPeriod(sub, 'duplicate_subscription');
     await getStripe().subscriptions.cancel(sub.id, {
-      cancellation_details: { comment: `Duplicate of ${keepSubscriptionId}` },
+      cancellation_details: { comment: keepSubscriptionId ? `Duplicate of ${keepSubscriptionId}` : 'Already owns lifetime' },
     });
     console.error(
       `[ALERT][billing] duplicate subscription ${sub.id} canceled for customer ${customerId} ` +

@@ -5,6 +5,7 @@ import {
   cancelDuplicateSubscriptions,
   cancelSubscriptionsReplacedByLifetime,
   subscriptionIdForCharge,
+  subscriptionToKeep,
 } from '@/lib/stripe-subscriptions';
 import { isValidProduct, planForPriceId } from '@/lib/stripe-products';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
@@ -92,13 +93,39 @@ async function handleCheckoutCompleted(svc: SupabaseClient, session: Stripe.Chec
   if (!supabase_user_id || !product || !plan) return;
 
   if (session.mode === 'subscription' && session.subscription) {
+    const customerId = session.customer as string;
     const sub = await getStripe().subscriptions.retrieve(session.subscription as string) as Stripe.Subscription;
+
+    // Checkout refuses lifetime owners, so only a subscription checkout racing the
+    // lifetime one gets here: it must not turn the lifetime row back into monthly
+    const { data: current } = must(
+      await svc
+        .from('toshiki_tech_subscriptions')
+        .select('status, is_lifetime')
+        .eq('user_id', supabase_user_id)
+        .eq('product', product)
+        .maybeSingle(),
+      'read current subscription'
+    );
+    if (current?.is_lifetime && current.status === 'active') {
+      await cancelDuplicateSubscriptions(customerId, product, null);
+      return;
+    }
+
+    // Two checkouts completed in a race: only the webhook of the subscription that is
+    // kept writes the row; the other one just makes sure its own subscription is gone
+    const keepId = await subscriptionToKeep(customerId, product, sub);
+    if (keepId !== sub.id) {
+      if (keepId) await cancelDuplicateSubscriptions(customerId, product, keepId);
+      return;
+    }
+
     await upsertSubscription(svc, {
       userId:               supabase_user_id,
       product,
       plan,
       status:               'active',
-      stripeCustomerId:     session.customer as string,
+      stripeCustomerId:     customerId,
       stripeSubscriptionId: sub.id,
       currentPeriodEnd:     sub.items.data[0]
                               ? new Date(sub.items.data[0].current_period_end * 1000).toISOString()
@@ -107,7 +134,7 @@ async function handleCheckoutCompleted(svc: SupabaseClient, session: Stripe.Chec
     });
     await syncProStatus(svc, supabase_user_id, product, true);
     // The row now points at this subscription; any other one still billing is a duplicate
-    await cancelDuplicateSubscriptions(session.customer as string, product, sub.id);
+    await cancelDuplicateSubscriptions(customerId, product, sub.id);
   }
 
   if (session.mode === 'payment' && plan === 'lifetime') {
