@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSupabase, getAuthUser } from '@/lib/supabase-server-api';
 import { getFeatureFlags } from '@/lib/yomi-feature-flags';
+import { isProActive } from '@/lib/pro-status';
 
 export async function POST(request: Request) {
   const supabase = getSupabase();
@@ -18,12 +19,21 @@ export async function POST(request: Request) {
   // Get user profile
   const { data: profile } = await supabase
     .from('toshiki_tech_yomi_profiles')
-    .select('points, is_pro')
+    .select('points')
     .eq('id', user.id)
     .single();
 
   if (!profile) return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
-  if (profile.is_pro) return NextResponse.json({ error: 'Already a Pro member' }, { status: 400 });
+
+  // Pro comes from the subscriptions table: profiles.is_pro stays true after a
+  // manual grant expires, which would lock that user out of redeeming again
+  const { data: sub } = await supabase
+    .from('toshiki_tech_subscriptions')
+    .select('status, is_lifetime, current_period_end')
+    .eq('user_id', user.id)
+    .eq('product', 'yomiplay')
+    .maybeSingle();
+  if (isProActive(sub)) return NextResponse.json({ error: 'Already a Pro member' }, { status: 400 });
 
   // Check threshold
   const { data: config } = await supabase

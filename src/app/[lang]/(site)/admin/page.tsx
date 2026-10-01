@@ -162,7 +162,7 @@ export default async function AdminPage({ params: { lang } }: { params: { lang: 
   // Fetch all subscriptions (no FK to yomi_profiles, so query separately)
   const { data: subscriptions } = await svc
     .from('toshiki_tech_subscriptions')
-    .select('user_id, product, plan, status, current_period_end, is_lifetime, updated_at')
+    .select('user_id, product, plan, status, source, note, current_period_end, is_lifetime, updated_at')
     .order('updated_at', { ascending: false })
     .limit(100);
 
@@ -174,6 +174,14 @@ export default async function AdminPage({ params: { lang } }: { params: { lang: 
   const subProfileMap: Record<string, string | null> = Object.fromEntries(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (subProfiles ?? []).map((p: any) => [p.id as string, (p.display_name ?? null) as string | null])
+  );
+  // Emails live in auth.users; the RPC comes from supabase/manual_pro_grants.sql
+  const { data: subEmails } = subUserIds.length > 0
+    ? await svc.rpc('toshiki_tech_user_emails', { p_ids: subUserIds })
+    : { data: [] };
+  const subEmailMap: Record<string, string | null> = Object.fromEntries(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ((subEmails ?? []) as any[]).map((r: any) => [r.id as string, (r.email ?? null) as string | null])
   );
 
   // Community download stats: total + top 10
@@ -209,9 +217,12 @@ export default async function AdminPage({ params: { lang } }: { params: { lang: 
   const flatSubs = (subscriptions ?? []).map((s: any) => ({
     user_id:            s.user_id,
     display_name:       subProfileMap[s.user_id] ?? null,
+    email:              subEmailMap[s.user_id] ?? null,
     product:            s.product,
     plan:               s.plan,
     status:             s.status,
+    source:             s.source ?? 'stripe',
+    note:               s.note ?? null,
     current_period_end: s.current_period_end,
     is_lifetime:        s.is_lifetime,
     updated_at:         s.updated_at,

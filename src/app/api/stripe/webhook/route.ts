@@ -49,6 +49,10 @@ async function upsertSubscription(svc: SupabaseClient, p: UpsertParams) {
       stripe_payment_intent_id:  p.stripePaymentIntentId  ?? null,
       current_period_end:        p.currentPeriodEnd       ?? null,
       is_lifetime:               p.isLifetime             ?? false,
+      // A paid checkout replaces any manual (admin / points) grant on the same row
+      source:                    'stripe',
+      granted_by:                null,
+      note:                      null,
       updated_at:                new Date().toISOString(),
     },
     { onConflict: 'user_id,product' }

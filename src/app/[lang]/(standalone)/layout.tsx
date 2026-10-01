@@ -8,6 +8,7 @@ import { ChevronDown, FolderOpen, LogOut, Shield, CreditCard, Loader2 } from 'lu
 import Logo from '@/components/Logo';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { createClient } from '@/lib/supabase-browser';
+import { isProActive } from '@/lib/pro-status';
 import LangSwitcher from '@/components/LangSwitcher';
 
 function AuthNav({ lang }: { lang: Locale }) {
@@ -23,17 +24,24 @@ function AuthNav({ lang }: { lang: Locale }) {
   useEffect(() => {
     if (!user) return;
     const supabase = createClient();
-    // Fetch points and pro status
     supabase
       .from('toshiki_tech_yomi_profiles')
-      .select('is_pro, role')
+      .select('role')
       .eq('id', user.id)
       .single()
       .then(({ data }) => {
-        if (data) {
-          setIsPro(data.is_pro || false);
-          setIsAdmin(data.role === 'admin');
-        }
+        if (data) setIsAdmin(data.role === 'admin');
+      });
+    // The billing portal only manages Stripe subscriptions, not admin / points grants.
+    // '*' so this keeps working before manual_pro_grants.sql adds `source`.
+    supabase
+      .from('toshiki_tech_subscriptions')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('product', 'yomiplay')
+      .maybeSingle()
+      .then(({ data }) => {
+        setIsPro(isProActive(data) && (data?.source ?? 'stripe') === 'stripe');
       });
     // Trigger daily-login bonus if points feature is enabled
     fetch('/api/yomiplay/feature-flags')

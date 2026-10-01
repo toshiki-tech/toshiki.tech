@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase-browser';
 import { useAuth } from '@/contexts/AuthContext';
+import { isProActive } from '@/lib/pro-status';
 import Link from 'next/link';
 import { Crown, Star, ChevronDown, ChevronUp, ExternalLink, ImagePlus, ShieldCheck } from 'lucide-react';
 
@@ -151,15 +152,21 @@ export default function PointsPanel({ lang, allowProRedemption }: { lang: string
     // Fetch profile
     supabase
       .from('toshiki_tech_yomi_profiles')
-      .select('points, is_pro')
+      .select('points')
       .eq('id', user.id)
       .single()
       .then(({ data }) => {
-        if (data) {
-          setPoints(data.points || 0);
-          setIsPro(data.is_pro || false);
-        }
+        if (data) setPoints(data.points || 0);
       });
+
+    // Pro status from the subscriptions table: profiles.is_pro is not cleared when a grant expires
+    supabase
+      .from('toshiki_tech_subscriptions')
+      .select('status, is_lifetime, current_period_end')
+      .eq('user_id', user.id)
+      .eq('product', 'yomiplay')
+      .maybeSingle()
+      .then(({ data }) => setIsPro(isProActive(data)));
 
     // Fetch threshold
     supabase

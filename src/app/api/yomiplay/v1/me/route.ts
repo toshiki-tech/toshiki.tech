@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { extractBearerToken, getUserFromBearer } from '@/lib/supabase-bearer';
+import { isProActive } from '@/lib/pro-status';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -28,17 +29,14 @@ export async function GET(request: Request) {
   // Query the unified subscriptions table for this user + product
   const { data: sub } = await supabase
     .from('toshiki_tech_subscriptions')
-    .select('plan, status, cancel_at_period_end, current_period_end, is_lifetime, updated_at')
+    // '*' rather than a column list: if this deploys before manual_pro_grants.sql runs,
+    // naming the missing `source` column would fail the query and report everyone as Free
+    .select('*')
     .eq('user_id', user.id)
     .eq('product', 'yomiplay')
     .single();
 
-  const now = new Date();
-  const isPro = !!sub && (
-    sub.is_lifetime === true ||
-    (sub.status === 'active' &&
-      (sub.current_period_end == null || new Date(sub.current_period_end) > now))
-  );
+  const isPro = isProActive(sub);
 
   return NextResponse.json(
     {
@@ -47,6 +45,8 @@ export async function GET(request: Request) {
         is_pro:                isPro,
         plan:                  sub?.plan                 ?? null,
         status:                sub?.status               ?? null,
+        // stripe | admin | points — only 'stripe' has a billing portal to manage
+        source:                sub?.source               ?? null,
         cancel_at_period_end:  sub?.cancel_at_period_end ?? false,
         current_period_end:    sub?.current_period_end   ?? null,
         is_lifetime:           sub?.is_lifetime           ?? false,
