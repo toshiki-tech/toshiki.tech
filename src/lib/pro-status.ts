@@ -12,7 +12,8 @@ export interface ProRow {
  * lifetime, so status is checked first.
  */
 export function isProActive(sub: ProRow | null | undefined, now = new Date()): boolean {
-  if (!sub || sub.status !== 'active') return false;
+  // 'trialing' is a live subscription too (the webhook stores Stripe's status as-is)
+  if (!sub || (sub.status !== 'active' && sub.status !== 'trialing')) return false;
   if (sub.is_lifetime) return true;
   return sub.current_period_end == null || new Date(sub.current_period_end) > now;
 }

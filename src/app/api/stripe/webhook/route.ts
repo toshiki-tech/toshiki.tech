@@ -1,7 +1,12 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { getStripe } from '@/lib/stripe';
-import { subscriptionIdForCharge } from '@/lib/stripe-subscriptions';
+import {
+  cancelDuplicateSubscriptions,
+  cancelSubscriptionsReplacedByLifetime,
+  subscriptionIdForCharge,
+} from '@/lib/stripe-subscriptions';
+import { isValidProduct, planForPriceId } from '@/lib/stripe-products';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 // Raw body needed for Stripe signature verification — do not use Next.js body parser
@@ -101,6 +106,8 @@ async function handleCheckoutCompleted(svc: SupabaseClient, session: Stripe.Chec
       isLifetime:           false,
     });
     await syncProStatus(svc, supabase_user_id, product, true);
+    // The row now points at this subscription; any other one still billing is a duplicate
+    await cancelDuplicateSubscriptions(session.customer as string, product, sub.id);
   }
 
   if (session.mode === 'payment' && plan === 'lifetime') {
@@ -114,6 +121,12 @@ async function handleCheckoutCompleted(svc: SupabaseClient, session: Stripe.Chec
       isLifetime:              true,
     });
     await syncProStatus(svc, supabase_user_id, product, true);
+    // Upgrade from monthly / yearly: stop the old plan billing (the row is lifetime now,
+    // so its cancellation events are ignored). If Stripe fails, the 500 makes it retry.
+    const replaced = await cancelSubscriptionsReplacedByLifetime(session.customer as string, product);
+    if (replaced.length > 0) {
+      console.log(`[webhook] lifetime purchase replaced ${replaced.join(', ')} for user ${supabase_user_id}`);
+    }
   }
 }
 
@@ -196,9 +209,15 @@ async function handleSubscriptionChange(svc: SupabaseClient, sub: Stripe.Subscri
   if (dbSub.is_lifetime) return;
 
   const active = isSubscriptionActive(sub.status);
+  // A plan switch in the Customer Portal (monthly ⇄ yearly) only shows up as a new
+  // price on the subscription; without this the row kept saying 'monthly'
+  const plan = isValidProduct(dbSub.product)
+    ? planForPriceId(dbSub.product, sub.items.data[0]?.price?.id)
+    : null;
   must(await svc
     .from('toshiki_tech_subscriptions')
     .update({
+      ...(plan && plan !== 'lifetime' && { plan }),
       status:                sub.status,
       cancel_at_period_end:  sub.cancel_at_period_end ?? false,
       current_period_end:    sub.items.data[0]

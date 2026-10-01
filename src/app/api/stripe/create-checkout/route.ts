@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { getStripe } from '@/lib/stripe';
-import { listBillingSubscriptions } from '@/lib/stripe-subscriptions';
+import { listProductBillingSubscriptions } from '@/lib/stripe-subscriptions';
 import { getPriceId, getPlanMode, isValidProduct, isValidPlan, type ProductKey } from '@/lib/stripe-products';
 import { extractBearerToken, getUserFromBearer } from '@/lib/supabase-bearer';
 import { createClient } from '@supabase/supabase-js';
@@ -110,14 +110,16 @@ export async function POST(request: Request) {
     }
   }
 
-  // 5. Refuse a second purchase while a subscription still bills this customer.
+  // 5. Refuse a second subscription while one still bills this customer.
   //    Stripe is checked rather than our table, which can lag behind or point at
   //    a different subscription. The customer is shared across products, so only
   //    this product's subscriptions count (ones without metadata are ours too).
-  const billing = (await listBillingSubscriptions(stripeCustomerId)).filter(
-    (sub) => !sub.metadata?.product || sub.metadata.product === product
-  );
-  if (billing.length > 0) {
+  //    Lifetime is the exception: it is an upgrade, and the webhook cancels the
+  //    monthly / yearly plan once the lifetime payment has succeeded (not before,
+  //    so a failed payment never leaves the user with neither).
+  const mode = getPlanMode(product as ProductKey, plan);
+  const billing = await listProductBillingSubscriptions(stripeCustomerId, product);
+  if (mode === 'subscription' && billing.length > 0) {
     return NextResponse.json(
       {
         error: 'You already have a subscription. Manage it from the subscription settings instead of buying again.',
@@ -139,7 +141,6 @@ export async function POST(request: Request) {
   );
 
   // 7. Create Checkout Session
-  const mode = getPlanMode(product as ProductKey, plan);
   const priceId = getPriceId(product as ProductKey, plan);
   const metadata = { supabase_user_id: user.id, product, plan };
 

@@ -51,3 +51,17 @@ export function isValidProduct(p: string): p is ProductKey {
 export function isValidPlan(product: ProductKey, plan: string): boolean {
   return plan in STRIPE_PRODUCTS[product].plans;
 }
+
+/**
+ * Reverse lookup: which plan a Stripe price belongs to. Used when a subscription
+ * changes price in the Customer Portal (monthly ⇄ yearly), where only the new
+ * price id is known. Returns null for prices that are not configured here.
+ */
+export function planForPriceId(product: ProductKey, priceId: string | null | undefined): string | null {
+  if (!priceId) return null;
+  const plans = STRIPE_PRODUCTS[product].plans as Record<string, { priceEnvKey: string }>;
+  for (const [plan, cfg] of Object.entries(plans)) {
+    if (process.env[cfg.priceEnvKey] === priceId) return plan;
+  }
+  return null;
+}
