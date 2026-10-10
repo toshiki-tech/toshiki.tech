@@ -29,7 +29,7 @@ const content = {
       },
       {
         title: '5. Usage Statistics & Anonymized Data',
-        body: 'We may collect anonymous usage data (e.g., device model, system version, app version) to help us diagnose issues and optimize the user experience. No personally identifiable information is collected during this process.'
+        body: 'To decide what to improve, the app sends anonymous usage events to our own server (toshiki.tech) — for example which import method was used, whether recognition finished, or whether a review session was completed — together with the app version, system version, device type, interface language and subscription status. Events are linked only to a random ID generated when the app is installed; we do not use advertising identifiers, do not link this data to your account, and do not use it for tracking or advertising. Your subtitles, titles, file names, vocabulary content and search terms are never included. We store the country derived from the network connection, not your IP address. Raw events are deleted after 180 days. You can turn this off at any time in the app under Settings › Data › Help Improve YomiPlay.'
       },
       {
         title: '6. Subscriptions & In-App Purchases',
@@ -107,7 +107,7 @@ const content = {
       },
       {
         title: '5. 匿名统计数据',
-        body: '我们可能会收集匿名的设备信息（如型号、系统版本）用于优化应用性能和诊断错误，这些数据不包含任何个人身份信息。'
+        body: '为了决定先改进什么，App 会把匿名的功能使用事件发送到我们自己的服务器（toshiki.tech），例如用了哪种导入方式、识别是否完成、是否完成一次复习，以及 App 版本、系统版本、设备类型、界面语言和是否订阅。这些事件只关联一个安装 App 时随机生成的编号：不使用广告标识符，不与您的账号关联，也不用于追踪或广告。字幕、标题、文件名、词条内容和搜索词一律不包含。我们只保存由网络连接推断出的国家/地区，不保存 IP 地址。原始事件 180 天后删除。您可以随时在 App 的「设置 › 数据 › 帮助改进 YomiPlay」中关闭。'
       },
       {
         title: '6. 订阅与支付',
@@ -185,7 +185,7 @@ const content = {
       },
       {
         title: '5. 匿名統計資料',
-        body: '我們可能會收集匿名的裝置資訊（如型號、系統版本）用於優化應用程式性能和診斷錯誤，這些資料不包含任何個人身份資訊。'
+        body: '為了決定優先改進哪些功能，App 會將匿名的功能使用事件傳送到我們自己的伺服器（toshiki.tech），例如使用了哪種匯入方式、辨識是否完成、是否完成一次複習，以及 App 版本、系統版本、裝置類型、介面語言與是否訂閱。這些事件只關聯一個安裝 App 時隨機產生的編號：不使用廣告識別碼，不與您的帳號關聯，也不用於追蹤或廣告。字幕、標題、檔案名稱、詞條內容與搜尋字詞一律不包含。我們只保存由網路連線推斷出的國家/地區，不保存 IP 位址。原始事件 180 天後刪除。您可以隨時在 App 的「設定 › 資料 › 幫助改進 YomiPlay」中關閉。'
       },
       {
         title: '6. 訂閱與支付',
@@ -263,7 +263,7 @@ const content = {
       },
       {
         title: '5. 匿名統計データ',
-        body: 'アプリのパフォーマンス向上やエラー診断のため、匿名の端末情報（モデル名、システムバージョン）を収集する場合があります。個人を特定できる情報は含まれません。'
+        body: '改善の優先順位を決めるため、アプリは匿名の機能利用イベントを当社のサーバー（toshiki.tech）に送信します。たとえば、どのインポート方法を使ったか、文字起こしが完了したか、復習を1回終えたかといった情報と、アプリのバージョン、OSのバージョン、端末の種類、表示言語、サブスクリプションの有無です。イベントはアプリのインストール時にランダムに生成されるIDにのみ紐づき、広告識別子は使用せず、アカウントとも紐づけず、トラッキングや広告には使用しません。字幕、タイトル、ファイル名、単語帳の内容、検索語は一切含まれません。保存するのはネットワーク接続から推定した国・地域のみで、IPアドレスは保存しません。元のイベントは180日後に削除されます。アプリの「設定 › データ › YomiPlay の改善に協力」からいつでもオフにできます。'
       },
       {
         title: '6. 定期購読と支払い',

@@ -15,6 +15,7 @@ import UploadAdminControls from './UploadAdminControls';
 import FeatureFlagsPanel from './FeatureFlagsPanel';
 import ApkReleasePanel from './ApkReleasePanel';
 import SubscriptionsPanel from './SubscriptionsPanel';
+import AppUsagePanel from './AppUsagePanel';
 import FileUpdateActions from './FileUpdateActions';
 import ReplaceUploadFile from '@/components/ReplaceUploadFile';
 import { primaryFileKind } from '@/lib/yomi-upload-files';
@@ -604,6 +605,8 @@ export default async function AdminPage({ params: { lang } }: { params: { lang: 
           </div>
         </div>
       </section>
+
+      <AppUsagePanel />
 
       <FeatureFlagsPanel initialFlags={featureFlags} />
 
