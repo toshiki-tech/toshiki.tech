@@ -47,3 +47,21 @@ CREATE INDEX IF NOT EXISTS idx_apk_downloads_version
 
 CREATE INDEX IF NOT EXISTS idx_apk_downloads_date
   ON yomiplay_apk_downloads (downloaded_at DESC);
+
+
+-- 4. Download counts per version for the admin page (service role only)
+-- ------------------------------------------------------------
+-- Counted in the database: fetching the rows and counting in the page stopped at the API's
+-- 1000-row limit.
+CREATE OR REPLACE FUNCTION yomiplay_apk_download_counts()
+RETURNS TABLE (version_code integer, version_name text, downloads bigint)
+LANGUAGE sql
+STABLE
+SECURITY INVOKER
+AS $$
+  SELECT version_code, max(version_name), count(*)
+  FROM yomiplay_apk_downloads
+  GROUP BY version_code
+  ORDER BY version_code DESC;
+$$;
+REVOKE ALL ON FUNCTION yomiplay_apk_download_counts() FROM PUBLIC, anon, authenticated;

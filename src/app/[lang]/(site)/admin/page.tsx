@@ -17,6 +17,8 @@ import ApkReleasePanel from './ApkReleasePanel';
 import SubscriptionsPanel from './SubscriptionsPanel';
 import AppUsagePanel from './AppUsagePanel';
 import AdminRefreshButton from './AdminRefreshButton';
+import AdminTabs from './AdminTabs';
+import SortableTable from './SortableTable';
 import FileUpdateActions from './FileUpdateActions';
 import ReplaceUploadFile from '@/components/ReplaceUploadFile';
 import { primaryFileKind } from '@/lib/yomi-upload-files';
@@ -203,17 +205,19 @@ export default async function AdminPage({ params: { lang } }: { params: { lang: 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     .reduce((sum: number, r: any) => sum + (r.download_count ?? 0), 0);
 
-  // APK download stats: total + per version
-  const { data: apkStats } = await svc
-    .from('yomiplay_apk_downloads')
-    .select('version_name')
-    .order('downloaded_at', { ascending: false });
-
-  const apkTotal = apkStats?.length ?? 0;
+  // APK download stats: total + per version, counted in the database
+  // (supabase/apk_releases.sql → yomiplay_apk_download_counts; fetching rows stopped at 1000)
+  const { data: apkCounts } = await svc.rpc('yomiplay_apk_download_counts');
   const apkByVersion: Record<string, number> = {};
-  for (const row of apkStats ?? []) {
-    apkByVersion[row.version_name] = (apkByVersion[row.version_name] ?? 0) + 1;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  for (const row of (apkCounts ?? []) as any[]) {
+    apkByVersion[row.version_name] = (apkByVersion[row.version_name] ?? 0) + Number(row.downloads);
   }
+  const apkTotal = Object.values(apkByVersion).reduce((sum, n) => sum + n, 0);
+
+  // Items waiting for an admin decision (badge on the Moderation tab)
+  const moderationCount =
+    (reports?.length ?? 0) + (pendingUploads?.length ?? 0) + (pendingFileUpdates?.length ?? 0) + (proRequests?.length ?? 0);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const flatSubs = (subscriptions ?? []).map((s: any) => ({
@@ -238,398 +242,390 @@ export default async function AdminPage({ params: { lang } }: { params: { lang: 
       </div>
       <AdminRefreshButton />
 
-      {/* Pending Reports */}
-      <section className="mb-12">
-        <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-          <AlertTriangle size={18} />
-          Pending Reports ({(reports || []).length})
-        </h2>
+      <AdminTabs
+        tabs={[
+          {
+            id: 'moderation',
+            label: 'Moderation',
+            badge: moderationCount,
+            content: (
+        <>
+          {/* Pending Reports */}
+          <section className="mb-12">
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <AlertTriangle size={18} />
+              Pending Reports ({(reports || []).length})
+            </h2>
 
-        {!reports || reports.length === 0 ? (
-          <p className="text-[var(--muted-foreground)] py-8 text-center">No pending reports.</p>
-        ) : (
-          <div className="space-y-3">
-            {(reports as Report[]).map((report) => {
-              const date = new Date(report.created_at).toLocaleDateString('en-US', {
-                month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
-              });
+            {!reports || reports.length === 0 ? (
+              <p className="text-[var(--muted-foreground)] py-8 text-center">No pending reports.</p>
+            ) : (
+              <div className="space-y-3">
+                {(reports as Report[]).map((report) => {
+                  const date = new Date(report.created_at).toLocaleDateString('en-US', {
+                    month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
+                  });
 
-              return (
-                <div key={report.id} className="p-5 border border-yellow-500/20 rounded-2xl bg-yellow-500/5">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <p className="text-sm mb-1"><strong>Content:</strong>{' '}
-                        <Link href={`/${lang}/yomiplay/community/${report.upload_id}`} className="text-[rgb(var(--accent))] hover:underline">
-                          {report.upload_id}
-                        </Link>
-                      </p>
-                      <p className="text-sm mb-1"><strong>Reporter:</strong> {report.reporter_email}</p>
-                      <p className="text-sm text-[var(--muted-foreground)]">{report.reason}</p>
-                      <ReportActions reportId={report.id} uploadId={report.upload_id} />
-                    </div>
-                    <span className="text-xs text-[var(--muted-foreground)] shrink-0">{date}</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </section>
-
-      {/* Pending Uploads */}
-      <section className="mb-12">
-        <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-          <FileText size={18} />
-          Pending Review ({(pendingUploads || []).length})
-        </h2>
-
-        {!pendingUploads || pendingUploads.length === 0 ? (
-          <p className="text-[var(--muted-foreground)] py-8 text-center">No pending uploads.</p>
-        ) : (
-          <div className="space-y-3">
-            {(pendingUploads as AdminUpload[]).map((upload) => {
-              const platform = SOURCE_PLATFORMS.find(p => p.id === upload.source_platform);
-              const langLabel = CONTENT_LANGUAGES.find(l => l.id === upload.language);
-              const date = new Date(upload.created_at).toLocaleDateString('en-US', {
-                month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
-              });
-
-              return (
-                <div key={upload.id} className="p-5 border border-[var(--border)] rounded-2xl bg-[var(--card)]">
-                  <div className="flex flex-col gap-4">
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2 mb-1">
-                        <Link
-                          href={`/${lang}/yomiplay/community/${upload.id}`}
-                          className="font-bold break-words hover:text-[rgb(var(--accent))] transition-colors"
-                        >
-                          {upload.title}
-                        </Link>
-                        {upload.audio_storage_path && <Music size={14} className="text-green-600 shrink-0" />}
-                        {upload.file_kind === 'yomibook' && (
-                          <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600">
-                            Deck
-                          </span>
-                        )}
-                        <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-[rgb(var(--accent))]/10 text-[rgb(var(--accent))]">
-                          {upload.content_type}
-                        </span>
-                      </div>
-                      <div className="text-xs text-[var(--muted-foreground)] flex flex-wrap gap-2 items-center">
-                        <span>by {upload.toshiki_tech_yomi_profiles?.display_name || 'Unknown'}</span>
-                        {langLabel && <span>· {langLabel.label}</span>}
-                        {platform && <span>· {platform.name}</span>}
-                        {upload.category && <span>· {upload.category}</span>}
-                        <span>· {date}</span>
-                        {upload.is_hidden && (
-                          <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-600">Hidden</span>
-                        )}
-                        {upload.sort_order > 0 && (
-                          <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-[rgb(var(--accent))]/10 text-[rgb(var(--accent))]">Pin {upload.sort_order}</span>
-                        )}
-                      </div>
-                      {upload.tags && upload.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-2">
-                          {upload.tags.map((tag) => (
-                            <span key={tag} className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-[var(--muted)] text-[var(--muted-foreground)]">
-                              #{tag}
-                            </span>
-                          ))}
+                  return (
+                    <div key={report.id} className="p-5 border border-yellow-500/20 rounded-2xl bg-yellow-500/5">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <p className="text-sm mb-1"><strong>Content:</strong>{' '}
+                            <Link href={`/${lang}/yomiplay/community/${report.upload_id}`} className="text-[rgb(var(--accent))] hover:underline">
+                              {report.upload_id}
+                            </Link>
+                          </p>
+                          <p className="text-sm mb-1"><strong>Reporter:</strong> {report.reporter_email}</p>
+                          <p className="text-sm text-[var(--muted-foreground)]">{report.reason}</p>
+                          <ReportActions reportId={report.id} uploadId={report.upload_id} />
                         </div>
-                      )}
-                    </div>
-                    <div className="flex flex-wrap items-center justify-between gap-2 pt-4 border-t border-[var(--border)]">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <UploadAdminControls uploadId={upload.id} isHidden={upload.is_hidden} sortOrder={upload.sort_order} isFreeImport={upload.is_free_import} />
-                        <EditUpload upload={upload} />
-                      </div>
-                      <AdminActions uploadId={upload.id} status={upload.status} />
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </section>
-
-      {/* Pending File Updates */}
-      <section id="pending-file-updates" className="mb-12 scroll-mt-24">
-        <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-          <RefreshCw size={18} />
-          Pending File Updates ({(pendingFileUpdates || []).length})
-        </h2>
-
-        {!pendingFileUpdates || pendingFileUpdates.length === 0 ? (
-          <p className="text-[var(--muted-foreground)] py-8 text-center">No new versions waiting for review.</p>
-        ) : (
-          <div className="space-y-3">
-            {(pendingFileUpdates as AdminUpload[]).map((upload) => {
-              const submitted = new Date(upload.pending_submitted_at!).toLocaleDateString('en-US', {
-                month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
-              });
-              const downloadClass =
-                'inline-flex items-center gap-1 text-xs font-bold text-[rgb(var(--accent))] hover:underline';
-
-              return (
-                <div key={upload.id} className="p-5 border border-[var(--border)] rounded-2xl bg-[var(--card)]">
-                  <div className="flex flex-col gap-4">
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2 mb-1">
-                        <Link
-                          href={`/${lang}/yomiplay/community/${upload.id}`}
-                          className="font-bold break-words hover:text-[rgb(var(--accent))] transition-colors"
-                        >
-                          {upload.title}
-                        </Link>
-                        {upload.file_kind === 'yomibook' && (
-                          <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600">
-                            Deck
-                          </span>
-                        )}
-                        <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-600">
-                          v{upload.file_version ?? 1} → v{(upload.file_version ?? 1) + 1}
-                        </span>
-                      </div>
-                      <div className="text-xs text-[var(--muted-foreground)] flex flex-wrap gap-2 items-center mb-2">
-                        <span>by {upload.toshiki_tech_yomi_profiles?.display_name || 'Unknown'}</span>
-                        <span>· submitted {submitted}</span>
-                      </div>
-                      {upload.pending_note && (
-                        <p className="text-sm mb-2 whitespace-pre-line">{upload.pending_note}</p>
-                      )}
-                      <div className="flex flex-wrap gap-x-4 gap-y-1">
-                        {upload.pending_storage_path && (
-                          <>
-                            <a href={`/api/yomi/download/${upload.id}?pending=1`} className={downloadClass}>
-                              <Download size={12} /> New: {upload.pending_file_name}
-                            </a>
-                            <a href={`/api/yomi/download/${upload.id}`} className={downloadClass}>
-                              <Download size={12} /> Current: {upload.yomi_file_name || 'file'}
-                            </a>
-                          </>
-                        )}
-                        {upload.pending_audio_storage_path && (
-                          <>
-                            <a href={`/api/yomi/download/${upload.id}?type=media&pending=1`} className={downloadClass}>
-                              <Music size={12} /> New media: {upload.pending_audio_file_name}
-                            </a>
-                            <a href={`/api/yomi/download/${upload.id}?type=media`} className={downloadClass}>
-                              <Music size={12} /> Current media: {upload.audio_file_name || 'media'}
-                            </a>
-                          </>
-                        )}
+                        <span className="text-xs text-[var(--muted-foreground)] shrink-0">{date}</span>
                       </div>
                     </div>
-                    <div className="flex justify-end pt-4 border-t border-[var(--border)]">
-                      <FileUpdateActions uploadId={upload.id} submittedAt={upload.pending_submitted_at!} />
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </section>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+          {/* Pending Uploads */}
+          <section className="mb-12">
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <FileText size={18} />
+              Pending Review ({(pendingUploads || []).length})
+            </h2>
 
-      {/* All Uploads */}
-      <section className="mb-12">
-        <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-          <List size={18} />
-          All Uploads ({(allUploads || []).length})
-        </h2>
+            {!pendingUploads || pendingUploads.length === 0 ? (
+              <p className="text-[var(--muted-foreground)] py-8 text-center">No pending uploads.</p>
+            ) : (
+              <div className="space-y-3">
+                {(pendingUploads as AdminUpload[]).map((upload) => {
+                  const platform = SOURCE_PLATFORMS.find(p => p.id === upload.source_platform);
+                  const langLabel = CONTENT_LANGUAGES.find(l => l.id === upload.language);
+                  const date = new Date(upload.created_at).toLocaleDateString('en-US', {
+                    month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
+                  });
 
-        {!allUploads || allUploads.length === 0 ? (
-          <p className="text-[var(--muted-foreground)] py-8 text-center">No uploads.</p>
-        ) : (
-          <div className="space-y-3">
-            {(allUploads as AdminUpload[]).map((upload) => {
-              const platform = SOURCE_PLATFORMS.find(p => p.id === upload.source_platform);
-              const langLabel = CONTENT_LANGUAGES.find(l => l.id === upload.language);
-              const date = new Date(upload.created_at).toLocaleDateString('en-US', {
-                month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
-              });
-
-              const statusColors: Record<string, string> = {
-                pending: 'bg-yellow-500/10 text-yellow-600',
-                approved: 'bg-green-500/10 text-green-600',
-                rejected: 'bg-red-500/10 text-red-500',
-              };
-
-              return (
-                <div key={upload.id} className="p-5 border border-[var(--border)] rounded-2xl bg-[var(--card)]">
-                  <div className="flex flex-col gap-4">
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2 mb-1">
-                        <Link
-                          href={`/${lang}/yomiplay/community/${upload.id}`}
-                          className="font-bold break-words hover:text-[rgb(var(--accent))] transition-colors"
-                        >
-                          {upload.title}
-                        </Link>
-                        {upload.audio_storage_path && <Music size={14} className="text-green-600 shrink-0" />}
-                        {upload.file_kind === 'yomibook' && (
-                          <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600">
-                            Deck
-                          </span>
-                        )}
-                        <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${statusColors[upload.status] || ''}`}>
-                          {upload.status}
-                        </span>
-                        {(upload.file_version ?? 1) > 1 && (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--muted)] text-[var(--muted-foreground)]">
-                            v{upload.file_version}
-                          </span>
-                        )}
-                        {upload.pending_submitted_at && (
-                          <a
-                            href="#pending-file-updates"
-                            className="text-[10px] font-bold uppercase whitespace-nowrap px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-600 hover:bg-yellow-500/20"
-                          >
-                            Update pending
-                          </a>
-                        )}
-                      </div>
-                      <div className="text-xs text-[var(--muted-foreground)] flex flex-wrap gap-2 items-center">
-                        <span>by {upload.toshiki_tech_yomi_profiles?.display_name || 'Unknown'}</span>
-                        {langLabel && <span>· {langLabel.label}</span>}
-                        {platform && <span>· {platform.name}</span>}
-                        {upload.category && <span>· {upload.category}</span>}
-                        <span>· {date}</span>
-                        {upload.is_hidden && (
-                          <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-600">Hidden</span>
-                        )}
-                        {upload.sort_order > 0 && (
-                          <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-[rgb(var(--accent))]/10 text-[rgb(var(--accent))]">Pin {upload.sort_order}</span>
-                        )}
-                      </div>
-                      {upload.tags && upload.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-2">
-                          {upload.tags.map((tag) => (
-                            <span key={tag} className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-[var(--muted)] text-[var(--muted-foreground)]">
-                              #{tag}
+                  return (
+                    <div key={upload.id} className="p-5 border border-[var(--border)] rounded-2xl bg-[var(--card)]">
+                      <div className="flex flex-col gap-4">
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2 mb-1">
+                            <Link
+                              href={`/${lang}/yomiplay/community/${upload.id}`}
+                              className="font-bold break-words hover:text-[rgb(var(--accent))] transition-colors"
+                            >
+                              {upload.title}
+                            </Link>
+                            {upload.audio_storage_path && <Music size={14} className="text-green-600 shrink-0" />}
+                            {upload.file_kind === 'yomibook' && (
+                              <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600">
+                                Deck
+                              </span>
+                            )}
+                            <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-[rgb(var(--accent))]/10 text-[rgb(var(--accent))]">
+                              {upload.content_type}
                             </span>
-                          ))}
+                          </div>
+                          <div className="text-xs text-[var(--muted-foreground)] flex flex-wrap gap-2 items-center">
+                            <span>by {upload.toshiki_tech_yomi_profiles?.display_name || 'Unknown'}</span>
+                            {langLabel && <span>· {langLabel.label}</span>}
+                            {platform && <span>· {platform.name}</span>}
+                            {upload.category && <span>· {upload.category}</span>}
+                            <span>· {date}</span>
+                            {upload.is_hidden && (
+                              <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-600">Hidden</span>
+                            )}
+                            {upload.sort_order > 0 && (
+                              <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-[rgb(var(--accent))]/10 text-[rgb(var(--accent))]">Pin {upload.sort_order}</span>
+                            )}
+                          </div>
+                          {upload.tags && upload.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {upload.tags.map((tag) => (
+                                <span key={tag} className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-[var(--muted)] text-[var(--muted-foreground)]">
+                                  #{tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                    <div className="flex flex-wrap items-center justify-between gap-2 pt-4 border-t border-[var(--border)]">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <UploadAdminControls uploadId={upload.id} isHidden={upload.is_hidden} sortOrder={upload.sort_order} isFreeImport={upload.is_free_import} />
-                        <EditUpload upload={upload} />
-                        <ReplaceUploadFile
-                          lang="en"
-                          uploadId={upload.id}
-                          primaryKind={primaryFileKind(upload)}
-                          hasSeparateMedia={!!upload.audio_storage_path}
-                          outcome="admin"
-                        />
+                        <div className="flex flex-wrap items-center justify-between gap-2 pt-4 border-t border-[var(--border)]">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <UploadAdminControls uploadId={upload.id} isHidden={upload.is_hidden} sortOrder={upload.sort_order} isFreeImport={upload.is_free_import} />
+                            <EditUpload upload={upload} />
+                          </div>
+                          <AdminActions uploadId={upload.id} status={upload.status} />
+                        </div>
                       </div>
-                      <AdminActions uploadId={upload.id} status={upload.status} />
                     </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </section>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+          {/* Pending File Updates */}
+          <section id="pending-file-updates" className="mb-12 scroll-mt-24">
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <RefreshCw size={18} />
+              Pending File Updates ({(pendingFileUpdates || []).length})
+            </h2>
 
-      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-      <ApkReleasePanel releases={(apkReleases || []) as any} />
+            {!pendingFileUpdates || pendingFileUpdates.length === 0 ? (
+              <p className="text-[var(--muted-foreground)] py-8 text-center">No new versions waiting for review.</p>
+            ) : (
+              <div className="space-y-3">
+                {(pendingFileUpdates as AdminUpload[]).map((upload) => {
+                  const submitted = new Date(upload.pending_submitted_at!).toLocaleDateString('en-US', {
+                    month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
+                  });
+                  const downloadClass =
+                    'inline-flex items-center gap-1 text-xs font-bold text-[rgb(var(--accent))] hover:underline';
 
-      <SubscriptionsPanel subscriptions={flatSubs} />
+                  return (
+                    <div key={upload.id} className="p-5 border border-[var(--border)] rounded-2xl bg-[var(--card)]">
+                      <div className="flex flex-col gap-4">
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2 mb-1">
+                            <Link
+                              href={`/${lang}/yomiplay/community/${upload.id}`}
+                              className="font-bold break-words hover:text-[rgb(var(--accent))] transition-colors"
+                            >
+                              {upload.title}
+                            </Link>
+                            {upload.file_kind === 'yomibook' && (
+                              <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600">
+                                Deck
+                              </span>
+                            )}
+                            <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-600">
+                              v{upload.file_version ?? 1} → v{(upload.file_version ?? 1) + 1}
+                            </span>
+                          </div>
+                          <div className="text-xs text-[var(--muted-foreground)] flex flex-wrap gap-2 items-center mb-2">
+                            <span>by {upload.toshiki_tech_yomi_profiles?.display_name || 'Unknown'}</span>
+                            <span>· submitted {submitted}</span>
+                          </div>
+                          {upload.pending_note && (
+                            <p className="text-sm mb-2 whitespace-pre-line">{upload.pending_note}</p>
+                          )}
+                          <div className="flex flex-wrap gap-x-4 gap-y-1">
+                            {upload.pending_storage_path && (
+                              <>
+                                <a href={`/api/yomi/download/${upload.id}?pending=1`} className={downloadClass}>
+                                  <Download size={12} /> New: {upload.pending_file_name}
+                                </a>
+                                <a href={`/api/yomi/download/${upload.id}`} className={downloadClass}>
+                                  <Download size={12} /> Current: {upload.yomi_file_name || 'file'}
+                                </a>
+                              </>
+                            )}
+                            {upload.pending_audio_storage_path && (
+                              <>
+                                <a href={`/api/yomi/download/${upload.id}?type=media&pending=1`} className={downloadClass}>
+                                  <Music size={12} /> New media: {upload.pending_audio_file_name}
+                                </a>
+                                <a href={`/api/yomi/download/${upload.id}?type=media`} className={downloadClass}>
+                                  <Music size={12} /> Current media: {upload.audio_file_name || 'media'}
+                                </a>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex justify-end pt-4 border-t border-[var(--border)]">
+                          <FileUpdateActions uploadId={upload.id} submittedAt={upload.pending_submitted_at!} />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+          {/* Pro Requests */}
+          <section>
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <Crown size={18} className="text-purple-500" />
+              Pro Membership Requests ({(proRequests || []).length})
+            </h2>
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+            <ProRequests requests={(proRequests || []) as any} />
+          </section>
+        </>
+      ),
+          },
+          { id: 'content', label: 'Content', content: (
+        <>
+          {/* All Uploads */}
+          <section className="mb-12">
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <List size={18} />
+              All Uploads ({(allUploads || []).length})
+            </h2>
 
-      {/* Download Stats */}
-      <section className="mb-12">
-        <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-          <List size={18} />
-          Download Stats
-        </h2>
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--card)]">
-            <p className="text-xs font-black uppercase tracking-widest text-[var(--muted-foreground)] mb-1">Community Subtitles</p>
-            <p className="text-3xl font-black">{communityTotalDownloads.toLocaleString()}</p>
-            <p className="text-xs text-[var(--muted-foreground)] mt-1">total downloads</p>
-          </div>
-          <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--card)]">
-            <p className="text-xs font-black uppercase tracking-widest text-[var(--muted-foreground)] mb-1">Android APK</p>
-            <p className="text-3xl font-black">{apkTotal.toLocaleString()}</p>
-            <p className="text-xs text-[var(--muted-foreground)] mt-1">total downloads</p>
-          </div>
-        </div>
+            {!allUploads || allUploads.length === 0 ? (
+              <p className="text-[var(--muted-foreground)] py-8 text-center">No uploads.</p>
+            ) : (
+              <div className="space-y-3">
+                {(allUploads as AdminUpload[]).map((upload) => {
+                  const platform = SOURCE_PLATFORMS.find(p => p.id === upload.source_platform);
+                  const langLabel = CONTENT_LANGUAGES.find(l => l.id === upload.language);
+                  const date = new Date(upload.created_at).toLocaleDateString('en-US', {
+                    month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
+                  });
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Top community uploads */}
-          <div>
-            <h3 className="text-sm font-bold mb-3 text-[var(--muted-foreground)] uppercase tracking-widest">Top Subtitle Resources</h3>
-            <div className="rounded-2xl border border-[var(--border)] overflow-hidden">
-              {(topUploads ?? []).length === 0 ? (
-                <p className="text-sm text-[var(--muted-foreground)] p-4 text-center">No data yet.</p>
-              ) : (
-                <table className="w-full text-sm">
-                  <tbody>
-                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                    {(topUploads ?? []).map((u: any, i: number) => (
-                      <tr key={u.id} className="border-b border-[var(--border)] last:border-0">
-                        <td className="px-4 py-2.5 text-[var(--muted-foreground)] text-xs w-6">{i + 1}</td>
-                        <td className="px-4 py-2.5 font-medium truncate max-w-[200px]">{u.title}</td>
-                        <td className="px-4 py-2.5 text-right text-[var(--muted-foreground)] text-xs whitespace-nowrap">{(u.download_count ?? 0).toLocaleString()} dl</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
+                  const statusColors: Record<string, string> = {
+                    pending: 'bg-yellow-500/10 text-yellow-600',
+                    approved: 'bg-green-500/10 text-green-600',
+                    rejected: 'bg-red-500/10 text-red-500',
+                  };
+
+                  return (
+                    <div key={upload.id} className="p-5 border border-[var(--border)] rounded-2xl bg-[var(--card)]">
+                      <div className="flex flex-col gap-4">
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2 mb-1">
+                            <Link
+                              href={`/${lang}/yomiplay/community/${upload.id}`}
+                              className="font-bold break-words hover:text-[rgb(var(--accent))] transition-colors"
+                            >
+                              {upload.title}
+                            </Link>
+                            {upload.audio_storage_path && <Music size={14} className="text-green-600 shrink-0" />}
+                            {upload.file_kind === 'yomibook' && (
+                              <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600">
+                                Deck
+                              </span>
+                            )}
+                            <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${statusColors[upload.status] || ''}`}>
+                              {upload.status}
+                            </span>
+                            {(upload.file_version ?? 1) > 1 && (
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--muted)] text-[var(--muted-foreground)]">
+                                v{upload.file_version}
+                              </span>
+                            )}
+                            {upload.pending_submitted_at && (
+                              <a
+                                href="#pending-file-updates"
+                                className="text-[10px] font-bold uppercase whitespace-nowrap px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-600 hover:bg-yellow-500/20"
+                              >
+                                Update pending
+                              </a>
+                            )}
+                          </div>
+                          <div className="text-xs text-[var(--muted-foreground)] flex flex-wrap gap-2 items-center">
+                            <span>by {upload.toshiki_tech_yomi_profiles?.display_name || 'Unknown'}</span>
+                            {langLabel && <span>· {langLabel.label}</span>}
+                            {platform && <span>· {platform.name}</span>}
+                            {upload.category && <span>· {upload.category}</span>}
+                            <span>· {date}</span>
+                            {upload.is_hidden && (
+                              <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-600">Hidden</span>
+                            )}
+                            {upload.sort_order > 0 && (
+                              <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-[rgb(var(--accent))]/10 text-[rgb(var(--accent))]">Pin {upload.sort_order}</span>
+                            )}
+                          </div>
+                          {upload.tags && upload.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {upload.tags.map((tag) => (
+                                <span key={tag} className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-[var(--muted)] text-[var(--muted-foreground)]">
+                                  #{tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex flex-wrap items-center justify-between gap-2 pt-4 border-t border-[var(--border)]">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <UploadAdminControls uploadId={upload.id} isHidden={upload.is_hidden} sortOrder={upload.sort_order} isFreeImport={upload.is_free_import} />
+                            <EditUpload upload={upload} />
+                            <ReplaceUploadFile
+                              lang="en"
+                              uploadId={upload.id}
+                              primaryKind={primaryFileKind(upload)}
+                              hasSeparateMedia={!!upload.audio_storage_path}
+                              outcome="admin"
+                            />
+                          </div>
+                          <AdminActions uploadId={upload.id} status={upload.status} />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        </>
+      ) },
+          { id: 'analytics', label: 'Analytics', content: (
+        <>
+          <AppUsagePanel />
+          {/* Download Stats */}
+          <section className="mb-12">
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <List size={18} />
+              Download Stats
+            </h2>
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--card)]">
+                <p className="text-xs font-black uppercase tracking-widest text-[var(--muted-foreground)] mb-1">Community Subtitles</p>
+                <p className="text-3xl font-black">{communityTotalDownloads.toLocaleString()}</p>
+                <p className="text-xs text-[var(--muted-foreground)] mt-1">total downloads</p>
+              </div>
+              <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--card)]">
+                <p className="text-xs font-black uppercase tracking-widest text-[var(--muted-foreground)] mb-1">Android APK</p>
+                <p className="text-3xl font-black">{apkTotal.toLocaleString()}</p>
+                <p className="text-xs text-[var(--muted-foreground)] mt-1">total downloads</p>
+              </div>
             </div>
-          </div>
 
-          {/* APK downloads by version */}
-          <div>
-            <h3 className="text-sm font-bold mb-3 text-[var(--muted-foreground)] uppercase tracking-widest">APK Downloads by Version</h3>
-            <div className="rounded-2xl border border-[var(--border)] overflow-hidden">
-              {Object.keys(apkByVersion).length === 0 ? (
-                <p className="text-sm text-[var(--muted-foreground)] p-4 text-center">No downloads yet.</p>
-              ) : (
-                <table className="w-full text-sm">
-                  <tbody>
-                    {Object.entries(apkByVersion)
-                      .sort(([, a], [, b]) => b - a)
-                      .map(([ver, count]) => (
-                        <tr key={ver} className="border-b border-[var(--border)] last:border-0">
-                          <td className="px-4 py-2.5 font-medium">v{ver}</td>
-                          <td className="px-4 py-2.5 text-right text-[var(--muted-foreground)] text-xs">{count.toLocaleString()} dl</td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
-              )}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Top community uploads */}
+              <SortableTable
+                title="Top Subtitle Resources"
+                ranked
+                columns={[{ label: 'Resource' }, { label: 'Downloads', kind: 'number' }]}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                rows={(topUploads ?? []).map((u: any) => [u.title as string, (u.download_count ?? 0) as number])}
+                defaultSort={{ col: 1, dir: 'desc' }}
+                empty="No data yet."
+              />
+              {/* APK downloads by version (newest version first) */}
+              <SortableTable
+                title="APK Downloads by Version"
+                columns={[{ label: 'Version', kind: 'version' }, { label: 'Downloads', kind: 'number' }]}
+                rows={Object.entries(apkByVersion).map(([ver, count]) => [`v${ver}`, count])}
+                defaultSort={{ col: 0, dir: 'desc' }}
+                empty="No downloads yet."
+              />
             </div>
-          </div>
-        </div>
-      </section>
-
-      <AppUsagePanel />
-
-      <FeatureFlagsPanel initialFlags={featureFlags} />
-
-      {/* Points Config */}
-      <section className="mb-12">
-        <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-          <Settings size={18} />
-          Points Configuration
-        </h2>
-        <PointsConfig />
-      </section>
-
-      {/* Pro Requests */}
-      <section>
-        <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-          <Crown size={18} className="text-purple-500" />
-          Pro Membership Requests ({(proRequests || []).length})
-        </h2>
-        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-        <ProRequests requests={(proRequests || []) as any} />
-      </section>
+          </section>
+        </>
+      ) },
+          { id: 'members', label: 'Members', content: (
+        <>
+          <SubscriptionsPanel subscriptions={flatSubs} />
+        </>
+      ) },
+          { id: 'settings', label: 'Settings', content: (
+        <>
+          <FeatureFlagsPanel initialFlags={featureFlags} />
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+          <ApkReleasePanel releases={(apkReleases || []) as any} />
+          {/* Points Config */}
+          <section className="mb-12">
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <Settings size={18} />
+              Points Configuration
+            </h2>
+            <PointsConfig />
+          </section>
+        </>
+      ) },
+        ]}
+      />
     </div>
   );
 }

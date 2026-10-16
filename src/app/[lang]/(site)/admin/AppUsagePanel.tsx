@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { BarChart3, Loader2, RefreshCw } from 'lucide-react';
 import { ADMIN_REFRESH_EVENT } from './useAdminRefresh';
+import SortableTable from './SortableTable';
 
 // Anonymous YomiPlay app analytics (docs/yomiplay-analytics-api.md)
 
@@ -54,32 +55,6 @@ function Card({ label, value, hint }: { label: string; value: string | number; h
       <p className="text-xs text-[var(--muted-foreground)] mb-1">{label}</p>
       <p className="text-2xl font-bold">{value}</p>
       {hint && <p className="text-xs text-[var(--muted-foreground)] mt-1">{hint}</p>}
-    </div>
-  );
-}
-
-function Table({ title, head, rows }: { title: string; head: string[]; rows: (string | number)[][] }) {
-  return (
-    <div className="border border-[var(--border)] rounded-2xl p-4 overflow-x-auto">
-      <h3 className="font-semibold mb-3 text-sm">{title}</h3>
-      {rows.length === 0 ? (
-        <p className="text-sm text-[var(--muted-foreground)]">No data.</p>
-      ) : (
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="text-left text-[var(--muted-foreground)]">
-              {head.map((h, i) => <th key={h} className={`pb-2 font-medium ${i > 0 ? 'text-right' : ''}`}>{h}</th>)}
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r, i) => (
-              <tr key={i} className="border-t border-[var(--border)]">
-                {r.map((c, j) => <td key={j} className={`py-1.5 ${j > 0 ? 'text-right tabular-nums' : 'font-mono text-xs'}`}>{c}</td>)}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
     </div>
   );
 }
@@ -175,32 +150,40 @@ export default function AppUsagePanel() {
           )}
 
           <div className="grid md:grid-cols-2 gap-4">
-            <Table
+            <SortableTable
               title="New-user funnel (installs first seen in range)"
-              head={['Step', 'Users', 'Of first launch']}
+              columns={[{ label: 'Step' }, { label: 'Users', kind: 'number' }, { label: 'Of first launch', kind: 'number' }]}
               rows={stats.funnel.map((f) => [FUNNEL_LABELS[f.step] ?? f.step, f.users, pct(f.users, firstLaunch)])}
             />
-            <Table
+            <SortableTable
               title="Paywall by trigger"
-              head={['Trigger', 'Shown', 'Purchased']}
+              ranked
+              columns={[{ label: 'Trigger' }, { label: 'Shown', kind: 'number' }, { label: 'Purchased', kind: 'number' }]}
               rows={stats.paywall.map((p) => [p.trigger, p.shown, p.purchased])}
+              defaultSort={{ col: 1, dir: 'desc' }}
             />
-            <Table
+            <SortableTable
               title="Import sources"
-              head={['Source', 'Times']}
+              ranked
+              columns={[{ label: 'Source' }, { label: 'Times', kind: 'number' }]}
               rows={stats.import_sources.map((s) => [s.source, s.times])}
+              defaultSort={{ col: 1, dir: 'desc' }}
             />
-            <Table
-              title="Countries (active installs)"
-              head={['Country', 'Installs']}
+            <SortableTable
+              title="Countries (active installs, top 10)"
+              ranked
+              columns={[{ label: 'Country' }, { label: 'Installs', kind: 'number' }]}
               rows={stats.countries.map((c) => [c.country, c.installs])}
+              defaultSort={{ col: 1, dir: 'desc' }}
             />
           </div>
 
-          <Table
+          <SortableTable
             title="Feature usage"
-            head={['Event', 'Users', 'Times']}
+            ranked
+            columns={[{ label: 'Event' }, { label: 'Users', kind: 'number' }, { label: 'Times', kind: 'number' }]}
             rows={stats.events.map((ev) => [ev.name, ev.users, ev.times])}
+            defaultSort={{ col: 1, dir: 'desc' }}
           />
         </div>
       )}
