@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useAdminRefresh } from './useAdminRefresh';
 import { CheckCircle2, XCircle, Crown, Link as LinkIcon, Image as ImageIcon } from 'lucide-react';
 
 interface ProRequest {
@@ -14,6 +15,7 @@ interface ProRequest {
 }
 
 export default function ProRequests({ requests }: { requests: ProRequest[] }) {
+  const { refresh } = useAdminRefresh();
   const [loading, setLoading] = useState<string | null>(null);
   const [done, setDone] = useState<Record<string, string>>({});
   const [redeemUrls, setRedeemUrls] = useState<Record<string, string>>({});
@@ -36,7 +38,7 @@ export default function ProRequests({ requests }: { requests: ProRequest[] }) {
     });
     if (res.ok) {
       setDone(prev => ({ ...prev, [requestId]: action }));
-      setTimeout(() => window.location.reload(), 800);
+      refresh();
     }
     setLoading(null);
   };

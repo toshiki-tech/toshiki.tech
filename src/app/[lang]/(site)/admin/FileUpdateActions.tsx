@@ -1,9 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import { useAdminRefresh } from './useAdminRefresh';
 import { CheckCircle2, XCircle } from 'lucide-react';
 
 export default function FileUpdateActions({ uploadId, submittedAt }: { uploadId: string; submittedAt: string }) {
+  const { refresh } = useAdminRefresh();
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState<string | null>(null);
 
@@ -17,7 +19,7 @@ export default function FileUpdateActions({ uploadId, submittedAt }: { uploadId:
     });
     if (res.ok) {
       setDone(action);
-      setTimeout(() => window.location.reload(), 500);
+      refresh();
     } else {
       const err = await res.json().catch(() => ({}));
       alert('Failed: ' + (err.error || 'Unknown error'));

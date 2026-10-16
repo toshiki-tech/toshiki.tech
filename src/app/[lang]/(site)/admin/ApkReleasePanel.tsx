@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
+import { useAdminRefresh } from './useAdminRefresh';
 import { Smartphone, CheckCircle2, AlertCircle, ChevronDown, ChevronUp, Upload, X, RefreshCw } from 'lucide-react';
 
 interface Release {
@@ -15,6 +16,7 @@ interface Release {
 }
 
 export default function ApkReleasePanel({ releases }: { releases: Release[] }) {
+  const { refresh } = useAdminRefresh();
   const latest = releases[0] ?? null;
 
   const [open, setOpen] = useState(false);
@@ -111,7 +113,7 @@ export default function ApkReleasePanel({ releases }: { releases: Release[] }) {
     }
 
     setReplaceStatus('ok');
-    setTimeout(() => { setReplaceOpen(false); clearReplace(); window.location.reload(); }, 1000);
+    setTimeout(() => { setReplaceOpen(false); clearReplace(); refresh(); }, 1000);
   }
 
   const inputClass =
@@ -220,7 +222,7 @@ export default function ApkReleasePanel({ releases }: { releases: Release[] }) {
     setMinVersion('1'); setForceUpdate(false);
     clearFile();
     setOpen(false);
-    setTimeout(() => window.location.reload(), 800);
+    refresh();
   }
 
   return (

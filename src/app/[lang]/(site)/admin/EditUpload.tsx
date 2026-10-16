@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useAdminRefresh } from './useAdminRefresh';
 import { Pencil, X, Save, Languages, Loader2 } from 'lucide-react';
 import { SOURCE_PLATFORMS, CONTENT_LANGUAGES, CONTENT_CATEGORIES, parseTranslationLanguages, serializeTranslationLanguages } from '@/lib/yomi-constants';
 import TranslationFields, { toTranslationForm, hasAnyTranslation, type TranslationForm } from '@/components/TranslationFields';
@@ -22,6 +23,7 @@ interface UploadData {
 }
 
 export default function EditUpload({ upload }: { upload: UploadData }) {
+  const { refresh } = useAdminRefresh();
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [primaryTranslation, secondaryTranslation] = parseTranslationLanguages(
@@ -87,7 +89,7 @@ export default function EditUpload({ upload }: { upload: UploadData }) {
     });
     if (res.ok) {
       setOpen(false);
-      window.location.reload();
+      refresh();
     } else {
       const err = await res.json().catch(() => ({}));
       alert('Failed to save: ' + (err.error || 'Unknown error'));

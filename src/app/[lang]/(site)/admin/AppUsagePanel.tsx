@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { BarChart3, Loader2, RefreshCw } from 'lucide-react';
+import { ADMIN_REFRESH_EVENT } from './useAdminRefresh';
 
 // Anonymous YomiPlay app analytics (docs/yomiplay-analytics-api.md)
 
@@ -91,6 +92,11 @@ export default function AppUsagePanel() {
   }, []);
 
   useEffect(() => { load(days); }, [days, load]);
+  useEffect(() => {
+    const onRefresh = () => load(days);
+    window.addEventListener(ADMIN_REFRESH_EVENT, onRefresh);
+    return () => window.removeEventListener(ADMIN_REFRESH_EVENT, onRefresh);
+  }, [days, load]);
 
   const firstLaunch = stats?.funnel.find((f) => f.step === 'app_first_launch')?.users ?? 0;
   const maxDaily = Math.max(1, ...(stats?.daily_active.map((d) => d.users) ?? [1]));

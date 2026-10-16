@@ -1,9 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import { useAdminRefresh } from './useAdminRefresh';
 import { Trash2, XCircle } from 'lucide-react';
 
 export default function ReportActions({ reportId, uploadId }: { reportId: string; uploadId: string }) {
+  const { refresh } = useAdminRefresh();
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState<string | null>(null);
 
@@ -21,7 +23,7 @@ export default function ReportActions({ reportId, uploadId }: { reportId: string
       body: JSON.stringify({ reportId, action: 'resolved' }),
     });
     setDone('removed');
-    setTimeout(() => window.location.reload(), 500);
+    refresh();
   };
 
   const handleDismiss = async () => {
@@ -32,7 +34,7 @@ export default function ReportActions({ reportId, uploadId }: { reportId: string
       body: JSON.stringify({ reportId, action: 'dismissed' }),
     });
     setDone('dismissed');
-    setTimeout(() => window.location.reload(), 500);
+    refresh();
   };
 
   if (done) {

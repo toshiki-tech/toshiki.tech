@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Flag, Loader2 } from 'lucide-react';
 import { FEATURE_FLAG_KEYS, type FeatureFlagKey, type FeatureFlags } from '@/lib/yomi-feature-flags';
 
@@ -25,6 +25,7 @@ const FLAG_META: Record<FeatureFlagKey, { title: string; description: string }> 
 
 export default function FeatureFlagsPanel({ initialFlags }: { initialFlags: FeatureFlags }) {
   const [flags, setFlags] = useState<FeatureFlags>(initialFlags);
+  useEffect(() => { setFlags(initialFlags); }, [initialFlags]);
   const [busy, setBusy] = useState<FeatureFlagKey | null>(null);
 
   async function toggle(key: FeatureFlagKey) {

@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useAdminRefresh } from './useAdminRefresh';
 import { CheckCircle2, XCircle, Trash2 } from 'lucide-react';
 
 // Approve and reject are only offered when they change something: re-approving an
@@ -8,6 +9,9 @@ import { CheckCircle2, XCircle, Trash2 } from 'lucide-react';
 export default function AdminActions({ uploadId, status }: { uploadId: string; status?: string }) {
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState<string | null>(null);
+  const { refresh } = useAdminRefresh();
+  // The row stays in "All uploads" after a review; show the buttons for its new status again
+  useEffect(() => { setDone(null); }, [status]);
 
   const handleAction = async (action: 'approved' | 'rejected') => {
     setLoading(true);
@@ -18,7 +22,7 @@ export default function AdminActions({ uploadId, status }: { uploadId: string; s
     });
     if (res.ok) {
       setDone(action);
-      setTimeout(() => window.location.reload(), 500);
+      refresh();
     }
     setLoading(false);
   };
@@ -33,7 +37,7 @@ export default function AdminActions({ uploadId, status }: { uploadId: string; s
     });
     if (res.ok) {
       setDone('removed');
-      setTimeout(() => window.location.reload(), 500);
+      refresh();
     }
     setLoading(false);
   };

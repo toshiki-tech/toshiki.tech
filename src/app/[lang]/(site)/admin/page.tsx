@@ -16,6 +16,7 @@ import FeatureFlagsPanel from './FeatureFlagsPanel';
 import ApkReleasePanel from './ApkReleasePanel';
 import SubscriptionsPanel from './SubscriptionsPanel';
 import AppUsagePanel from './AppUsagePanel';
+import AdminRefreshButton from './AdminRefreshButton';
 import FileUpdateActions from './FileUpdateActions';
 import ReplaceUploadFile from '@/components/ReplaceUploadFile';
 import { primaryFileKind } from '@/lib/yomi-upload-files';
@@ -235,6 +236,7 @@ export default async function AdminPage({ params: { lang } }: { params: { lang: 
         <Shield size={24} className="text-[rgb(var(--accent))]" />
         <h1 className="text-3xl font-bold">Site Admin</h1>
       </div>
+      <AdminRefreshButton />
 
       {/* Pending Reports */}
       <section className="mb-12">

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CreditCard, XCircle, Gift } from 'lucide-react';
 
 interface Subscription {
@@ -44,6 +44,8 @@ const INPUT = 'rounded-lg border border-[var(--border)] bg-transparent px-3 py-2
 
 export default function SubscriptionsPanel({ subscriptions }: { subscriptions: Subscription[] }) {
   const [items, setItems] = useState(subscriptions);
+  // Follow fresh server data after "Refresh data" (router.refresh keeps client state)
+  useEffect(() => { setItems(subscriptions); }, [subscriptions]);
   const [revoking, setRevoking] = useState<string | null>(null);
 
   const [identifier, setIdentifier] = useState('');
