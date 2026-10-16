@@ -10,6 +10,8 @@ import SortableTable from './SortableTable';
 interface UsageStats {
   days: number;
   new_installs: number;
+  /** installs first seen in range that upgraded from an older version (not new users) */
+  upgraded_installs?: number;
   active_installs: number;
   daily_active: { day: string; users: number }[];
   funnel: { step: string; users: number }[];
@@ -25,13 +27,15 @@ interface Overview {
   today: string;
   total_installs: number;
   new_today: number;
+  upgraded_today?: number;
+  upgraded_total?: number;
   active_today: number;
   active_7d: number;
   active_30d: number;
   pro_active_today: number;
   pro_active_30d: number;
   purchases_today: { product: string; times: number }[];
-  trend: { day: string; active: number; new: number; purchases: number }[];
+  trend: { day: string; active: number; new: number; upgraded?: number; purchases: number }[];
 }
 
 const FUNNEL_LABELS: Record<string, string> = {
@@ -123,7 +127,11 @@ export default function AppUsagePanel() {
         <div className="space-y-4">
           <h3 className="font-semibold text-sm pt-2">Selected range ({days === 1 ? 'last 24h' : `last ${days} days`})</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <Card label="New installs" value={stats.new_installs} />
+            <Card
+              label="New users"
+              value={stats.new_installs}
+              hint={stats.upgraded_installs ? `+ ${stats.upgraded_installs} upgraded` : undefined}
+            />
             <Card label="Active installs" value={stats.active_installs} />
             <Card
               label="Day-1 retention"
@@ -193,7 +201,8 @@ export default function AppUsagePanel() {
 
 const TREND_SERIES = [
   { key: 'active', label: 'Active', color: 'rgb(var(--accent))' },
-  { key: 'new', label: 'New installs', color: '#3b82f6' },
+  { key: 'new', label: 'New users', color: '#3b82f6' },
+  { key: 'upgraded', label: 'Upgraded', color: '#94a3b8' },
   { key: 'purchases', label: 'Purchases', color: '#f59e0b' },
 ] as const;
 
@@ -205,12 +214,18 @@ function OverviewBlock({ overview: o }: { overview: Overview }) {
       <p className="text-xs text-[var(--muted-foreground)]">
         Today = {o.today} (Tokyo time). “Users” are app installs: one person on two devices counts twice, a
         reinstall counts as new, installs with analytics off are not counted. Pro counts are estimates.
+        “Upgraded” = an existing user’s first launch of a version with analytics (flagged by the app from 2.3;
+        before that only existing Pro users can be recognised), kept out of new users, the funnel and retention.
       </p>
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         <Card label="Active today" value={o.active_today} hint={`Pro ${o.pro_active_today}`} />
         <Card label="Active, last 7 days" value={o.active_7d} />
         <Card label="Active, last 30 days" value={o.active_30d} hint={`Pro ${o.pro_active_30d} (est.)`} />
-        <Card label="Total installs" value={o.total_installs} hint={`New today ${o.new_today}`} />
+        <Card
+          label="Total installs"
+          value={o.total_installs}
+          hint={`New today ${o.new_today} · upgraded ${o.upgraded_today ?? 0} (all-time upgraded ${o.upgraded_total ?? 0})`}
+        />
         <Card
           label="Purchases today"
           value={purchasesToday}
@@ -234,13 +249,13 @@ function OverviewBlock({ overview: o }: { overview: Overview }) {
             <div
               key={d.day}
               className="flex-1 flex items-end justify-center gap-px h-full"
-              title={`${d.day}: active ${d.active}, new ${d.new}, purchases ${d.purchases}`}
+              title={`${d.day}: active ${d.active}, new ${d.new}, upgraded ${d.upgraded ?? 0}, purchases ${d.purchases}`}
             >
               {TREND_SERIES.map((s) => (
                 <div
                   key={s.key}
                   className="flex-1 rounded-t"
-                  style={{ background: s.color, height: `${(d[s.key] / max) * 100}%`, minHeight: d[s.key] > 0 ? 2 : 0 }}
+                  style={{ background: s.color, height: `${((d[s.key] ?? 0) / max) * 100}%`, minHeight: (d[s.key] ?? 0) > 0 ? 2 : 0 }}
                 />
               ))}
             </div>

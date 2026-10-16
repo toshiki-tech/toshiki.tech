@@ -40,6 +40,25 @@ CREATE INDEX IF NOT EXISTS idx_yomiplay_installs_first_seen ON yomiplay_installs
 ALTER TABLE yomiplay_installs ENABLE ROW LEVEL SECURITY;
 
 
+-- 2b. Installs that are upgrades from an older app version (or restores), not new users
+-- ------------------------------------------------------------
+-- Analytics started in 2.2, so an existing user's first 2.2 launch also sends app_first_launch.
+-- From 2.3 that event carries existing_user. For earlier events (no flag): an install that was
+-- already Pro on its very first event is an existing subscriber (nobody buys before launching).
+CREATE OR REPLACE VIEW yomiplay_upgraded_installs AS
+  SELECT install_id FROM yomiplay_events
+  WHERE name = 'app_first_launch' AND props->>'existing_user' = 'true'
+  UNION
+  SELECT f.install_id FROM (
+    SELECT DISTINCT ON (install_id) install_id, is_pro FROM yomiplay_events ORDER BY install_id, client_ts
+  ) f
+  WHERE f.is_pro AND NOT EXISTS (
+    SELECT 1 FROM yomiplay_events e
+    WHERE e.install_id = f.install_id AND e.name = 'app_first_launch' AND e.props ? 'existing_user'
+  );
+REVOKE ALL ON yomiplay_upgraded_installs FROM PUBLIC, anon, authenticated;
+
+
 -- 3. Dashboard summary for the admin page (service role only)
 -- ------------------------------------------------------------
 CREATE OR REPLACE FUNCTION yomiplay_usage_stats(p_days integer DEFAULT 7)
@@ -55,13 +74,18 @@ AS $$
     SELECT e.* FROM yomiplay_events e, params
     WHERE e.client_ts >= params.since AND e.platform NOT LIKE '%-debug'
   ),
+  -- new users only: upgrades from an older version are not part of the funnel / new installs
   cohort AS (
     SELECT i.install_id FROM yomiplay_installs i, params
     WHERE i.first_seen >= params.since AND i.platform NOT LIKE '%-debug'
+      AND i.install_id NOT IN (SELECT install_id FROM yomiplay_upgraded_installs)
   )
   SELECT jsonb_build_object(
     'days', p_days,
     'new_installs', (SELECT count(*) FROM cohort),
+    'upgraded_installs', (SELECT count(*) FROM yomiplay_installs i, params
+                          WHERE i.first_seen >= params.since AND i.platform NOT LIKE '%-debug'
+                            AND i.install_id IN (SELECT install_id FROM yomiplay_upgraded_installs)),
     'active_installs', (SELECT count(DISTINCT install_id) FROM ev),
     'daily_active', COALESCE((
       SELECT jsonb_agg(jsonb_build_object('day', day, 'users', users) ORDER BY day)
@@ -101,7 +125,8 @@ AS $$
       FROM yomiplay_installs i, params
       -- only installs old enough to have had a "day 1"
       WHERE i.first_seen >= params.since AND i.first_seen < date_trunc('day', now()) - interval '1 day'
-        AND i.platform NOT LIKE '%-debug')
+        AND i.platform NOT LIKE '%-debug'
+        AND i.install_id NOT IN (SELECT install_id FROM yomiplay_upgraded_installs))
   );
 $$;
 REVOKE ALL ON FUNCTION yomiplay_usage_stats(integer) FROM PUBLIC, anon, authenticated;
@@ -124,7 +149,8 @@ AS $$
     SELECT (date_trunc('day', now() AT TIME ZONE 'Asia/Tokyo')) AT TIME ZONE 'Asia/Tokyo' AS today
   ),
   inst AS (
-    SELECT * FROM yomiplay_installs WHERE platform NOT LIKE '%-debug'
+    SELECT i.*, (i.install_id IN (SELECT install_id FROM yomiplay_upgraded_installs)) AS upgraded
+    FROM yomiplay_installs i WHERE i.platform NOT LIKE '%-debug'
   ),
   days AS (
     SELECT generate_series((now() AT TIME ZONE 'Asia/Tokyo')::date - 29,
@@ -141,7 +167,9 @@ AS $$
   SELECT jsonb_build_object(
     'today', (SELECT today FROM d0),
     'total_installs',  (SELECT count(*) FROM inst),
-    'new_today',       (SELECT count(*) FROM inst, t WHERE first_seen >= t.today),
+    'new_today',       (SELECT count(*) FROM inst, t WHERE first_seen >= t.today AND NOT upgraded),
+    'upgraded_today',  (SELECT count(*) FROM inst, t WHERE first_seen >= t.today AND upgraded),
+    'upgraded_total',  (SELECT count(*) FROM inst WHERE upgraded),
     -- active = sent any event that day / in the window (same source as the trend)
     'active_today',    (SELECT count(DISTINCT install_id) FROM ev30, d0 WHERE day = d0.today),
     'active_7d',       (SELECT count(DISTINCT install_id) FROM ev30, d0 WHERE day >= d0.today - 6),
@@ -157,7 +185,8 @@ AS $$
       SELECT jsonb_agg(jsonb_build_object(
         'day', d.day,
         'active',    (SELECT count(DISTINCT e.install_id) FROM ev30 e WHERE e.day = d.day),
-        'new',       (SELECT count(*) FROM inst i WHERE (i.first_seen AT TIME ZONE 'Asia/Tokyo')::date = d.day),
+        'new',       (SELECT count(*) FROM inst i WHERE (i.first_seen AT TIME ZONE 'Asia/Tokyo')::date = d.day AND NOT i.upgraded),
+        'upgraded',  (SELECT count(*) FROM inst i WHERE (i.first_seen AT TIME ZONE 'Asia/Tokyo')::date = d.day AND i.upgraded),
         'purchases', (SELECT count(*) FROM ev30 e WHERE e.day = d.day AND e.name = 'purchase_completed')
       ) ORDER BY d.day)
       FROM days d)

@@ -87,7 +87,7 @@
 
 | 事件 | 何时 | 参数 |
 |---|---|---|
-| `app_first_launch` | 首次启动（生成 install_id 时） | — |
+| `app_first_launch` | 首次启动（生成 install_id 时）。统计从 2.2 开始，老用户升级后第一次打开也会记 | `existing_user`: bool — 本机已有旧数据（记录 / 词库 / 示例已播种），即升级或恢复上来的，不是新用户（App 2.3 起带；更早的事件没有这个字段） |
 | `app_open` | 进入前台，距上次 `app_open` ≥ 30 分钟才记 | — |
 | `sample_opened` | 打开首次启动的示例内容 | — |
 

@@ -21,7 +21,8 @@ const PAYWALL_TRIGGER = e('local_import', 'zip', 'photos', 'tts', 'share_sheet',
 
 export const ANALYTICS_EVENTS: Record<string, Record<string, PropSpec>> = {
   // lifecycle
-  app_first_launch: {},
+  // existing_user: data from an older version / a restore was already on the device (an upgrade, not a new user)
+  app_first_launch: { existing_user: BOOL },
   app_open: {},
   sample_opened: {},
   // import & recognition
