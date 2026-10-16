@@ -140,6 +140,7 @@ GET /api/yomiplay/v1/subtitles?lang=ja&category=anime&page=1&per_page=20&sort=do
       "free_import": false,
       "file_version": 1,
       "file_updated_at": null,
+      "file_name": "aot_s1e01.yomi",
       "has_media": false,
       "download_count": 128,
       "uploaded_by": "toshiki",
@@ -171,7 +172,8 @@ GET /api/yomiplay/v1/subtitles?lang=ja&category=anime&page=1&per_page=20&sort=do
 | `source_url` | 来源视频/音频直链（如 YouTube URL），可直接传入播放器实现一键导入，可能为 `null` |
 | `file_version` | 文件版本号，从 `1` 开始。上传者发布的新版本上线后加 1，只改标题等信息时不变 |
 | `file_updated_at` | 当前版本文件的上线时间，从未更新过文件时为 `null` |
-| `has_media` | 是否附带音频/视频媒体文件 |
+| `file_name` | 内容文件名（`.yomi` / `.zip` / `.yomibook`）；`.zip` 包内已含媒体，可一键导入 |
+| `has_media` | 是否附带**独立的**音频/视频媒体文件（`.zip` 包内的媒体不算，此时为 `false`） |
 | `download_count` | 累计下载次数 |
 | `uploaded_by` | 上传者昵称 |
 
