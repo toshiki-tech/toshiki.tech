@@ -19,6 +19,20 @@ interface UsageStats {
   retention_d1: { cohort: number; retained: number } | null;
 }
 
+// Range-independent cards and 30-day trend (yomiplay_overview). Days are Tokyo calendar days.
+interface Overview {
+  today: string;
+  total_installs: number;
+  new_today: number;
+  active_today: number;
+  active_7d: number;
+  active_30d: number;
+  pro_active_today: number;
+  pro_active_30d: number;
+  purchases_today: { product: string; times: number }[];
+  trend: { day: string; active: number; new: number; purchases: number }[];
+}
+
 const FUNNEL_LABELS: Record<string, string> = {
   app_first_launch: 'First launch',
   import_started: 'Import started',
@@ -73,6 +87,7 @@ function Table({ title, head, rows }: { title: string; head: string[]; rows: (st
 export default function AppUsagePanel() {
   const [days, setDays] = useState(7);
   const [stats, setStats] = useState<UsageStats | null>(null);
+  const [overview, setOverview] = useState<Overview | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -84,6 +99,7 @@ export default function AppUsagePanel() {
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || res.statusText);
       setStats(json.data as UsageStats);
+      setOverview((json.overview ?? null) as Overview | null);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -126,8 +142,11 @@ export default function AppUsagePanel() {
 
       {error && <p className="text-sm text-red-500 mb-4">Failed to load: {error}</p>}
 
+      {overview && <OverviewBlock overview={overview} />}
+
       {stats && (
         <div className="space-y-4">
+          <h3 className="font-semibold text-sm pt-2">Selected range ({days === 1 ? 'last 24h' : `last ${days} days`})</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <Card label="New installs" value={stats.new_installs} />
             <Card label="Active installs" value={stats.active_installs} />
@@ -186,5 +205,69 @@ export default function AppUsagePanel() {
         </div>
       )}
     </section>
+  );
+}
+
+const TREND_SERIES = [
+  { key: 'active', label: 'Active', color: 'rgb(var(--accent))' },
+  { key: 'new', label: 'New installs', color: '#3b82f6' },
+  { key: 'purchases', label: 'Purchases', color: '#f59e0b' },
+] as const;
+
+function OverviewBlock({ overview: o }: { overview: Overview }) {
+  const purchasesToday = o.purchases_today.reduce((s, p) => s + p.times, 0);
+  const max = Math.max(1, ...o.trend.map((d) => d.active));
+  return (
+    <div className="space-y-4 mb-8">
+      <p className="text-xs text-[var(--muted-foreground)]">
+        Today = {o.today} (Tokyo time). “Users” are app installs: one person on two devices counts twice, a
+        reinstall counts as new, installs with analytics off are not counted. Pro counts are estimates.
+      </p>
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <Card label="Active today" value={o.active_today} hint={`Pro ${o.pro_active_today}`} />
+        <Card label="Active, last 7 days" value={o.active_7d} />
+        <Card label="Active, last 30 days" value={o.active_30d} hint={`Pro ${o.pro_active_30d} (est.)`} />
+        <Card label="Total installs" value={o.total_installs} hint={`New today ${o.new_today}`} />
+        <Card
+          label="Purchases today"
+          value={purchasesToday}
+          hint={o.purchases_today.length > 0 ? o.purchases_today.map((p) => `${p.product} ${p.times}`).join(' · ') : undefined}
+        />
+      </div>
+      <div className="border border-[var(--border)] rounded-2xl p-4">
+        <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
+          <h3 className="font-semibold text-sm">Last 30 days</h3>
+          <div className="flex items-center gap-3 text-xs text-[var(--muted-foreground)]">
+            {TREND_SERIES.map((s) => (
+              <span key={s.key} className="flex items-center gap-1">
+                <span className="inline-block w-2.5 h-2.5 rounded-sm" style={{ background: s.color }} />
+                {s.label}
+              </span>
+            ))}
+          </div>
+        </div>
+        <div className="flex items-end gap-[3px] h-32">
+          {o.trend.map((d) => (
+            <div
+              key={d.day}
+              className="flex-1 flex items-end justify-center gap-px h-full"
+              title={`${d.day}: active ${d.active}, new ${d.new}, purchases ${d.purchases}`}
+            >
+              {TREND_SERIES.map((s) => (
+                <div
+                  key={s.key}
+                  className="flex-1 rounded-t"
+                  style={{ background: s.color, height: `${(d[s.key] / max) * 100}%`, minHeight: d[s.key] > 0 ? 2 : 0 }}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
+        <div className="flex justify-between text-[10px] text-[var(--muted-foreground)] mt-1 tabular-nums">
+          <span>{o.trend[0]?.day.slice(5)}</span>
+          <span>{o.trend[o.trend.length - 1]?.day.slice(5)}</span>
+        </div>
+      </div>
+    </div>
   );
 }

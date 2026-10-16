@@ -65,7 +65,8 @@ AS $$
     'active_installs', (SELECT count(DISTINCT install_id) FROM ev),
     'daily_active', COALESCE((
       SELECT jsonb_agg(jsonb_build_object('day', day, 'users', users) ORDER BY day)
-      FROM (SELECT date_trunc('day', client_ts)::date AS day, count(DISTINCT install_id) AS users
+      -- calendar days in Tokyo time (the dashboard's "today")
+      FROM (SELECT (client_ts AT TIME ZONE 'Asia/Tokyo')::date AS day, count(DISTINCT install_id) AS users
             FROM ev GROUP BY 1) d), '[]'::jsonb),
     'funnel', COALESCE((
       SELECT jsonb_agg(jsonb_build_object('step', s.step, 'users', (
@@ -104,6 +105,65 @@ AS $$
   );
 $$;
 REVOKE ALL ON FUNCTION yomiplay_usage_stats(integer) FROM PUBLIC, anon, authenticated;
+
+
+-- 3b. Overview cards + 30-day trend for the admin page (service role only)
+-- ------------------------------------------------------------
+-- "Users" are installs (random install_id, no accounts): one person on two devices counts twice,
+-- a reinstall counts as a new install, and installs with analytics turned off are not counted.
+-- Days are calendar days in Tokyo time. Pro = the install reported is_pro with its events, so the
+-- Pro numbers are an estimate (several devices of one subscriber, Family Sharing) until App
+-- Store server notifications are wired in.
+CREATE OR REPLACE FUNCTION yomiplay_overview()
+RETURNS jsonb
+LANGUAGE sql
+STABLE
+SECURITY INVOKER
+AS $$
+  WITH t AS (
+    SELECT (date_trunc('day', now() AT TIME ZONE 'Asia/Tokyo')) AT TIME ZONE 'Asia/Tokyo' AS today
+  ),
+  inst AS (
+    SELECT * FROM yomiplay_installs WHERE platform NOT LIKE '%-debug'
+  ),
+  days AS (
+    SELECT generate_series((now() AT TIME ZONE 'Asia/Tokyo')::date - 29,
+                           (now() AT TIME ZONE 'Asia/Tokyo')::date, interval '1 day')::date AS day
+  ),
+  ev30 AS (
+    SELECT install_id, name, props, is_pro, (client_ts AT TIME ZONE 'Asia/Tokyo')::date AS day
+    FROM yomiplay_events, t
+    WHERE client_ts >= t.today - interval '29 days' AND platform NOT LIKE '%-debug'
+  ),
+  d0 AS (
+    SELECT (now() AT TIME ZONE 'Asia/Tokyo')::date AS today
+  )
+  SELECT jsonb_build_object(
+    'today', (SELECT today FROM d0),
+    'total_installs',  (SELECT count(*) FROM inst),
+    'new_today',       (SELECT count(*) FROM inst, t WHERE first_seen >= t.today),
+    -- active = sent any event that day / in the window (same source as the trend)
+    'active_today',    (SELECT count(DISTINCT install_id) FROM ev30, d0 WHERE day = d0.today),
+    'active_7d',       (SELECT count(DISTINCT install_id) FROM ev30, d0 WHERE day >= d0.today - 6),
+    'active_30d',      (SELECT count(DISTINCT install_id) FROM ev30),
+    'pro_active_today',(SELECT count(DISTINCT install_id) FROM ev30, d0 WHERE is_pro AND day = d0.today),
+    'pro_active_30d',  (SELECT count(DISTINCT install_id) FROM ev30 WHERE is_pro),
+    'purchases_today', COALESCE((
+      SELECT jsonb_agg(jsonb_build_object('product', product, 'times', times) ORDER BY times DESC)
+      FROM (SELECT COALESCE(props->>'product', '?') AS product, count(*) AS times
+            FROM ev30, d0 WHERE name = 'purchase_completed' AND day = d0.today
+            GROUP BY 1) p), '[]'::jsonb),
+    'trend', (
+      SELECT jsonb_agg(jsonb_build_object(
+        'day', d.day,
+        'active',    (SELECT count(DISTINCT e.install_id) FROM ev30 e WHERE e.day = d.day),
+        'new',       (SELECT count(*) FROM inst i WHERE (i.first_seen AT TIME ZONE 'Asia/Tokyo')::date = d.day),
+        'purchases', (SELECT count(*) FROM ev30 e WHERE e.day = d.day AND e.name = 'purchase_completed')
+      ) ORDER BY d.day)
+      FROM days d)
+  );
+$$;
+REVOKE ALL ON FUNCTION yomiplay_overview() FROM PUBLIC, anon, authenticated;
 
 
 -- 4. Retention: delete raw events older than 180 days (needs the pg_cron extension)
