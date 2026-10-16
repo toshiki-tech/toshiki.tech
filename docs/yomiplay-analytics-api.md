@@ -95,7 +95,7 @@
 
 | 事件 | 何时 | 参数 |
 |---|---|---|
-| `import_started` | 开始导入（已过付费墙、预检） | `source`: `podcast_search` / `url` / `local_file` / `zip` / `photos` / `tts` / `community` / `share_sheet` / `yomi_replace` |
+| `import_started` | 开始导入（已过付费墙、预检） | `source`: `podcast_search` / `url` / `local_file` / `zip` / `photos` / `tts` / `community` / `share_sheet` / `yomi_replace`；`free_used`: int — 免费用户本月已用的免费导入次数（App 2.3 起，Pro 不带） |
 | `import_failed` | 导入失败 | `source`，`reason`: `disk_space` / `icloud` / `unsupported` / `network` / `other` |
 | `recognition_completed` | 识别成功完成 | `model`: `tiny` / `base` / `small` / `medium` / `large`；`language`: `ja` / `en` / `zh` / `auto`；`duration_bucket`: `lt5m` / `5_20m` / `20_60m` / `gt60m` |
 | `recognition_failed` | 识别失败 / 取消 | `model`，`reason`: `cancelled` / `memory` / `error` |
@@ -133,7 +133,7 @@
 
 | 事件 | 何时 | 参数 |
 |---|---|---|
-| `paywall_shown` | 付费墙出现 | `trigger`: `local_import` / `zip` / `photos` / `tts` / `share_sheet` / `community` / `recognition_quota` / `vocab_quota` / `album_limit` / `video_export` / `ai_deck` / `book_import_full` / `settings` |
+| `paywall_shown` | 付费墙出现 | `trigger`: `local_import` / `zip` / `photos` / `tts` / `share_sheet` / `community` / `recognition_quota` / `vocab_quota` / `album_limit` / `video_export` / `ai_deck` / `book_import_full` / `settings` / `import_quota`（本月免费导入次数用完，2.3 起）/ `import_too_long`（要识别的文件超过免费版单个文件时长，2.3 起）。2.3 起本地文件、相册、文字转语音、社区对免费用户开放（计次），`local_import` / `photos` / `tts` / `community` 只会出现在旧版本 |
 | `purchase_completed` | 购买成功 | `product`: `monthly` / `yearly` / `lifetime`；`trigger`（同上，记最近一次付费墙） |
 | `review_prompt_requested` | 调用系统评分弹窗（P0-5） | `moment`: `vocab_session` / `video_export` |
 

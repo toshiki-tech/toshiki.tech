@@ -7,6 +7,22 @@ import ZoomableImage from '@/components/ZoomableImage';
 import { ZOOM_LABELS } from '@/lib/zoom-labels';
 import { detectStore, STORE_LABELS } from '@/lib/external-store';
 import YomiCommunitySection from './YomiCommunitySection';
+import { createClient } from '@supabase/supabase-js';
+import { getAppConfig, fillFreeTier } from '@/lib/yomi-app-config';
+
+// The YomiPlay pricing summary shows the admin-editable free-tier numbers
+export const revalidate = 300;
+
+// Free-tier numbers ({n} / {m} in the copy) come from the admin-editable app config
+async function freeTierConfig() {
+  return getAppConfig(createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY ||
+      process.env.PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY ||
+      '',
+  ));
+}
 
 export async function generateStaticParams() {
   const locales: Locale[] = ['en', 'zh', 'ja', 'zh-tw'];
@@ -32,6 +48,7 @@ export async function generateMetadata({ params }: { params: { lang: Locale; slu
 }
 
 export default async function ProductDetailPage({ params }: { params: { lang: Locale; slug: string } }) {
+  const freeTier = await freeTierConfig();
   const product = products.find((p) => p.slug === params.slug);
   const dict = await getDictionary(params.lang);
 
@@ -460,7 +477,7 @@ export default async function ProductDetailPage({ params }: { params: { lang: Lo
             heading: 'Simple, transparent pricing',
             sub: 'Start for free. Upgrade when you\'re ready.',
             plans: [
-              { name: 'Free', price: '¥0', period: '', badge: null, tagline: '1 hour/month of free speech-to-text — experience the core listening workflow at no cost.' },
+              { name: 'Free', price: '¥0', period: '', badge: null, tagline: 'iOS: {n} free imports a month (each file to recognize up to {m} min). Android: 1 hour/month of speech-to-text.' },
               { name: 'Premium Monthly', price: '¥180', period: '/mo', badge: null, tagline: 'Unlock unlimited subtitle generation, shadowing, TTS, and audio/video subtitle import, export & sharing.' },
               { name: 'Premium Yearly', price: '¥1,480', period: '/yr', badge: 'Save 31%', tagline: 'All Premium features at the best value — roughly 2 months free vs. monthly.' },
               { name: 'Lifetime', price: '¥2,980', period: '', badge: 'One-time', tagline: 'Pay once, use forever. No recurring fees, all future Premium updates included.' },
@@ -472,7 +489,7 @@ export default async function ProductDetailPage({ params }: { params: { lang: Lo
             heading: '简单透明的定价',
             sub: '免费开始使用，准备好时再升级。',
             plans: [
-              { name: '免费版', price: '¥0', period: '', badge: null, tagline: '每月 1 小时语音转文字配额，免费体验核心精听功能。' },
+              { name: '免费版', price: '¥0', period: '', badge: null, tagline: 'iOS：每月免费导入 {n} 次（要识别的单个文件最长 {m} 分钟）。Android：每月 1 小时语音转文字。' },
               { name: 'Premium 月付', price: '¥180', period: '/月', badge: null, tagline: '解锁无限字幕生成、跟读、文本朗读及音视频字幕资源导入导出分享功能。' },
               { name: 'Premium 年付', price: '¥1,480', period: '/年', badge: '省 31%', tagline: '全部 Premium 功能，最划算之选 —— 相比月付约省 2 个月。' },
               { name: 'Premium 买断', price: '¥2,980', period: '', badge: '一次付清', tagline: '一次付费，永久使用。无定期扣费，含未来全部 Premium 更新。' },
@@ -484,7 +501,7 @@ export default async function ProductDetailPage({ params }: { params: { lang: Lo
             heading: '簡單透明的定價',
             sub: '免費開始使用，準備好時再升級。',
             plans: [
-              { name: '免費版', price: '¥0', period: '', badge: null, tagline: '每月 1 小時語音轉文字配額，免費體驗核心精聽功能。' },
+              { name: '免費版', price: '¥0', period: '', badge: null, tagline: 'iOS：每月免費匯入 {n} 次（要辨識的單個檔案最長 {m} 分鐘）。Android：每月 1 小時語音轉文字。' },
               { name: 'Premium 月付', price: '¥180', period: '/月', badge: null, tagline: '解鎖無限字幕生成、跟讀、文字朗讀及音視頻字幕資源導入導出分享功能。' },
               { name: 'Premium 年付', price: '¥1,480', period: '/年', badge: '省 31%', tagline: '全部 Premium 功能，最划算之選 —— 相比月付約省 2 個月。' },
               { name: 'Premium 買斷', price: '¥2,980', period: '', badge: '一次付清', tagline: '一次付費，永久使用。無定期扣費，含未來全部 Premium 更新。' },
@@ -496,7 +513,7 @@ export default async function ProductDetailPage({ params }: { params: { lang: Lo
             heading: 'シンプルで透明な料金体系',
             sub: '無料で始めて、準備ができたらアップグレード。',
             plans: [
-              { name: '無料版', price: '¥0', period: '', badge: null, tagline: '毎月1時間の音声テキスト変換枠付き、無料でコア精聴機能をお試しいただけます。' },
+              { name: '無料版', price: '¥0', period: '', badge: null, tagline: 'iOS：毎月 {n} 回まで無料でインポート（文字起こしするファイルは 1 つ {m} 分まで）。Android：毎月 1 時間の音声テキスト変換。' },
               { name: 'Premium 月払い', price: '¥180', period: '/月', badge: null, tagline: '無制限の字幕生成・シャドーイング・読み上げ、音声／動画字幕リソースのインポート・エクスポート・共有を解放。' },
               { name: 'Premium 年払い', price: '¥1,480', period: '/年', badge: '31% お得', tagline: 'すべての Premium 機能を最もお得に。月額換算で約2ヶ月分お得です。' },
               { name: '買い切り', price: '¥2,980', period: '', badge: '一括払い', tagline: '一度の購入で永久に利用可能。継続課金なし、今後の Premium アップデートもすべて含まれます。' },
@@ -537,7 +554,7 @@ export default async function ProductDetailPage({ params }: { params: { lang: Lo
                           <span className="text-sm font-normal text-[var(--muted-foreground)]">{plan.period}</span>
                         </p>
                       </div>
-                      <p className="text-xs text-[var(--muted-foreground)] leading-relaxed flex-1">{plan.tagline}</p>
+                      <p className="text-xs text-[var(--muted-foreground)] leading-relaxed flex-1">{fillFreeTier(plan.tagline, freeTier)}</p>
                     </div>
                   ))}
                 </div>

@@ -1,6 +1,21 @@
 import { Locale } from '@/lib/get-dictionary';
 import { Metadata } from 'next';
 import BuyButton from './BuyButton';
+import { createClient } from '@supabase/supabase-js';
+import { getAppConfig, fillFreeTier } from '@/lib/yomi-app-config';
+
+// Free-tier numbers ({n} / {m} in the copy) come from the admin-editable app config
+export const revalidate = 300;
+
+async function freeTierConfig() {
+  return getAppConfig(createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY ||
+      process.env.PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY ||
+      '',
+  ));
+}
 
 const content = {
   en: {
@@ -16,7 +31,7 @@ const content = {
         planKey: 'free' as const,
         price: '¥0',
         period: '',
-        tagline: '1 hour/month of free speech-to-text — experience the core listening workflow at no cost.',
+        tagline: 'iOS: {n} free imports a month (podcasts, links, local files, camera roll, text-to-speech, community; each file to recognize up to {m} min). Android: 1 hour/month of speech-to-text.',
         highlight: false,
         badge: '',
         cta: 'Download Free',
@@ -55,9 +70,11 @@ const content = {
     compareTitle: 'Feature Comparison',
     compareHeaders: { feature: 'Feature', free: 'Free', premium: 'Premium' },
     features: [
-      { name: 'Recognition quota', isHeader: true, free: '', premium: '' },
-      { name: 'Podcast audio recognition', free: '1 hr / month', premium: 'Unlimited' },
-      { name: 'Online audio/video link recognition', free: '1 hr / month', premium: 'Unlimited' },
+      { name: 'Free imports & recognition', isHeader: true, free: '', premium: '' },
+      { name: 'iOS — imports per month (podcasts, links, local files, camera roll, text-to-speech, community)', free: '{n} / month', premium: 'Unlimited' },
+      { name: 'iOS — length of each file to recognize', free: 'Up to {m} min', premium: 'Any length' },
+      { name: 'iOS — ZIP batch import', free: false, premium: true },
+      { name: 'Android — podcast / online link recognition', free: '1 hr / month', premium: 'Unlimited' },
       { name: 'Learning tools — all plans', isHeader: true, free: '', premium: '' },
       { name: 'Translation', free: true, premium: true },
       { name: 'Furigana display', free: true, premium: true },
@@ -65,7 +82,7 @@ const content = {
       { name: 'Sentence-by-sentence playback', free: true, premium: true },
       { name: 'Shadowing', free: true, premium: true },
       { name: 'Premium exclusive', isHeader: true, free: '', premium: '' },
-      { name: 'Text-to-Speech (TTS)', free: false, premium: true },
+      { name: 'Text-to-Speech (TTS)', free: 'iOS: counts as an import', premium: true },
       { name: 'Subtitle file import, export & sharing', free: false, premium: true },
       { name: 'Platform', isHeader: true, free: '', premium: '' },
       { name: 'Supported platforms', free: 'iOS / Android', premium: 'iOS / Android' },
@@ -104,7 +121,7 @@ const content = {
         planKey: 'free' as const,
         price: '¥0',
         period: '',
-        tagline: '每月 1 小时语音转文字配额，免费体验核心精听功能。',
+        tagline: 'iOS：每月免费导入 {n} 次（播客、链接、本地文件、相册、文字转语音、社区；要识别的单个文件最长 {m} 分钟）。Android：每月 1 小时语音转文字。',
         highlight: false,
         badge: '',
         cta: '免费下载',
@@ -143,9 +160,11 @@ const content = {
     compareTitle: '功能对比',
     compareHeaders: { feature: '功能', free: '免费版', premium: 'Premium' },
     features: [
-      { name: '识别额度', isHeader: true, free: '', premium: '' },
-      { name: '播客音频识别', free: '每月1小时', premium: '无限' },
-      { name: '网络音视频链接识别', free: '每月1小时内', premium: '无限' },
+      { name: '免费导入与识别', isHeader: true, free: '', premium: '' },
+      { name: 'iOS — 每月导入次数（播客、链接、本地文件、相册、文字转语音、社区）', free: '每月 {n} 次', premium: '不限' },
+      { name: 'iOS — 要识别的单个文件时长', free: '最长 {m} 分钟', premium: '不限' },
+      { name: 'iOS — ZIP 批量导入', free: false, premium: true },
+      { name: 'Android — 播客 / 网络链接识别', free: '每月 1 小时', premium: '无限' },
       { name: '学习功能 — 所有版本', isHeader: true, free: '', premium: '' },
       { name: '翻译', free: true, premium: true },
       { name: '假名标注', free: true, premium: true },
@@ -153,7 +172,7 @@ const content = {
       { name: '逐句精听播放', free: true, premium: true },
       { name: '跟读', free: true, premium: true },
       { name: 'Premium 专属', isHeader: true, free: '', premium: '' },
-      { name: '文本朗读（TTS）', free: false, premium: true },
+      { name: '文本朗读（TTS）', free: 'iOS：计入导入次数', premium: true },
       { name: '音视频字幕文件导入导出', free: false, premium: true },
       { name: '平台', isHeader: true, free: '', premium: '' },
       { name: '支持平台', free: 'iOS / Android', premium: 'iOS / Android' },
@@ -192,7 +211,7 @@ const content = {
         planKey: 'free' as const,
         price: '¥0',
         period: '',
-        tagline: '每月 1 小時語音轉文字配額，免費體驗核心精聽功能。',
+        tagline: 'iOS：每月免費匯入 {n} 次（Podcast、連結、本機檔案、相簿、文字轉語音、社群；要辨識的單個檔案最長 {m} 分鐘）。Android：每月 1 小時語音轉文字。',
         highlight: false,
         badge: '',
         cta: '免費下載',
@@ -231,9 +250,11 @@ const content = {
     compareTitle: '功能對比',
     compareHeaders: { feature: '功能', free: '免費版', premium: 'Premium' },
     features: [
-      { name: '識別額度', isHeader: true, free: '', premium: '' },
-      { name: '播客音頻識別', free: '每月1小時', premium: '無限' },
-      { name: '網路音視頻連結識別', free: '每月1小時內', premium: '無限' },
+      { name: '免費匯入與辨識', isHeader: true, free: '', premium: '' },
+      { name: 'iOS — 每月匯入次數（Podcast、連結、本機檔案、相簿、文字轉語音、社群）', free: '每月 {n} 次', premium: '不限' },
+      { name: 'iOS — 要辨識的單個檔案時長', free: '最長 {m} 分鐘', premium: '不限' },
+      { name: 'iOS — ZIP 批次匯入', free: false, premium: true },
+      { name: 'Android — 播客 / 網路連結辨識', free: '每月 1 小時', premium: '無限' },
       { name: '學習功能 — 所有版本', isHeader: true, free: '', premium: '' },
       { name: '翻譯', free: true, premium: true },
       { name: '假名標注', free: true, premium: true },
@@ -241,7 +262,7 @@ const content = {
       { name: '逐句精聽播放', free: true, premium: true },
       { name: '跟讀', free: true, premium: true },
       { name: 'Premium 專屬', isHeader: true, free: '', premium: '' },
-      { name: '文字朗讀（TTS）', free: false, premium: true },
+      { name: '文字朗讀（TTS）', free: 'iOS：計入匯入次數', premium: true },
       { name: '音視頻字幕檔案導入導出', free: false, premium: true },
       { name: '平台', isHeader: true, free: '', premium: '' },
       { name: '支援平台', free: 'iOS / Android', premium: 'iOS / Android' },
@@ -280,7 +301,7 @@ const content = {
         planKey: 'free' as const,
         price: '¥0',
         period: '',
-        tagline: '毎月1時間の音声テキスト変換枠付き、無料でコア精聴機能をお試しいただけます。',
+        tagline: 'iOS：毎月 {n} 回まで無料でインポート（ポッドキャスト・リンク・端末内ファイル・カメラロール・テキスト読み上げ・コミュニティ。文字起こしするファイルは 1 つ {m} 分まで）。Android：毎月 1 時間の音声テキスト変換。',
         highlight: false,
         badge: '',
         cta: '無料でダウンロード',
@@ -319,9 +340,11 @@ const content = {
     compareTitle: '機能比較',
     compareHeaders: { feature: '機能', free: 'Free', premium: 'Premium' },
     features: [
-      { name: '認識枠', isHeader: true, free: '', premium: '' },
-      { name: 'ポッドキャスト音声認識', free: '月1時間', premium: '無制限' },
-      { name: 'ネット音声・動画リンク認識', free: '月1時間内', premium: '無制限' },
+      { name: '無料インポートと認識', isHeader: true, free: '', premium: '' },
+      { name: 'iOS — 月間インポート回数（ポッドキャスト・リンク・端末内ファイル・カメラロール・テキスト読み上げ・コミュニティ）', free: '月 {n} 回', premium: '無制限' },
+      { name: 'iOS — 文字起こしするファイル 1 つの長さ', free: '{m} 分まで', premium: '無制限' },
+      { name: 'iOS — ZIP 一括取り込み', free: false, premium: true },
+      { name: 'Android — ポッドキャスト / ネットリンク認識', free: '月 1 時間', premium: '無制限' },
       { name: '学習機能 — 全プラン共通', isHeader: true, free: '', premium: '' },
       { name: '翻訳', free: true, premium: true },
       { name: 'ふりがな表示', free: true, premium: true },
@@ -329,7 +352,7 @@ const content = {
       { name: '一文ずつ精聴再生', free: true, premium: true },
       { name: 'シャドーイング', free: true, premium: true },
       { name: 'Premium 限定', isHeader: true, free: '', premium: '' },
-      { name: '読み上げ（TTS）', free: false, premium: true },
+      { name: '読み上げ（TTS）', free: 'iOS：インポート回数に含む', premium: true },
       { name: '字幕ファイル 読み込み・書き出し・共有', free: false, premium: true },
       { name: 'プラットフォーム', isHeader: true, free: '', premium: '' },
       { name: '対応プラットフォーム', free: 'iOS / Android', premium: 'iOS / Android' },
@@ -365,8 +388,10 @@ export async function generateMetadata({ params: { lang } }: { params: { lang: L
   };
 }
 
-export default function YomiPlayPricingPage({ params: { lang } }: { params: { lang: Locale } }) {
+export default async function YomiPlayPricingPage({ params: { lang } }: { params: { lang: Locale } }) {
   const t = content[lang] || content.en;
+  const config = await freeTierConfig();
+  const fill = (v: string) => fillFreeTier(v, config);
 
   const renderCell = (value: boolean | string) => {
     if (value === true) {
@@ -375,7 +400,7 @@ export default function YomiPlayPricingPage({ params: { lang } }: { params: { la
     if (value === false) {
       return <span className="text-[var(--muted-foreground)]">—</span>;
     }
-    return <span className="text-[var(--foreground-rgb)]">{value}</span>;
+    return <span className="text-[var(--foreground-rgb)]">{fill(value)}</span>;
   };
 
   return (
@@ -420,7 +445,7 @@ export default function YomiPlayPricingPage({ params: { lang } }: { params: { la
               )}
             </div>
             <p className="flex-1 text-sm text-[var(--muted-foreground)] leading-relaxed mb-6">
-              {plan.tagline}
+              {fill(plan.tagline)}
             </p>
             <BuyButton
               plan={plan.planKey}
@@ -472,7 +497,7 @@ export default function YomiPlayPricingPage({ params: { lang } }: { params: { la
                     className="border-b border-[var(--border)] last:border-b-0"
                   >
                     <td className="px-6 py-4 text-[var(--foreground-rgb)]">
-                      {feature.name}
+                      {fill(feature.name)}
                     </td>
                     <td className="px-6 py-4 text-center">
                       {renderCell(feature.free as boolean | string)}

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { getFeatureFlags, DEFAULT_FEATURE_FLAGS } from '@/lib/yomi-feature-flags';
+import { getAppConfig, DEFAULT_APP_CONFIG } from '@/lib/yomi-app-config';
 
 export const runtime = 'edge';
 
@@ -28,8 +29,10 @@ function anonClient() {
 
 export async function GET() {
   let flags = DEFAULT_FEATURE_FLAGS;
+  let config = DEFAULT_APP_CONFIG;
   try {
-    flags = await getFeatureFlags(anonClient());
+    const client = anonClient();
+    [flags, config] = await Promise.all([getFeatureFlags(client), getAppConfig(client)]);
   } catch {
     // ignore — fall back to defaults
   }
@@ -39,6 +42,9 @@ export async function GET() {
       pro_redemption_enabled: flags.pro_redemption,
       community_download_enabled: flags.community_download,
       community_enabled: flags.community_enabled,
+      // iOS free tier (app 2.3+): imports per month / max minutes of a file to recognize
+      free_import_limit: config.free_import_limit,
+      free_import_max_minutes: config.free_import_max_minutes,
       updated_at: new Date().toISOString(),
     },
     { headers: { ...CORS_HEADERS, ...CACHE_HEADERS } }

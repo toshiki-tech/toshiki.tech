@@ -1,6 +1,21 @@
 import { Locale } from '@/lib/get-dictionary';
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { createClient } from '@supabase/supabase-js';
+import { getAppConfig, fillFreeTier } from '@/lib/yomi-app-config';
+
+export const revalidate = 300;
+
+// Free-tier numbers ({n} / {m} in the copy) come from the admin-editable app config
+async function freeTierConfig() {
+  return getAppConfig(createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY ||
+      process.env.PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY ||
+      '',
+  ));
+}
 
 const APP_STORE_URL = 'https://apps.apple.com/jp/app/yomiplay/id6760715932';
 
@@ -45,7 +60,7 @@ const content = {
       {
         icon: '🎧',
         title: 'Podcast & audio/video recognition',
-        desc: 'Import a podcast file or paste any online audio/video URL. AI transcribes it into synced subtitles automatically. Free plan includes 1 hr/month.',
+        desc: 'Import a podcast file or paste any online audio/video URL. AI transcribes it into synced subtitles automatically. Free on iOS: {n} imports a month (each file up to {m} min); Android: 1 hr/month.',
       },
       {
         icon: '🔁',
@@ -63,7 +78,7 @@ const content = {
         desc: 'Convert any text into natural speech. Keep listening even when reading isn\'t an option.',
       },
     ],
-    freeNote: 'Free plan includes 1 hr/month of speech-to-text. Upgrade for unlimited recognition and TTS.',
+    freeNote: 'Free on iOS: {n} imports a month from podcasts, links, local files, camera roll, text-to-speech and the community (each file to recognize up to {m} min). Free on Android: 1 hr/month of speech-to-text. Premium removes the limits and adds ZIP import.',
     pricingLink: 'Compare all plans',
     versionNote: 'v0.1.0  ·  Released June 2026',
   },
@@ -95,7 +110,7 @@ const content = {
       {
         icon: '🎧',
         title: '播客与音视频字幕生成',
-        desc: '导入播客文件，或粘贴网络音视频链接，AI 自动识别并生成同步字幕。免费版每月 1 小时额度。',
+        desc: '导入播客文件，或粘贴网络音视频链接，AI 自动识别并生成同步字幕。免费版：iOS 每月导入 {n} 次（单个文件最长 {m} 分钟），Android 每月 1 小时。',
       },
       {
         icon: '🔁',
@@ -113,7 +128,7 @@ const content = {
         desc: '将任意文字转为自然语音，随时随地用耳朵学，不受阅读场景限制。',
       },
     ],
-    freeNote: '免费版每月包含 1 小时语音转文字额度。升级 Premium 可解锁无限识别与 TTS 功能。',
+    freeNote: '免费版：iOS 每月可导入 {n} 次，播客、链接、本地文件、相册、文字转语音、社区都能用（要识别的单个文件最长 {m} 分钟）；Android 每月 1 小时语音转文字。升级 Premium 不限次数与时长，并可 ZIP 批量导入。',
     pricingLink: '查看全部价格方案',
     versionNote: 'v0.1.0  ·  发布于 2026年6月',
   },
@@ -145,7 +160,7 @@ const content = {
       {
         icon: '🎧',
         title: '播客與音視頻字幕生成',
-        desc: '匯入播客檔案，或貼上網路音視頻連結，AI 自動辨識並生成同步字幕。免費版每月 1 小時額度。',
+        desc: '匯入播客檔案，或貼上網路音視頻連結，AI 自動辨識並生成同步字幕。免費版：iOS 每月匯入 {n} 次（單個檔案最長 {m} 分鐘），Android 每月 1 小時。',
       },
       {
         icon: '🔁',
@@ -163,7 +178,7 @@ const content = {
         desc: '將任意文字轉為自然語音，隨時隨地用耳朵學，不受閱讀場景限制。',
       },
     ],
-    freeNote: '免費版每月包含 1 小時語音轉文字額度。升級 Premium 可解鎖無限識別與 TTS 功能。',
+    freeNote: '免費版：iOS 每月可匯入 {n} 次，Podcast、連結、本機檔案、相簿、文字轉語音、社群都能用（要辨識的單個檔案最長 {m} 分鐘）；Android 每月 1 小時語音轉文字。升級 Premium 不限次數與時長，並可 ZIP 批次匯入。',
     pricingLink: '查看全部價格方案',
     versionNote: 'v0.1.0  ·  發布於 2026年6月',
   },
@@ -195,7 +210,7 @@ const content = {
       {
         icon: '🎧',
         title: 'ポッドキャスト・音声動画の字幕生成',
-        desc: 'ポッドキャストをインポートするか、音声・動画 URL を貼り付けるだけ。AI が自動で同期字幕を生成。無料版は月1時間の枠つき。',
+        desc: 'ポッドキャストをインポートするか、音声・動画 URL を貼り付けるだけ。AI が自動で同期字幕を生成。無料版：iOS は月 {n} 回（1 ファイル {m} 分まで）、Android は月 1 時間。',
       },
       {
         icon: '🔁',
@@ -213,7 +228,7 @@ const content = {
         desc: 'テキストを自然な音声に変換。移動中も「聴く学習」を続けられます。',
       },
     ],
-    freeNote: '無料プランには月1時間の音声テキスト変換枠が含まれます。Premium にアップグレードすると無制限 & TTS が使えます。',
+    freeNote: '無料版：iOS は毎月 {n} 回までインポートでき、ポッドキャスト・リンク・端末内ファイル・カメラロール・テキスト読み上げ・コミュニティすべてに対応（文字起こしするファイルは 1 つ {m} 分まで）。Android は毎月 1 時間の音声テキスト変換。Premium なら回数・長さ無制限、ZIP 一括取り込みも。',
     pricingLink: '料金プランを比較する',
     versionNote: 'v0.1.0  ·  2026年6月 公開',
   },
@@ -227,7 +242,9 @@ export async function generateMetadata({ params: { lang } }: { params: { lang: L
   };
 }
 
-export default function YomiPlayDownloadPage({ params: { lang } }: { params: { lang: Locale } }) {
+export default async function YomiPlayDownloadPage({ params: { lang } }: { params: { lang: Locale } }) {
+  const config = await freeTierConfig();
+  const fill = (v: string) => fillFreeTier(v, config);
   const t = content[lang] || content.en;
 
   return (
@@ -331,7 +348,7 @@ export default function YomiPlayDownloadPage({ params: { lang } }: { params: { l
               >
                 <div className="text-3xl">{h.icon}</div>
                 <h3 className="font-black text-base text-[var(--foreground-rgb)]">{h.title}</h3>
-                <p className="text-sm text-[var(--muted-foreground)] leading-relaxed">{h.desc}</p>
+                <p className="text-sm text-[var(--muted-foreground)] leading-relaxed">{fill(h.desc)}</p>
               </div>
             ))}
           </div>
@@ -341,7 +358,7 @@ export default function YomiPlayDownloadPage({ params: { lang } }: { params: { l
       {/* Free tier note + pricing link */}
       <section className="py-12 border-t border-[var(--border)] text-center">
         <div className="container-custom max-w-xl mx-auto space-y-4">
-          <p className="text-sm text-[var(--muted-foreground)] leading-relaxed">{t.freeNote}</p>
+          <p className="text-sm text-[var(--muted-foreground)] leading-relaxed">{fill(t.freeNote)}</p>
           <Link
             href={`/${lang}/yomiplay/pricing`}
             className="inline-block text-sm font-bold text-[rgb(var(--accent))] hover:opacity-75 transition-opacity"

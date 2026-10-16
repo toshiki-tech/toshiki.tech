@@ -17,7 +17,9 @@ const IMPORT_SOURCE = e('podcast_search', 'url', 'local_file', 'zip', 'photos', 
 const WHISPER_MODEL = e('tiny', 'base', 'small', 'medium', 'large');
 const VOCAB_FROM = e('player', 'manual', 'ocr', 'quick_lookup', 'how_to_say', 'yomicard', 'promote');
 const PAYWALL_TRIGGER = e('local_import', 'zip', 'photos', 'tts', 'share_sheet', 'community', 'recognition_quota', 'vocab_quota',
-  'album_limit', 'video_export', 'ai_deck', 'book_import_full', 'settings');
+  'album_limit', 'video_export', 'ai_deck', 'book_import_full', 'settings',
+  // app 2.3+: monthly free imports used up / a file to recognize over the free length limit
+  'import_quota', 'import_too_long');
 
 export const ANALYTICS_EVENTS: Record<string, Record<string, PropSpec>> = {
   // lifecycle
@@ -26,7 +28,8 @@ export const ANALYTICS_EVENTS: Record<string, Record<string, PropSpec>> = {
   app_open: {},
   sample_opened: {},
   // import & recognition
-  import_started: { source: IMPORT_SOURCE },
+  // free_used: free imports already used this month (free users only, app 2.3+)
+  import_started: { source: IMPORT_SOURCE, free_used: INT },
   import_failed: { source: IMPORT_SOURCE, reason: e('disk_space', 'icloud', 'unsupported', 'network', 'other') },
   recognition_completed: {
     model: WHISPER_MODEL,
