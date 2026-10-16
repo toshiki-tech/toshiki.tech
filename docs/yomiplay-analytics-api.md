@@ -133,7 +133,7 @@
 
 | 事件 | 何时 | 参数 |
 |---|---|---|
-| `paywall_shown` | 付费墙出现 | `trigger`: `local_import` / `zip` / `photos` / `tts` / `share_sheet` / `community` / `recognition_quota` / `vocab_quota` / `album_limit` / `video_export` / `ai_deck` / `book_import_full` / `settings` / `import_quota`（本月免费导入次数用完，2.3 起）/ `import_too_long`（要识别的文件超过免费版单个文件时长，2.3 起）。2.3 起本地文件、相册、文字转语音、社区对免费用户开放（计次），`local_import` / `photos` / `tts` / `community` 只会出现在旧版本 |
+| `paywall_shown` | 付费墙出现 | `trigger`: `local_import` / `zip` / `photos` / `tts` / `share_sheet` / `community` / `recognition_quota` / `vocab_quota` / `album_limit` / `video_export` / `ai_deck` / `book_import_full` / `settings` / `import_quota`（本月免费导入次数用完，2.3 起）/ `import_too_long`（要识别的文件超过免费版单个文件时长，2.3 起）。2.3 起本地文件、相册、文字转语音对免费用户开放（计次），`local_import` / `photos` / `tts` 只会出现在旧版本；社区仍按资源的「免会员导入」标记，`community` 照旧 |
 | `purchase_completed` | 购买成功 | `product`: `monthly` / `yearly` / `lifetime`；`trigger`（同上，记最近一次付费墙） |
 | `review_prompt_requested` | 调用系统评分弹窗（P0-5） | `moment`: `vocab_session` / `video_export` |
 

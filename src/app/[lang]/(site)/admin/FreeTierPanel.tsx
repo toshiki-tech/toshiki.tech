@@ -54,8 +54,8 @@ export default function FreeTierPanel({ initialConfig }: { initialConfig: AppCon
         Free Tier Limits (iOS 2.3+)
       </h2>
       <p className="text-sm text-[var(--muted-foreground)] mb-4">
-        Free users can import from podcasts, links, local files, camera roll, text-to-speech and the community this many
-        times a month; ZIP stays Pro. Shown in the app and on the pricing / download pages. Loosen in small steps —
+        Free users can import from podcasts, links, local files, camera roll and text-to-speech this many times a
+        month; ZIP stays Pro. Community items are not counted — the per-item &ldquo;free import&rdquo; flag decides. Shown in the app and on the pricing / download pages. Loosen in small steps —
         tightening a limit upsets users.
       </p>
       {error && <p className="text-sm text-red-500 mb-3">{error}</p>}
