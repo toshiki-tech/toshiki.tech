@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { getFeatureFlags, DEFAULT_FEATURE_FLAGS } from '@/lib/yomi-feature-flags';
-import { getAppConfig, DEFAULT_APP_CONFIG } from '@/lib/yomi-app-config';
+import { getAppConfig, getAppTextConfig, DEFAULT_APP_CONFIG, DEFAULT_APP_TEXT_CONFIG } from '@/lib/yomi-app-config';
 
 export const runtime = 'edge';
 
@@ -30,9 +30,10 @@ function anonClient() {
 export async function GET() {
   let flags = DEFAULT_FEATURE_FLAGS;
   let config = DEFAULT_APP_CONFIG;
+  let text = DEFAULT_APP_TEXT_CONFIG;
   try {
     const client = anonClient();
-    [flags, config] = await Promise.all([getFeatureFlags(client), getAppConfig(client)]);
+    [flags, config, text] = await Promise.all([getFeatureFlags(client), getAppConfig(client), getAppTextConfig(client)]);
   } catch {
     // ignore — fall back to defaults
   }
@@ -45,6 +46,8 @@ export async function GET() {
       // iOS free tier (app 2.3+): imports per month / max minutes of a file to recognize
       free_import_limit: config.free_import_limit,
       free_import_max_minutes: config.free_import_max_minutes,
+      // Podcast search "Try:" example for new users (app 2.3+)
+      podcast_search_default_term: text.podcast_search_default_term,
       updated_at: new Date().toISOString(),
     },
     { headers: { ...CORS_HEADERS, ...CACHE_HEADERS } }

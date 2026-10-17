@@ -14,6 +14,7 @@ import EditUpload from './EditUpload';
 import UploadAdminControls from './UploadAdminControls';
 import FeatureFlagsPanel from './FeatureFlagsPanel';
 import FreeTierPanel from './FreeTierPanel';
+import PodcastSearchPanel from './PodcastSearchPanel';
 import ApkReleasePanel from './ApkReleasePanel';
 import SubscriptionsPanel from './SubscriptionsPanel';
 import AppUsagePanel from './AppUsagePanel';
@@ -24,7 +25,7 @@ import FileUpdateActions from './FileUpdateActions';
 import ReplaceUploadFile from '@/components/ReplaceUploadFile';
 import { primaryFileKind } from '@/lib/yomi-upload-files';
 import { getFeatureFlags } from '@/lib/yomi-feature-flags';
-import { getAppConfig } from '@/lib/yomi-app-config';
+import { getAppConfig, getAppTextConfig } from '@/lib/yomi-app-config';
 import { createClient } from '@supabase/supabase-js';
 
 interface AdminUpload {
@@ -152,6 +153,7 @@ export default async function AdminPage({ params: { lang } }: { params: { lang: 
 
   const featureFlags = await getFeatureFlags(supabase);
   const appConfig = await getAppConfig(supabase);
+  const appTextConfig = await getAppTextConfig(supabase);
 
   // Fetch APK releases (latest first)
   const { data: apkReleases } = await supabase
@@ -616,6 +618,7 @@ export default async function AdminPage({ params: { lang } }: { params: { lang: 
         <>
           <FeatureFlagsPanel initialFlags={featureFlags} />
           <FreeTierPanel initialConfig={appConfig} />
+          <PodcastSearchPanel initialTerm={appTextConfig.podcast_search_default_term} />
           {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
           <ApkReleasePanel releases={(apkReleases || []) as any} />
           {/* Points Config */}

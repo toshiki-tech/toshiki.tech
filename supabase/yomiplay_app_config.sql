@@ -20,3 +20,12 @@ INSERT INTO yomiplay_app_config (key, value) VALUES
   ('free_import_limit', 3),
   ('free_import_max_minutes', 30)
 ON CONFLICT (key) DO NOTHING;
+
+-- Text values (app 2.3+): stored in text_value, value stays NULL
+ALTER TABLE yomiplay_app_config ADD COLUMN IF NOT EXISTS text_value text;
+ALTER TABLE yomiplay_app_config ALTER COLUMN value DROP NOT NULL;
+
+-- Podcast search: the "Try:" example term new users see; the app falls back to 日本語
+INSERT INTO yomiplay_app_config (key, text_value) VALUES
+  ('podcast_search_default_term', '日本語')
+ON CONFLICT (key) DO NOTHING;

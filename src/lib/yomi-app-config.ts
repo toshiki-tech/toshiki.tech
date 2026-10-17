@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-// Numeric YomiPlay config (supabase/yomiplay_app_config.sql), edited in the admin Settings tab.
+// YomiPlay app config (supabase/yomiplay_app_config.sql), edited in the admin Settings tab:
+// numbers in `value`, text in `text_value`.
 // The iOS app reads it through /api/yomiplay/feature-flags; the pricing / download pages show it.
 
 export const APP_CONFIG_META = {
@@ -34,6 +35,46 @@ export async function getAppConfig(supabase: SupabaseClient): Promise<AppConfig>
     if (error || !data) return config;
     for (const row of data as { key: string; value: number }[]) {
       if (isAppConfigKey(row.key) && isValidAppConfigValue(row.key, row.value)) config[row.key] = row.value;
+    }
+  } catch {
+    // fall back to defaults
+  }
+  return config;
+}
+
+export const APP_TEXT_CONFIG_META = {
+  podcast_search_default_term: { label: 'Podcast search example term (iOS)', maxLength: 40 },
+} as const;
+
+export type AppTextConfigKey = keyof typeof APP_TEXT_CONFIG_META;
+export type AppTextConfig = Record<AppTextConfigKey, string>;
+
+// Must match the app's built-in fallback (PodcastSearchDefaults.fallbackTerm).
+export const DEFAULT_APP_TEXT_CONFIG: AppTextConfig = {
+  podcast_search_default_term: '日本語',
+};
+
+export function isAppTextConfigKey(key: string): key is AppTextConfigKey {
+  return key in APP_TEXT_CONFIG_META;
+}
+
+/** Trimmed value, or null when empty / too long. */
+export function normalizeAppTextConfigValue(key: AppTextConfigKey, value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  const trimmed = value.trim();
+  if (!trimmed || Array.from(trimmed).length > APP_TEXT_CONFIG_META[key].maxLength) return null;
+  return trimmed;
+}
+
+export async function getAppTextConfig(supabase: SupabaseClient): Promise<AppTextConfig> {
+  const config: AppTextConfig = { ...DEFAULT_APP_TEXT_CONFIG };
+  try {
+    const { data, error } = await supabase.from('yomiplay_app_config').select('key, text_value');
+    if (error || !data) return config;
+    for (const row of data as { key: string; text_value: string | null }[]) {
+      if (!isAppTextConfigKey(row.key)) continue;
+      const value = normalizeAppTextConfigValue(row.key, row.text_value);
+      if (value) config[row.key] = value;
     }
   } catch {
     // fall back to defaults
